@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>商家管理后台</title>
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<style>
+:root{--green:#1a7a3a;--green-light:#2da85c;--green-dark:#0f5c2a;--green-bg:#eaf7ed;--orange:#e67e22;--red:#e74c3c;--blue:#3498db;--text:#1a1a2e;--text-light:#636e72;--text-lighter:#b2bec3;--bg:#f0f2f5;--card:#fff;--shadow:0 2px 12px rgba(0,0,0,.06);--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Microsoft YaHei','PingFang SC',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+#app,.app-wrap{height:100vh;display:flex;flex-direction:column}
+
+/* Login */
+.login-wrap{height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0a4a22 0%,var(--green) 50%,#0a4a22 100%);position:relative;overflow:hidden}
+.login-wrap::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 50%,rgba(255,255,255,.05) 0%,transparent 60%);pointer-events:none}
+.login-card{width:380px;padding:40px 36px;background:#fff;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);position:relative;animation:fadeUp .4s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.login-card h2{text-align:center;margin-bottom:28px;font-size:20px;color:var(--green);font-weight:700;letter-spacing:1px}
+.login-card h2 i{margin-right:6px}
+.login-card .el-input__inner{border-radius:10px;height:44px;font-size:14px}
+.login-card .el-button{border-radius:10px;height:44px;font-size:14px}
+.login-card .demo{text-align:center;font-size:11px;color:#999;margin-top:10px;line-height:1.6}
+
+/* Header */
+.app-header{height:54px;background:linear-gradient(135deg,#0a4a22,var(--green));color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;box-shadow:0 2px 12px rgba(10,74,34,.2)}
+.app-header h1{font-size:16px;letter-spacing:1px;font-weight:600;display:flex;align-items:center;gap:6px}
+.app-header .user-info{display:flex;align-items:center;gap:12px;font-size:13px}
+.app-header .user-info .el-button--mini{border-radius:8px;border-color:rgba(255,255,255,.25)!important;color:rgba(255,255,255,.9)!important;transition:all .2s}
+.app-header .user-info .el-button--mini:hover{background:rgba(255,255,255,.1)!important}
+
+/* Body */
+.app-body{display:flex;flex:1;overflow:hidden}
+
+/* Sidebar */
+.sidebar{width:200px;background:linear-gradient(180deg,#0a4a22,#0d5c2a);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sidebar .el-menu{border-right:none;background:transparent;padding:8px 0}
+.sidebar .el-menu-item,.sidebar .el-submenu__title{color:rgba(255,255,255,.7)!important;border-radius:8px;margin:2px 8px;padding:0 16px!important;height:44px!important;line-height:44px!important;font-size:13px;transition:all .2s}
+.sidebar .el-menu-item i,.sidebar .el-submenu__title i{margin-right:8px;font-size:16px}
+.sidebar .el-menu-item.is-active,.sidebar .el-menu-item:hover{color:#fff!important;background:rgba(255,255,255,.15)!important;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.sidebar .el-menu-item.is-active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:20px;background:#ffd700;border-radius:0 3px 3px 0}
+
+/* Main Content */
+.main-content{flex:1;overflow-y:auto;padding:20px;background:var(--bg)}
+.main-content::-webkit-scrollbar{width:5px}
+.main-content::-webkit-scrollbar-thumb{background:#ddd;border-radius:3px}
+
+/* Page Header */
+.page-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.page-hd h3{font-size:17px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+.page-hd h3 small{font-weight:400;font-size:12px;color:var(--text-lighter);background:var(--bg);padding:2px 8px;border-radius:6px}
+
+/* Dashboard */
+.dash-top-card{display:flex;gap:16px;background:var(--card);border-radius:14px;padding:20px;margin-bottom:16px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.02)}
+.dash-top-card .shop-logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--green-bg),#c8e6c9);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;box-shadow:0 2px 8px rgba(26,122,58,.12)}
+.dash-top-card .shop-info{flex:1}
+.dash-top-card .shop-info h2{font-size:18px;font-weight:700;margin-bottom:3px}
+.dash-top-card .shop-info p{font-size:13px;color:var(--text-light);line-height:1.4}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:var(--card);border-radius:14px;padding:20px 16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04);transition:all .25s;border:1px solid rgba(0,0,0,.02);position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat-card:nth-child(1)::before{background:linear-gradient(90deg,var(--green),var(--green-light))}
+.stat-card:nth-child(2)::before{background:linear-gradient(90deg,var(--orange),#fbbf24)}
+.stat-card:nth-child(3)::before{background:linear-gradient(90deg,var(--red),#ff6b6b)}
+.stat-card:nth-child(4)::before{background:linear-gradient(90deg,var(--blue),#60a5fa)}
+.stat-card .num{font-size:28px;font-weight:700;margin-bottom:2px}
+.stat-card .num.green{color:var(--green)}
+.stat-card .num.orange{color:var(--orange)}
+.stat-card .num.red{color:var(--red)}
+.stat-card .num.blue{color:var(--blue)}
+.stat-card .label{font-size:12px;color:var(--text-light);font-weight:500}
+.dash-section{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.02)}
+.dash-section h4{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text);display:flex;align-items:center;gap:6px}
+.dash-section h4::before{content:'';width:3px;height:14px;background:var(--green);border-radius:2px}
+
+/* Element Overrides */
+.el-button--primary{background:linear-gradient(135deg,var(--green),var(--green-light));border:none;border-radius:8px}
+.el-button--text{padding:4px 8px!important}
+.el-tag{border-radius:6px;font-weight:500}
+.el-tag--success{background:var(--green-bg);color:var(--green);border:none}
+.el-tag--warning{background:#fef3e7;color:var(--orange);border:none}
+.el-tag--danger{background:#fde8e8;color:var(--red);border:none}
+.el-tag--primary{background:#e8f4fd;color:var(--blue);border:none}
+.el-table{border-radius:12px!important;overflow:hidden!important;box-shadow:0 1px 4px rgba(0,0,0,.02)}
+.el-table th{background:#fafafa!important;font-weight:600!important;color:var(--text)!important;font-size:12px!important}
+.el-table--striped .el-table__body tr.el-table__row--striped td{background:#f8fdf8!important}
+.el-table .cell{font-size:12px}
+.el-dialog{border-radius:16px!important;overflow:hidden}
+.el-dialog__header{border-bottom:1px solid #f0f0f0;padding:18px 22px!important}
+.el-dialog__title{font-size:16px!important;font-weight:600!important}
+.el-dialog__body{padding:22px!important}
+.el-dialog__footer{padding:14px 22px!important;border-top:1px solid #f0f0f0}
+.el-tabs__item.is-active{color:var(--green)!important;font-weight:600}
+.el-tabs__active-bar{background:var(--green)!important}
+.el-input__inner{border-radius:8px!important}
+.el-message{min-width:200px!important;border-radius:12px!important;padding:12px 20px!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Login -->
+  <div class="login-wrap" v-if="!loggedIn">
+    <div class="login-card">
+      <h2><i class="el-icon-s-home"></i> 商家管理后台</h2>
+      <el-form @keyup.enter.native="doLogin">
+        <el-form-item><el-input v-model="loginForm.username" prefix-icon="el-icon-user" placeholder="商家账号" /></el-form-item>
+        <el-form-item><el-input v-model="loginForm.password" prefix-icon="el-icon-lock" type="password" placeholder="密码" show-password /></el-form-item>
+        <el-form-item><el-button type="success" style="width:100%" @click="doLogin" :loading="logining">登 录</el-button></el-form-item>
+      </el-form>
+      <div class="demo">演示: merchant1 / merch123 | merchant2 / merch123 | merchant3 / merch123</div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="app-wrap" v-else>
+    <div class="app-header">
+      <h1><i class="el-icon-s-home"></i> {{myShop?.shop_name||'商家中心'}}<small style="font-weight:400;font-size:11px;opacity:.8">商家管理后台</small></h1>
+      <div class="user-info">
+        <el-tag size="mini" type="success" effect="dark">商家</el-tag>
+        <span><i class="el-icon-user"></i> {{user.nickname}}</span>
+        <el-button size="mini" plain style="color:#fff;border-color:rgba(255,255,255,.3)" @click="viewStore">预览店铺</el-button>
+        <el-button size="mini" plain style="color:#fff;border-color:rgba(255,255,255,.3)" @click="doLogout">退出</el-button>
+      </div>
+    </div>
+    <div class="app-body">
+      <div class="sidebar">
+        <el-menu :default-active="page" @select="page=$event;initPage()" background-color="transparent" text-color="rgba(255,255,255,.8)" active-text-color="#fff">
+          <el-menu-item index="dashboard"><i class="el-icon-data-line"></i>店铺概览</el-menu-item>
+          <el-menu-item index="products"><i class="el-icon-goods"></i>商品管理</el-menu-item>
+          <el-menu-item index="orders"><i class="el-icon-document"></i>订单管理</el-menu-item>
+          <el-menu-item index="settings"><i class="el-icon-setting"></i>店铺设置</el-menu-item>
+        </el-menu>
+      </div>
+      <div class="main-content">
+        <!-- Dashboard -->
+        <div v-if="page==='dashboard'">
+          <div class="page-hd"><h3>店铺概览<small>{{myShop?.shop_name}}</small></h3></div>
+          <div class="dash-top-card">
+            <div class="shop-logo">{{myShop?.shop_logo||'🏪'}}</div>
+            <div class="shop-info"><h2>{{myShop?.shop_name}}</h2><p>{{myShop?.shop_desc||'暂无描述'}}</p></div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-card"><div class="num green">{{stats.productCount}}</div><div class="label">商品总数</div></div>
+            <div class="stat-card"><div class="num orange">{{stats.onSale}}</div><div class="label">上架中</div></div>
+            <div class="stat-card"><div class="num red">{{stats.orderCount}}</div><div class="label">订单数</div></div>
+            <div class="stat-card"><div class="num blue">{{stats.pendingShip||0}}</div><div class="label">待发货</div></div>
+          </div>
+          <div class="dash-section"><h4>📋 最近订单</h4>
+            <el-table :data="recentOrders" stripe size="mini" style="width:100%" v-if="recentOrders.length">
+              <el-table-column label="订单号" prop="order_no" width="180"></el-table-column>
+              <el-table-column label="金额" width="80"><template slot-scope="{row}">¥{{row.total_amount}}</template></el-table-column>
+              <el-table-column label="状态" width="80"><template slot-scope="{row}"><el-tag :type="orderTag(row.status)" size="mini">{{row.status}}</el-tag></template></el-table-column>
+              <el-table-column label="时间" prop="created_at" width="140"></el-table-column>
+            </el-table>
+            <div v-else style="text-align:center;padding:20px;color:#999">暂无订单</div>
+          </div>
+        </div>
+
+        <!-- Products -->
+        <div v-if="page==='products'">
+          <div class="page-hd"><h3>商品管理<small>管理您的商品</small><el-button type="primary" size="small" icon="el-icon-plus" @click="openForm()">新增商品</el-button></h3></div>
+          <el-table :data="myProducts" stripe size="mini" style="width:100%">
+            <el-table-column label="商品名" prop="name" width="160" show-overflow-tooltip></el-table-column>
+            <el-table-column label="分类" width="70"><template slot-scope="{row}">{{catName(row.category_id)}}</template></el-table-column>
+            <el-table-column label="价格" width="70"><template slot-scope="{row}">¥{{row.price}}</template></el-table-column>
+            <el-table-column label="库存" prop="stock" width="50"></el-table-column>
+            <el-table-column label="销量" prop="sales" width="50"></el-table-column>
+            <el-table-column label="评分" prop="rating" width="50"></el-table-column>
+            <el-table-column label="状态" width="60"><template slot-scope="{row}"><el-tag :type="row.status===1?'success':'info'" size="mini">{{row.status===1?'上架':'下架'}}</el-tag></template></el-table-column>
+            <el-table-column label="操作" width="160" fixed="right">
+              <template slot-scope="{row}"><el-button type="text" size="mini" icon="el-icon-edit" @click="openForm(row)">编辑</el-button><el-button type="text" size="mini" icon="el-icon-delete" style="color:#f56c6c" @click="delProduct(row)">删除</el-button></template>
+            </el-table-column>
+          </el-table>
+          <div v-if="!myProducts.length" style="text-align:center;padding:40px;color:#999">暂无商品，点击右上角新增</div>
+        </div>
+
+        <!-- Orders -->
+        <div v-if="page==='orders'">
+          <div class="page-hd"><h3>订单管理<small>含您商品的订单</small></h3></div>
+          <el-tabs v-model="orderTab" @tab-click="loadOrders">
+            <el-tab-pane label="全部" name="all"></el-tab-pane>
+            <el-tab-pane label="待发货" name="待发货"></el-tab-pane>
+            <el-tab-pane label="待收货" name="待收货"></el-tab-pane>
+            <el-tab-pane label="已完成" name="已完成"></el-tab-pane>
+          </el-tabs>
+          <el-table :data="filteredOrders" stripe size="mini" style="width:100%">
+            <el-table-column label="订单号" prop="order_no" width="180"></el-table-column>
+            <el-table-column label="商品" min-width="200"><template slot-scope="{row}"><span v-for="it in (row.myItems||row.items||[]).slice(0,3)" :key="it.id" style="display:block;font-size:12px">{{it.product_name}} {{it.sku_attrs}} × {{it.quantity}}</span></template></el-table-column>
+            <el-table-column label="金额" width="70"><template slot-scope="{row}">¥{{row.total_amount}}</template></el-table-column>
+            <el-table-column label="状态" width="70"><template slot-scope="{row}"><el-tag :type="orderTag(row.status)" size="mini">{{row.status}}</el-tag></template></el-table-column>
+            <el-table-column label="时间" prop="created_at" width="140"></el-table-column>
+            <el-table-column label="操作" width="80" fixed="right">
+              <template slot-scope="{row}"><el-button type="text" size="mini" v-if="row.status==='待发货'" @click="shipOrder(row)">发货</el-button><span v-else style="color:#999">--</span></template>
+            </el-table-column>
+          </el-table>
+          <div v-if="!filteredOrders.length" style="text-align:center;padding:40px;color:#999">暂无订单</div>
+        </div>
+
+        <!-- Settings -->
+        <div v-if="page==='settings'">
+          <div class="page-hd"><h3>店铺设置<small>修改店铺信息</small></h3></div>
+          <div class="dash-section" style="max-width:520px">
+            <el-form :model="shopForm" label-width="90px" size="small">
+              <el-form-item label="店铺名称"><el-input v-model="shopForm.shop_name" /></el-form-item>
+              <el-form-item label="店铺图标"><el-input v-model="shopForm.shop_logo" placeholder="emoji图标" maxlength="10" /></el-form-item>
+              <el-form-item label="店铺描述"><el-input v-model="shopForm.shop_desc" type="textarea" :rows="3" /></el-form-item>
+              <el-form-item label="联系人"><el-input v-model="shopForm.contact_name" /></el-form-item>
+              <el-form-item label="联系电话"><el-input v-model="shopForm.contact_phone" /></el-form-item>
+              <el-form-item><el-button type="primary" @click="saveShop" :loading="saving">保存修改</el-button></el-form-item>
+            </el-form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Dialog -->
+  <el-dialog :title="form.id?'编辑商品':'新增商品'" :visible.sync="formVisible" width="700px" class="modern-dialog">
+    <el-form :model="form" label-width="90px" size="small">
+      <el-form-item label="商品名称"><el-input v-model="form.name" /></el-form-item>
+      <el-row :gutter="12"><el-col :span="12"><el-form-item label="分类"><el-select v-model="form.category_id" style="width:100%"><el-option v-for="c in leafCats" :key="c.id" :label="c.name" :value="c.id" /></el-select></el-form-item></el-col><el-col :span="12"><el-form-item label="状态"><el-select v-model="form.status" style="width:100%"><el-option label="上架" :value="1" /><el-option label="下架" :value="0" /></el-select></el-form-item></el-col></el-row>
+      <el-row :gutter="12"><el-col :span="8"><el-form-item label="价格"><el-input-number v-model="form.price" :min="0" :step="0.1" :precision="1" style="width:100%" /></el-form-item></el-col><el-col :span="8"><el-form-item label="原价"><el-input-number v-model="form.original_price" :min="0" :step="0.1" :precision="1" style="width:100%" /></el-form-item></el-col><el-col :span="8"><el-form-item label="库存"><el-input-number v-model="form.stock" :min="0" style="width:100%" /></el-form-item></el-col></el-row>
+      <el-form-item label="图片URL"><el-input v-model="form.imagesText" type="textarea" :rows="2" placeholder="每行一个图片URL" /></el-form-item>
+      <el-form-item label="商品描述"><el-input v-model="form.description" type="textarea" :rows="3" /></el-form-item>
+    </el-form>
+    <span slot="footer"><el-button @click="formVisible=false">取消</el-button><el-button type="primary" @click="saveProduct" :loading="savingProd">保存</el-button></span>
+  </el-dialog>
+</div>
+
+<script>
+const API='/api';
+new Vue({
+  el:'#app',
+  data:{
+    loggedIn:false,logining:false,user:{},myShop:null,
+    loginForm:{username:'merchant1',password:'merch123'},
+    page:'dashboard',
+    myProducts:[],allCats:[],orders:[],orderTab:'all',
+    stats:{productCount:0,onSale:0,orderCount:0,pendingShip:0},
+    form:{},formVisible:false,savingProd:false,
+    shopForm:{},saving:false
+  },
+  computed:{
+    leafCats(){return this.allCats.filter(c=>c.level===2)},
+    filteredOrders(){return this.orderTab==='all'?this.orders:this.orders.filter(o=>o.status===this.orderTab)},
+    recentOrders(){return this.orders.slice(0,5)},
+    catName(){return(id)=>{const c=this.allCats.find(x=>x.id===id);return c?c.name:'未分类'}},
+    orderTag(){return(s)=>{const m={'待付款':'warning','待发货':'primary','待收货':'success','已完成':'','已取消':'info'};return m[s]||''}}
+  },
+  watch:{page(v){if(v==='orders')this.loadOrders()}},
+  mounted(){this.checkLogin()},
+  methods:{
+    checkLogin(){
+      fetch(API+'/me',{credentials:'include'}).then(r=>{if(r.ok)return r.json();throw 401}).then(u=>{this.user=u;this.myShop=u.myShop;if(u.role!=='merchant'){this.$message.error('仅商家可登录');this.doLogout();return}this.loggedIn=true;this.init()}).catch(()=>{})
+    },
+    doLogin(){
+      this.logining=true;
+      fetch(API+'/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.loginForm),credentials:'include'})
+        .then(r=>{if(!r.ok)return r.json().then(e=>Promise.reject(e.error||'登录失败'));return r.json()})
+        .then(d=>{this.user=d.user;this.myShop=d.myShop;if(d.user.role!=='merchant'){throw '仅商家可登录'}this.loggedIn=true;this.init()})
+        .catch(e=>{this.$message.error(typeof e==='string'?e:'登录失败')}).then(()=>this.logining=false)
+    },
+    doLogout(){fetch(API+'/logout',{credentials:'include'}).then(()=>{this.loggedIn=false;this.user={};this.myShop=null})},
+    async _get(url){try{const r=await fetch(url,{credentials:'include'});return r.ok?r.json():null}catch(e){return null}},
+    async init(){
+      const cats=await this._get(API+'/categories')||[];
+      this.allCats=cats;this.allCats.forEach(c=>{c.level=c.level||(c.parent_id===0?1:2)});
+      this.initPage()
+    },
+    initPage(){
+      if(this.page==='dashboard')this.loadDashboard();
+      else if(this.page==='products')this.loadProducts();
+      else if(this.page==='orders')this.loadOrders();
+      else if(this.page==='settings'){this.shopForm={...this.myShop}}
+    },
+    async loadDashboard(){
+      const [prods,ords]=await Promise.all([
+        this._get(API+'/products/merchant/'+this.myShop.id).then(d=>d||[]),
+        this._get(API+'/orders/merchant').then(d=>d||[])
+      ]);
+      this.myProducts=prods;this.orders=ords;
+      this.stats={productCount:prods.length,onSale:prods.filter(p=>p.status===1).length,orderCount:ords.length,pendingShip:ords.filter(o=>o.status==='待发货').length}
+    },
+    async loadProducts(){const d=await this._get(API+'/products/merchant/'+this.myShop.id);if(d)this.myProducts=d},
+    async loadOrders(){const d=await this._get(API+'/orders/merchant');if(d)this.orders=d},
+    openForm(r){
+      if(r){this.form={...r,imagesText:(r.images||[]).join('\n')}}else{this.form={name:'',category_id:this.leafCats[0]?.id||7,price:0,original_price:0,stock:0,status:1,images:[],imagesText:'',description:''}}
+      this.formVisible=true
+    },
+    async saveProduct(){
+      this.savingProd=true;
+      const f=this.form;const e=!!f.id;const b={...f};delete b.id;delete b.imagesText;delete b.merchant_name;delete b.merchant_logo;
+      if(f.imagesText)b.images=f.imagesText.split('\n').filter(l=>l.trim());
+      try{const r=await fetch(e?API+'/products/edit/'+f.id:API+'/products/add',{method:e?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b),credentials:'include'});if(!r.ok){const err=await r.json();throw err.error||'操作失败'}this.$message.success(e?'更新成功':'创建成功');this.formVisible=false;this.loadProducts();if(this.page==='dashboard')this.loadDashboard()}catch(e){this.$message.error(typeof e==='string'?e:'操作失败')}
+      this.savingProd=false
+    },
+    async delProduct(row){this.$confirm('确定删除「'+row.name+'」？').then(async()=>{const r=await fetch(API+'/products/del/'+row.id,{method:'DELETE',credentials:'include'});if(!r.ok){const e=await r.json();throw e.error||'删除失败'}this.$message.success('已删除');this.loadProducts();if(this.page==='dashboard')this.loadDashboard()}).catch(()=>{})},
+    async shipOrder(o){try{const r=await fetch(API+'/orders/'+o.id+'/ship',{method:'PUT',credentials:'include'});if(!r.ok){const e=await r.json();throw e.error||'发货失败'}this.$message.success('已发货');this.loadOrders()}catch(e){this.$message.error(typeof e==='string'?e:'发货失败')}},
+    async saveShop(){this.saving=true;try{const r=await fetch(API+'/merchants/'+this.myShop.id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.shopForm),credentials:'include'});if(!r.ok){const e=await r.json();throw e.error||'保存失败'}this.myShop={...this.myShop,...this.shopForm};this.$message.success('保存成功')}catch(e){this.$message.error(typeof e==='string'?e:'保存失败')}this.saving=false},
+    viewStore(){window.open('/mall.html?#store'+this.myShop.id,'_blank')}
+  }
+});
+</script>
+</body>
+</html>

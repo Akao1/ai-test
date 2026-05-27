@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>乡村振兴数字平台 - 管理后台</title>
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Microsoft YaHei',sans-serif;background:#f0f2f5}
+#app,.app-wrap{height:100vh;display:flex;flex-direction:column}
+.login-wrap{height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#001529 0,#003a70 50%,#001529 100%)}
+.login-card{width:400px;padding:40px;background:#fff;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.login-card h2{text-align:center;margin-bottom:24px;font-size:20px;color:#001529;letter-spacing:4px}
+.app-header{height:52px;background:linear-gradient(90deg,#001529,#003a70);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}
+.app-header h1{font-size:16px;letter-spacing:2px;font-weight:600}
+.app-header .user-info{display:flex;align-items:center;gap:12px;font-size:13px}
+.app-body{display:flex;flex:1;overflow:hidden}
+.sidebar{width:200px;background:#001529;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sidebar .el-menu{border-right:none;background:transparent}
+.sidebar .el-menu-item,.sidebar .el-submenu__title{color:rgba(255,255,255,.7)!important}
+.sidebar .el-menu-item.is-active,.sidebar .el-menu-item:hover{color:#fff!important;background:rgba(255,255,255,.08)!important}
+.main-content{flex:1;overflow-y:auto;padding:16px;background:#f0f2f5}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.page-header h3{font-size:16px;font-weight:600;color:#333}
+.page-header h3 small{font-weight:400;font-size:12px;color:#999;margin-left:8px}
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:16px}
+.stat-card{background:#fff;border-radius:6px;padding:16px;display:flex;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.06);border-left:4px solid #1890ff}
+.stat-card .icon{width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;margin-right:14px}
+.stat-card .info .num{font-size:24px;font-weight:700;color:#333;line-height:1.2}
+.stat-card .info .label{font-size:13px;color:#999;margin-top:2px}
+.dash-charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.dash-charts .chart-box{background:#fff;border-radius:6px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.dash-charts .chart-box h4{font-size:13px;color:#666;margin-bottom:8px;font-weight:600}
+.dash-charts .chart-box .chart{height:220px}
+.el-table th{background:#fafafa!important;font-weight:600;color:#333}
+.el-table .cell{font-size:12px}
+.dialog-form .el-form-item{margin-bottom:14px}
+.coord-tag{margin:2px 4px 2px 0}
+.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.config-grid .config-item{background:#fff;border-radius:6px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.config-grid .config-item h4{font-size:14px;margin-bottom:12px;color:#333;border-left:3px solid #1890ff;padding-left:10px}
+.leaflet-tooltip{background:rgba(6,20,45,.95)!important;border:1px solid rgba(79,195,247,.4)!important;border-radius:6px!important;color:#fff!important;padding:8px 12px!important;max-width:260px!important;white-space:normal!important;line-height:1.6!important}
+.leaflet-tooltip-top::before{border-top-color:rgba(79,195,247,.4)!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="login-wrap" v-if="!loggedIn">
+    <div class="login-card">
+      <h2><i class="el-icon-map-location" style="color:#1890ff"></i> 乡村振兴平台</h2>
+      <el-form ref="loginForm" :model="loginForm" :rules="loginRules" @keyup.enter.native="doLogin">
+        <el-form-item prop="username"><el-input v-model="loginForm.username" prefix-icon="el-icon-user" placeholder="用户名" /></el-form-item>
+        <el-form-item prop="password"><el-input v-model="loginForm.password" prefix-icon="el-icon-lock" type="password" placeholder="密码" show-password /></el-form-item>
+        <el-form-item><el-button type="primary" style="width:100%" @click="doLogin" :loading="logining">登 录</el-button></el-form-item>
+        <div style="text-align:center;font-size:12px;color:#999">演示账号：admin / admin123</div>
+      </el-form>
+    </div>
+  </div>
+
+  <div class="app-wrap" v-else>
+    <div class="app-header">
+      <h1><i class="el-icon-map-location" style="margin-right:6px"></i> {{ config.title || '乡村振兴数字平台' }}</h1>
+      <div class="user-info">
+        <el-tag size="mini" :type="user.role === 'admin' ? 'danger' : 'info'" effect="dark">{{ user.role === 'admin' ? '管理员' : '只读用户' }}</el-tag>
+        <span><i class="el-icon-user"></i> {{ user.nickname }}</span>
+        <el-button size="mini" plain style="color:#fff;border-color:rgba(255,255,255,.3)" @click="doLogout">退出</el-button>
+      </div>
+    </div>
+    <div class="app-body">
+      <div class="sidebar">
+        <el-menu :default-active="module" @select="module=$event" background-color="#001529" text-color="rgba(255,255,255,.7)" active-text-color="#fff">
+          <el-menu-item index="dashboard"><i class="el-icon-s-data"></i>首页概览</el-menu-item>
+          <el-menu-item index="households" v-if="modVisible('household')"><i class="el-icon-user"></i>户情管理</el-menu-item>
+          <el-menu-item index="buildings" v-if="modVisible('building')"><i class="el-icon-house"></i>房屋管理</el-menu-item>
+          <el-menu-item index="parcels" v-if="modVisible('crop')"><i class="el-icon-map-location"></i>地块管理</el-menu-item>
+          <el-menu-item index="crops" v-if="modVisible('crop')"><i class="el-icon-s-growth"></i>作物管理</el-menu-item>
+          <el-menu-item index="policies" v-if="modVisible('policy')"><i class="el-icon-s-claim"></i>政策保障</el-menu-item>
+          <el-menu-item index="users" v-if="user.role==='admin'"><i class="el-icon-setting"></i>权限管理</el-menu-item>
+          <el-menu-item index="sysconfig" v-if="user.role==='admin'"><i class="el-icon-s-tools"></i>系统配置</el-menu-item>
+        </el-menu>
+      </div>
+
+      <div class="main-content">
+        <div v-if="module==='dashboard'">
+          <div class="page-header"><h3>首页概览<small>全平台数据总览</small></h3></div>
+          <div class="stat-cards">
+            <div class="stat-card" style="border-left-color:#1890ff"><div class="icon" style="background:#1890ff"><i class="el-icon-map-location"></i></div><div class="info"><div class="num">{{stats.villageCount||0}}</div><div class="label">自然村</div></div></div>
+            <div class="stat-card" style="border-left-color:#52c41a"><div class="icon" style="background:#52c41a"><i class="el-icon-user"></i></div><div class="info"><div class="num">{{stats.householdCount||0}}</div><div class="label">户数</div></div></div>
+            <div class="stat-card" style="border-left-color:#faad14"><div class="icon" style="background:#faad14"><i class="el-icon-s-growth"></i></div><div class="info"><div class="num">{{stats.populationTotal||0}}</div><div class="label">人口</div></div></div>
+            <div class="stat-card" style="border-left-color:#722ed1"><div class="icon" style="background:#722ed1"><i class="el-icon-money"></i></div><div class="info"><div class="num">{{ (stats.avgIncome||0).toFixed(1) }}万</div><div class="label">户均收入</div></div></div>
+            <div class="stat-card" style="border-left-color:#eb2f96"><div class="icon" style="background:#eb2f96"><i class="el-icon-map-location"></i></div><div class="info"><div class="num">{{stats.parcelCount||0}}</div><div class="label">地块数</div></div></div>
+            <div class="stat-card" style="border-left-color:#13c2c2"><div class="icon" style="background:#13c2c2"><i class="el-icon-s-claim"></i></div><div class="info"><div class="num">{{stats.policyCount||0}}</div><div class="label">政策数</div></div></div>
+          </div>
+          <div class="dash-charts">
+            <div class="chart-box"><h4>户均收入分布</h4><div class="chart" id="dashIncomeChart"></div></div>
+            <div class="chart-box"><h4>作物收益概览</h4><div class="chart" id="dashCropChart"></div></div>
+          </div>
+          <el-card shadow="never" style="margin-top:14px">
+            <div slot="header"><span>最近户情</span></div>
+            <el-table :data="recentHouseholds" size="mini" stripe style="width:100%">
+              <el-table-column label="户主" prop="name" width="100"></el-table-column>
+              <el-table-column label="人口" prop="population" width="60"></el-table-column>
+              <el-table-column label="年收入(万)" prop="income" width="100"></el-table-column>
+              <el-table-column label="务工" prop="workCount" width="60"></el-table-column>
+              <el-table-column label="户类型" prop="poverty" width="120"></el-table-column>
+              <el-table-column label="电话" prop="phone" width="120"></el-table-column>
+              <el-table-column label="地址" prop="address"></el-table-column>
+            </el-table>
+          </el-card>
+        </div>
+
+        <div v-if="module==='households'">
+          <div class="page-header"><h3>户情管理<small>人口 / 收入 / 务工 / 帮扶</small><el-button type="primary" size="small" icon="el-icon-plus" @click="openHhForm()" style="margin-left:12px">新增</el-button></h3></div>
+          <el-table :data="households" stripe size="mini" style="width:100%">
+            <el-table-column label="户主" prop="name" width="100"></el-table-column>
+            <el-table-column label="所在村" width="100"><template slot-scope="{row}">{{villMap[row.villageId]}}</template></el-table-column>
+            <el-table-column label="人口" prop="population" width="60"></el-table-column>
+            <el-table-column label="年收入(万)" prop="income" width="100"></el-table-column>
+            <el-table-column label="务工人数" prop="workCount" width="80"></el-table-column>
+            <el-table-column label="户类型" prop="poverty" width="120"></el-table-column>
+            <el-table-column label="电话" prop="phone" width="120"></el-table-column>
+            <el-table-column label="地址" prop="address"></el-table-column>
+            <el-table-column label="操作" width="140" fixed="right">
+              <template slot-scope="{row}"><el-button type="text" size="mini" icon="el-icon-edit" @click="openHhForm(row)">编辑</el-button><el-button type="text" size="mini" icon="el-icon-delete" style="color:#f56c6c" @click="delItem('households',row,'户情')">删除</el-button></template>
+            </el-table-column>
+          </el-table>
+          <el-dialog :title="hhForm.id?'编辑户情':'新增户情'" :visible.sync="hhFormVisible" width="600px">
+            <el-form :model="hhForm" label-width="90px" size="small" class="dialog-form">
+              <el-row :gutter="16"><el-col :span="12"><el-form-item label="户主姓名"><el-input v-model="hhForm.name" /></el-form-item></el-col><el-col :span="12"><el-form-item label="所属自然村"><el-select v-model="hhForm.villageId" style="width:100%"><el-option v-for="v in villages" :key="v.id" :label="v.name" :value="v.id" /></el-select></el-form-item></el-col></el-row>
+              <el-row :gutter="16"><el-col :span="8"><el-form-item label="人口"><el-input-number v-model="hhForm.population" :min="1" style="width:100%" /></el-form-item></el-col><el-col :span="8"><el-form-item label="年收入(万)"><el-input-number v-model="hhForm.income" :min="0" :step="0.1" :precision="1" style="width:100%" /></el-form-item></el-col><el-col :span="8"><el-form-item label="务工人数"><el-input-number v-model="hhForm.workCount" :min="0" style="width:100%" /></el-form-item></el-col></el-row>
+              <el-row :gutter="16"><el-col :span="12"><el-form-item label="户类型"><el-select v-model="hhForm.poverty" style="width:100%"><el-option label="一般户" value="一般户" /><el-option label="已脱贫" value="已脱贫" /><el-option label="脱贫监测户" value="脱贫监测户" /><el-option label="边缘易致贫户" value="边缘易致贫户" /></el-select></el-form-item></el-col><el-col :span="12"><el-form-item label="电话"><el-input v-model="hhForm.phone" /></el-form-item></el-col></el-row>
+              <el-form-item label="地址"><el-input v-model="hhForm.address" /></el-form-item>
+            </el-form>
+            <span slot="footer"><el-button @click="hhFormVisible=false">取消</el-button><el-button type="primary" @click="saveItem('households',hhForm,'hhFormVisible')">保存</el-button></span>
+          </el-dialog>
+        </div>
+
+        <div v-if="module==='buildings'">
+          <div class="page-header"><h3>房屋管理<small>房屋类型 / 面积 / 安全等级</small><el-button type="primary" size="small" icon="el-icon-plus" @click="openBldForm()" style="margin-left:12px">新增</el-button></h3></div>
+          <el-table :data="buildings" stripe size="mini" style="width:100%">
+            <el-table-column label="所属户主" width="120"><template slot-scope="{row}">{{hhMap[row.householdId]}}</template></el-table-column>
+            <el-table-column label="结构" prop="type" width="80"></el-table-column><el-table-column label="面积(m²)" prop="area" width="80"></el-table-column>
+            <el-table-column label="层数" prop="floors" width="60"></el-table-column><el-table-column label="建成年份" prop="builtYear" width="100"></el-table-column>
+            <el-table-column label="安全等级" width="100"><template slot-scope="{row}"><el-tag :type="row.status==='安全'?'success':row.status==='需加固'?'warning':'info'" size="mini">{{row.status}}</el-tag></template></el-table-column>
+            <el-table-column label="操作" width="140" fixed="right"><template slot-scope="{row}"><el-button type="text" size="mini" icon="el-icon-edit" @click="openBldForm(row)">编辑</el-button><el-button type="text" size="mini" icon="el-icon-delete" style="color:#f56c6c" @click="delItem('buildings',row,'房屋')">删除</el-button></template></el-table-column>
+          </el-table>
+          <el-dialog :title="bldForm.id?'编辑房屋':'新增房屋'" :visible.sync="bldFormVisible" width="500px">
+            <el-form :model="bldForm" label-width="90px" size="small" class="dialog-form">
+              <el-form-item label="所属户主"><el-select v-model="bldForm.householdId" style="width:100%"><el-option v-for="h in households" :key="h.id" :label="h.name" :value="h.id" /></el-select></el-form-item>
+              <el-row :gutter="16"><el-col :span="12"><el-form-item label="结构类型"><el-select v-model="bldForm.type" style="width:100%"><el-option label="砖混" value="砖混" /><el-option label="框架" value="框架" /><el-option label="土木" value="土木" /><el-option label="简易房" value="简易房" /></el-select></el-form-item></el-col><el-col :span="12"><el-form-item label="面积(m²)"><el-input-number v-model="bldForm.area" :min="0" style="width:100%" /></el-form-item></el-col></el-row>
+              <el-row :gutter="16"><el-col :span="12"><el-form-item label="层数"><el-input-number v-model="bldForm.floors" :min="1" style="width:100%" /></el-form-item></el-col><el-col :span="12"><el-form-item label="建成年份"><el-input v-model="bldForm.builtYear" /></el-form-item></el-col></el-row>
+              <el-form-item label="安全等级"><el-select v-model="bldForm.status" style="width:100%"><el-option label="安全" value="安全" /><el-option label="需加固" value="需加固" /><el-option label="危险" value="危险" /><el-option label="附属" value="附属" /></el-select></el-form-item>
+            </el-form>
+            <span slot="footer"><el-button @click="bldFormVisible=false">取消</el-button><el-button type="primary" @click="saveItem('buildings',bldForm,'bldFormVisible')">保存</el-button></span>
+          </el-dialog>
+        </div>
+
+        <div v-if="module==='parcels'">
+          <div class="page-header"><h3>地块管理<small>地块 / 作物 / 边界</small><el-button type="primary" size="small" icon="el-icon-plus" @click="openPclForm()" style="margin-left:12px">新增</el-button></h3></div>
+          <el-table :data="parcels" stripe size="mini" style="width:100%">
+            <el-table-column label="地块名" prop="name" width="100"></el-table-column>
+            <el-table-column label="所在村" width="100"><template slot-scope="{row}">{{villMap[row.villageId]}}</template></el-table-column>
+            <el-table-column label="面积(亩)" prop="area" width="80"></el-table-column>
+            <el-table-column label="作物" prop="crop" width="80"></el-table-column>
+            <el-table-column label="承包人" prop="owner" width="100"></el-table-column>
+            <el-table-column label="状态" width="80"><template slot-scope="{row}"><el-tag :type="row.status==='丰收期'?'success':'primary'" size="mini">{{row.status}}</el-tag></template></el-table-column>
+            <el-table-column label="坐标数" width="70"><template slot-scope="{row}">{{row.coords?.length||0}}</template></el-table-column>
+            <el-table-column label="操作" width="140" fixed="right"><template slot-scope="{row}"><el-button type="text" size="mini" icon="el-icon-edit" @click="openPclForm(row)">编辑</el-button><el-button type="text" size="mini" icon="el-icon-delete" style="color:#f56c6c" @click="delItem('parcels',row,'地块')">删除</el-button></template></el-table-column>
+          </el-table>
+          <el-dialog :title="pclForm.id?'编辑地块':'新增地块'" :visible.sync="pclFormVisible" width="650px">
+            <el-form :model="pclForm" label-width="100px" size="small" class="dialog-form">
+              <el-row :gutter="16"><el-col :span="12"><el-form-item label="地块名称"><el-input v-model="pclForm.name" /></el-form-item></el-col><el-col :span="12"><el-form-item label="所属自然村"><el-select v-model="pclForm.villageId" style="width:100%"><el-option v-for="v in villages" :key="v.id" :label="v.name" :value="v.id" /></el-select></el-form-item></el-col></el-row>
+              <el-row :gutter="16"><el-col :span="8"><el-form-item label="面积(亩)"><el-input-number v-model="pclForm.area" :min="0" :step="0.1" style="width:100%" /></el-form-item></el-col><el-col :span="8"><el-form-item label="作物"><el-input v-model="pclForm.crop" /></el-form-item></el-col><el-col :span="8"><el-form-item label="承包人"><el-input v-model="pclForm.owner" /></el-form-item></el-col></el-row>
+              <el-form-item label="状态"><el-select v-model="pclForm.status" style="width:100%"><el-option label="种植中" value="种植中" /><el-option label="丰收期" value="丰收期" /><el-option label="休耕" value="休耕" /></el-select></el-form-item>
+              <el-form-item label="边界坐标">
+                <el-input type="textarea" v-model="pclCoordText" :rows="4" placeholder="纬度,经度，每行一对" />
+                <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px"><el-tag v-for="(c,i) in pclParsedCoords" :key="i" closable @close="pclRemoveCoord(i)" size="mini">{{c[0].toFixed(5)}},{{c[1].toFixed(5)}}</el-tag></div>
+                <span style="font-size:11px;color:#999;line-height:2">已解析 {{pclParsedCoords.length}} 个坐标</span>
+              </el-form-item>
+            </el-form>
+            <span slot="footer"><el-button @click="pclFormVisible=false">取消</el-button><el-button type="primary" @click="savePcl()">保存</el-button></span>
+          </el-dialog>
+        </div>
+
+        <div v-if="module==='crops'">
+          <div class="page-header"><h3>作物管理<small>品种 / 种植 / 产量 / 收益</small><el-button type="primary" size="small" icon="el-icon-plus" @click="openCropForm()" style="margin-left:12px">新增</el-button></h3></div>
+          <el-table :data="crops" stripe size="mini" style="width:100%">
+            <el-table-column label="地块" width="100"><template slot-scope="{row}">{{pclMap[row.parcelId]}}</template></el-table-column>
+            <el-table-column label="作物" prop="type" width="80"></el-table-column><el-table-column label="品种" prop="variety" width="100"></el-table-column>
+            <el-table-column label="面积(亩)" prop="area" width="80"></el-table-column><el-table-column label="播种" prop="plantDate" width="80"></el-table-column>
+            <el-table-column label="收获" prop="harvestDate" width="80"></el-table-column><el-table-column label="产量(吨)" prop="yield" width="80"></el-table-column>
+            <el-table-column label="收入(万)" prop="income" width="80"></el-table-column><el-table-column label="利润(万)" prop="profit" width="80"></el-table-column>
+            <el-table-column label="操作" width="140" fixed="right"><template slot-scope="{row}"><el-button type="text" size="mini" icon="el-icon-edit" @click="openCropForm(row)">编辑</el-button><el-button type="text" size="mini" icon="el-icon-delete" style="color:#f56c6c" @click="delItem('crops',row,'作物')">删除</el-button></template></el-table-column>
+          </el-table>
+          <el-dialog :title="cropForm.id?'编辑作物':'新增作物'" :visible.sync="cropFormVisible" width="600px">
+            <el-form :model="cropForm" label-width="90px" size="small" class="dialog-form">
+              <el-row :gutter="16"><el-col :span="12"><el-form-item label="所属地块"><el-select v-model="cropForm.parcelId" style="width:100%"><el-option v-for="p in parcels" :key="p.id" :label="p.name" :value="p.id" /></el-select></el-form-item></el-col><el-col :span="12"><el-form-item label="作物类型"><el-input v-model="cropForm.type" /></el-form-item></el-col></el-row>
+              <el-row :gutter="16"><el-col :span="12"><el-form-item label="品种"><el-input v-model="cropForm.variety" /></el-form-item></el-col><el-col :span="12"><el-form-item label="面积(亩)"><el-input-number v-model="cropForm.area" :min="0" :step="0.1" style="width:100%" /></el-form-item></el-col></el-row>
+              <el-row :gutter="16"><el-col :span="12"><el-form-item label="播种时间"><el-input v-model="cropForm.plantDate" placeholder="2026-04" /></el-form-item></el-col><el-col :span="12"><el-form-item label="收获时间"><el-input v-model="cropForm.harvestDate" placeholder="2026-09" /></el-form-item></el-col></el-row>
+              <el-row :gutter="16"><el-col :span="8"><el-form-item label="产量(吨)"><el-input-number v-model="cropForm.yield" :min="0" :step="0.1" style="width:100%" /></el-form-item></el-col><el-col :span="8"><el-form-item label="收入(万)"><el-input-number v-model="cropForm.income" :min="0" :step="0.1" style="width:100%" /></el-form-item></el-col><el-col :span="8"><el-form-item label="成本(万)"><el-input-number v-model="cropForm.cost" :min="0" :step="0.1" style="width:100%" /></el-form-item></el-col></el-row>
+              <el-row :gutter="16"><el-col :span="12"><el-form-item label="利润(万)"><el-input-number v-model="cropForm.profit" :min="0" :step="0.1" style="width:100%" /></el-form-item></el-col></el-row>
+            </el-form>
+            <span slot="footer"><el-button @click="cropFormVisible=false">取消</el-button><el-button type="primary" @click="saveItem('crops',cropForm,'cropFormVisible')">保存</el-button></span>
+          </el-dialog>
+        </div>
+
+        <div v-if="module==='policies'">
+          <div class="page-header"><h3>政策保障<small>低保 / 补贴 / 住房保障</small><el-button type="primary" size="small" icon="el-icon-plus" @click="openPolForm()" style="margin-left:12px">新增</el-button></h3></div>
+          <el-table :data="policies" stripe size="mini" style="width:100%">
+            <el-table-column label="政策名称" prop="name" width="160"></el-table-column><el-table-column label="类型" prop="type" width="120"></el-table-column>
+            <el-table-column label="标准" width="120"><template slot-scope="{row}">{{row.amount}}{{row.unit}}</template></el-table-column>
+            <el-table-column label="施行时间" prop="applyTime" width="100"></el-table-column><el-table-column label="说明" prop="desc"></el-table-column>
+            <el-table-column label="操作" width="140" fixed="right"><template slot-scope="{row}"><el-button type="text" size="mini" icon="el-icon-edit" @click="openPolForm(row)">编辑</el-button><el-button type="text" size="mini" icon="el-icon-delete" style="color:#f56c6c" @click="delItem('policies',row,'政策')">删除</el-button></template></el-table-column>
+          </el-table>
+          <el-dialog :title="polForm.id?'编辑政策':'新增政策'" :visible.sync="polFormVisible" width="550px">
+            <el-form :model="polForm" label-width="90px" size="small" class="dialog-form">
+              <el-row :gutter="16"><el-col :span="16"><el-form-item label="政策名称"><el-input v-model="polForm.name" /></el-form-item></el-col><el-col :span="8"><el-form-item label="类型"><el-select v-model="polForm.type" style="width:100%"><el-option label="生活保障" value="生活保障" /><el-option label="农业补贴" value="农业补贴" /><el-option label="住房保障" value="住房保障" /><el-option label="医疗保障" value="医疗保障" /><el-option label="教育补贴" value="教育补贴" /></el-select></el-form-item></el-col></el-row>
+              <el-row :gutter="16"><el-col :span="12"><el-form-item label="金额"><el-input-number v-model="polForm.amount" :min="0" style="width:100%" /></el-form-item></el-col><el-col :span="12"><el-form-item label="单位"><el-input v-model="polForm.unit" placeholder="元/年" /></el-form-item></el-col></el-row>
+              <el-row :gutter="16"><el-col :span="12"><el-form-item label="施行时间"><el-input v-model="polForm.applyTime" placeholder="2026-01" /></el-form-item></el-col></el-row>
+              <el-form-item label="说明"><el-input type="textarea" v-model="polForm.desc" :rows="3" /></el-form-item>
+            </el-form>
+            <span slot="footer"><el-button @click="polFormVisible=false">取消</el-button><el-button type="primary" @click="saveItem('policies',polForm,'polFormVisible')">保存</el-button></span>
+          </el-dialog>
+        </div>
+
+        <div v-if="module==='users'">
+          <div class="page-header"><h3>权限管理<small>管理员 / 只读用户</small><el-button type="primary" size="small" icon="el-icon-plus" @click="openUserForm()" style="margin-left:12px">新增用户</el-button></h3></div>
+          <el-table :data="users" stripe size="mini" style="width:100%">
+            <el-table-column label="用户名" prop="username" width="120"></el-table-column><el-table-column label="昵称" prop="nickname" width="120"></el-table-column>
+            <el-table-column label="角色" width="100"><template slot-scope="{row}"><el-tag :type="row.role==='admin'?'danger':'info'" size="mini">{{row.role==='admin'?'管理员':'只读用户'}}</el-tag></template></el-table-column>
+            <el-table-column label="状态" width="80"><template slot-scope="{row}"><el-tag :type="row.status===1?'success':'danger'" size="mini">{{row.status===1?'启用':'禁用'}}</el-tag></template></el-table-column>
+            <el-table-column label="创建时间" prop="created" width="120"></el-table-column>
+            <el-table-column label="操作" width="160" fixed="right"><template slot-scope="{row}"><el-button type="text" size="mini" icon="el-icon-edit" @click="openUserForm(row)">编辑</el-button><el-button type="text" size="mini" icon="el-icon-delete" style="color:#f56c6c" @click="delItem('users',row,'用户')" v-if="row.username!=='admin'">删除</el-button></template></el-table-column>
+          </el-table>
+          <el-dialog :title="userForm.id?'编辑用户':'新增用户'" :visible.sync="userFormVisible" width="450px">
+            <el-form :model="userForm" label-width="80px" size="small" class="dialog-form">
+              <el-form-item label="用户名"><el-input v-model="userForm.username" /></el-form-item>
+              <el-form-item label="密码"><el-input v-model="userForm.password" type="password" show-password /></el-form-item>
+              <el-form-item label="昵称"><el-input v-model="userForm.nickname" /></el-form-item>
+              <el-row :gutter="16"><el-col :span="12"><el-form-item label="角色"><el-select v-model="userForm.role" style="width:100%"><el-option label="管理员" value="admin" /><el-option label="只读用户" value="viewer" /></el-select></el-form-item></el-col><el-col :span="12"><el-form-item label="状态"><el-select v-model="userForm.status" style="width:100%"><el-option label="启用" :value="1" /><el-option label="禁用" :value="0" /></el-select></el-form-item></el-col></el-row>
+            </el-form>
+            <span slot="footer"><el-button @click="userFormVisible=false">取消</el-button><el-button type="primary" @click="saveUser()">保存</el-button></span>
+          </el-dialog>
+        </div>
+
+        <div v-if="module==='sysconfig'">
+          <div class="page-header"><h3>系统配置<small>平台设置 / 模块开关</small></h3></div>
+          <div class="config-grid">
+            <div class="config-item"><h4>基础设置</h4><el-form size="small" label-width="100px"><el-form-item label="平台名称"><el-input v-model="config.title" /></el-form-item><el-form-item label="地图密钥"><el-input v-model="config.mapKey" /></el-form-item></el-form></div>
+            <div class="config-item"><h4>模块开关</h4><el-form size="small"><el-form-item><el-switch v-model="config.modules" active-value="household" inactive-value="" @change="toggleMod('household')"></el-switch><span style="margin-left:8px">户情管理</span></el-form-item><el-form-item><el-switch v-model="config.modules" active-value="building" inactive-value="" @change="toggleMod('building')"></el-switch><span style="margin-left:8px">房屋管理</span></el-form-item><el-form-item><el-switch v-model="config.modules" active-value="crop" inactive-value="" @change="toggleMod('crop')"></el-switch><span style="margin-left:8px">地块/作物管理</span></el-form-item><el-form-item><el-switch v-model="config.modules" active-value="policy" inactive-value="" @change="toggleMod('policy')"></el-switch><span style="margin-left:8px">政策保障</span></el-form-item></el-form></div>
+          </div>
+          <el-button type="primary" size="small" style="margin-top:14px" @click="saveConfig" :loading="configSaving">保存配置</el-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API='/api';
+new Vue({
+  el:'#app',
+  data:{
+    loggedIn:false,logining:false,user:{},config:{title:'乡村振兴数字平台',modules:['household','building','crop','policy']},configSaving:false,
+    loginForm:{username:'admin',password:'admin123'},
+    loginRules:{username:[{required:true,message:'请输入用户名'}],password:[{required:true,message:'请输入密码'}]},
+    module:'dashboard',villages:[],parcels:[],households:[],buildings:[],crops:[],policies:[],users:[],stats:{},
+    hhForm:{},hhFormVisible:false,bldForm:{},bldFormVisible:false,pclForm:{},pclFormVisible:false,pclCoordText:'',
+    cropForm:{},cropFormVisible:false,polForm:{},polFormVisible:false,userForm:{},userFormVisible:false
+  },
+  computed:{
+    villMap(){const m={};this.villages.forEach(v=>m[v.id]=v.name);return m},
+    hhMap(){const m={};this.households.forEach(h=>m[h.id]=h.name);return m},
+    pclMap(){const m={};this.parcels.forEach(p=>m[p.id]=p.name);return m},
+    pclParsedCoords(){return this.pclCoordText.split('\n').map(l=>{const p=l.trim().split(/[,，\s]+/);if(p.length>=2){const lat=parseFloat(p[0]),lng=parseFloat(p[1]);if(!isNaN(lat)&&!isNaN(lng))return[lat,lng]}return null}).filter(Boolean)},
+    recentHouseholds(){return this.households.slice().reverse().slice(0,8)}
+  },
+  watch:{pclParsedCoords(v){this.pclForm.coords=v}},
+  mounted(){this.checkLogin()},
+  methods:{
+    modVisible(mod){return this.config.modules&&this.config.modules.includes(mod)},
+    toggleMod(mod){const i=this.config.modules.indexOf(mod);i>-1?this.config.modules.splice(i,1):this.config.modules.push(mod)},
+    checkLogin(){fetch(API+'/me').then(r=>{if(r.ok)return r.json();throw 401}).then(u=>{this.user=u;this.loggedIn=true;this.loadAll()}).catch(()=>{})},
+    doLogin(){this.$refs.loginForm.validate(v=>{if(!v)return;this.logining=true;fetch(API+'/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.loginForm)}).then(r=>r.json()).then(d=>{if(d.error)throw d.error;this.user=d.user;this.loggedIn=true;this.loadAll()}).catch(e=>{this.$message.error(e||'登录失败')}).then(()=>this.logining=false)})},
+    doLogout(){fetch(API+'/logout').then(()=>{this.loggedIn=false;this.user={}})},
+    async fetchOne(t){const r=await fetch(API+'/'+t);this[t]=await r.json()},
+    async loadAll(){await Promise.all(['villages','parcels','households','buildings','crops','policies','users'].map(t=>this.fetchOne(t)));const r=await fetch(API+'/stats/overview');this.stats=await r.json();await this.fetchOne('sysconfig');this.config=this.sysconfig||{title:'乡村振兴数字平台',modules:['household','building','crop','policy']};this.$nextTick(()=>this.initCharts())},
+    initCharts(){const c1=echarts.init(document.getElementById('dashIncomeChart'));c1.setOption({tooltip:{trigger:'item'},color:['#52c41a','#73d13d','#95de64'],series:[{type:'pie',radius:['35%','60%'],label:{show:true,formatter:'{b}\n{d}%',fontSize:10},data:[{value:this.stats.avgIncome||0,name:'户均收入'},{value:Math.max(this.stats.avgIncome*0.6||0,1),name:'低于平均'},{value:Math.max(this.stats.avgIncome*0.3||0,1),name:'高于平均'}]}]});const r=setTimeout(()=>{c1.resize();clearTimeout(r)},200);fetch(API+'/stats/crops').then(r=>r.json()).then(d=>{const c2=echarts.init(document.getElementById('dashCropChart'));c2.setOption({tooltip:{trigger:'axis'},grid:{top:12,bottom:36,left:36,right:8},xAxis:{type:'category',data:d.map(d=>d.type)},yAxis:{type:'value'},series:[{name:'收入',type:'bar',data:d.map(d=>d.income),barWidth:16,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#52c41a'},{offset:1,color:'#237804'}])}},{name:'利润',type:'bar',data:d.map(d=>d.profit),barWidth:16,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#faad14'},{offset:1,color:'#d48806'}])}}]});const s=setTimeout(()=>{c2.resize();clearTimeout(s)},200)})},
+    async saveItem(t,f,r){const e=!!f.id;const b={...f};delete b.id;try{const s=await fetch(API+'/'+t+(e?'/'+f.id:''),{method:e?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});if(!s.ok)throw await s.json();this.$message.success(e?'更新成功':'创建成功');this[r]=false;await this.fetchOne(t);if(t==='households'||t==='villages'){const s=await fetch(API+'/stats/overview');this.stats=await s.json()}}catch(e){this.$message.error(e.error||'操作失败')}},
+    delItem(t,r,l){this.$confirm('确定删除「'+(r.name||r.username||l)+'」？','提示',{confirmButtonText:'删除',cancelButtonText:'取消',type:'warning'}).then(async()=>{await fetch(API+'/'+t+'/'+r.id,{method:'DELETE'});this.$message.success('已删除');await this.fetchOne(t)}).catch(()=>{})},
+    openHhForm(r){this.hhForm=r?{...r}:{villageId:1,name:'',population:1,income:0,workCount:0,poverty:'一般户',phone:'',address:''};this.hhFormVisible=true},
+    openBldForm(r){this.bldForm=r?{...r}:{householdId:this.households[0]?.id||1,type:'砖混',area:0,floors:1,builtYear:'',status:'安全'};this.bldFormVisible=true},
+    openPclForm(r){if(r){this.pclForm={...r};this.pclCoordText=(r.coords||[]).map(c=>c.join(',')).join('\n')}else{this.pclForm={villageId:1,name:'',area:0,crop:'',owner:'',status:'种植中',coords:[]};this.pclCoordText=''}this.pclFormVisible=true},
+    pclRemoveCoord(i){const l=this.pclCoordText.split('\n').filter(l=>l.trim());l.splice(i,1);this.pclCoordText=l.join('\n')},
+    async savePcl(){if(this.pclParsedCoords.length<3){this.$message.error('至少3个坐标');return}this.pclForm.coords=this.pclParsedCoords;await this.saveItem('parcels',this.pclForm,'pclFormVisible')},
+    openCropForm(r){this.cropForm=r?{...r}:{parcelId:this.parcels[0]?.id||1,type:'',variety:'',area:0,plantDate:'',harvestDate:'',yield:0,income:0,cost:0,profit:0};this.cropFormVisible=true},
+    openPolForm(r){this.polForm=r?{...r}:{name:'',type:'生活保障',amount:0,unit:'元/年',applyTime:'',desc:''};this.polFormVisible=true},
+    openUserForm(r){this.userForm=r?{...r}:{username:'',password:'123456',nickname:'',role:'viewer',status:1};this.userFormVisible=true},
+    async saveUser(){const f=this.userForm;const e=!!f.id;const b={...f};delete b.id;try{const r=await fetch(API+'/users'+(e?'/'+f.id:''),{method:e?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});if(!r.ok)throw await r.json();this.$message.success(e?'更新成功':'创建成功');this.userFormVisible=false;await this.fetchOne('users')}catch(e){this.$message.error(e.error||'操作失败')}},
+    async saveConfig(){this.configSaving=true;try{const cfg=await(await fetch(API+'/sysconfig/1')).json();await fetch(API+'/sysconfig/1',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...cfg,title:this.config.title,mapKey:this.config.mapKey,modules:this.config.modules})});this.$message.success('配置已保存')}catch(e){this.$message.error('保存失败')}this.configSaving=false}
+  }
+});
+</script>
+</body>
+</html>

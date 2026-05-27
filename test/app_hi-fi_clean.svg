@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 950" width="500" height="950">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0F4C75;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3282B8;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="aiBtnGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#00B4D8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0077B6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="adGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E0F7FA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B2EBF2;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Shadows -->
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.1"/>
+    </filter>
+    <filter id="shadow-lg" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.15"/>
+    </filter>
+    <filter id="shadow-sm" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+
+    <!-- Styles -->
+    <style>
+      .text-title { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 20px; font-weight: bold; fill: #333; }
+      .text-subtitle { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 12px; fill: #666; }
+      .text-small { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 11px; fill: #888; }
+      .text-white { fill: #fff; }
+      .icon { font-family: 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif; font-size: 20px; }
+      .card-bg { fill: #fff; rx: 12; filter: url(#shadow-sm); }
+      .grid-card { fill: #fff; rx: 8; filter: url(#shadow-sm); transition: transform 0.2s; }
+      .btn-pill { fill: #fff; rx: 20; filter: url(#shadow-sm); }
+      .nav-item { fill: #f8f9fa; rx: 12; }
+      .nav-active { fill: url(#aiBtnGrad); rx: 24; filter: url(#shadow); }
+      .status-bar { font-family: sans-serif; font-size: 12px; fill: #fff; font-weight: bold; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="500" height="950" fill="#F0F2F5" />
+
+  <!-- Main Title -->
+  <text x="250" y="60" class="text-title" text-anchor="middle" fill="#1a202c">APP 框架首页设想 - 高保真原型</text>
+  <text x="250" y="85" class="text-subtitle" text-anchor="middle" fill="#718096">智 - 本地工厂智能服务平台 | 定位：南浔</text>
+
+  <!-- Phone Container (Centered) -->
+  <g transform="translate(50, 120)">
+    <!-- Phone Bezel -->
+    <rect x="0" y="0" width="400" height="800" rx="40" fill="#1a202c" filter="url(#shadow-lg)" />
+    <rect x="4" y="4" width="392" height="792" rx="36" fill="#F8F9FA" />
+    
+    <!-- Notch -->
+    <rect x="140" y="4" width="120" height="24" rx="12" fill="#1a202c" />
+    
+    <!-- Status Bar -->
+    <text x="30" y="20" class="status-bar">9:41</text>
+    <text x="350" y="20" class="status-bar" text-anchor="end">100% 🔋</text>
+
+    <!-- App Header -->
+    <rect x="0" y="0" width="400" height="140" fill="url(#headerGrad)" rx="40" />
+    <rect x="0" y="30" width="400" height="110" fill="url(#headerGrad)" /> <!-- Extend header down -->
+    
+    <text x="200" y="70" class="text-title" text-anchor="middle" fill="#fff" style="font-size:18px;">浔智 · 本地工厂智能服务平台</text>
+    <text x="200" y="95" class="text-subtitle" text-anchor="middle" fill="#e2e8f0">📍 定位：南浔</text>
+
+    <!-- Search Bar (Floating) -->
+    <g transform="translate(20, 110)">
+      <rect x="0" y="0" width="360" height="44" class="btn-pill" />
+      <text x="40" y="28" class="text-small" fill="#a0aec0">🔍 搜索厂房、维修、订单...</text>
+      <rect x="300" y="6" width="50" height="32" rx="16" fill="#3182CE" />
+      <text x="325" y="27" class="text-small" text-anchor="middle" fill="#fff">搜索</text>
+    </g>
+
+    <!-- Main Content Area -->
+    <g transform="translate(20, 170)">
+      
+      <!-- 3x3 Grid -->
+      <!-- Row 1 -->
+      <g transform="translate(0, 0)">
+        <rect x="0" y="0" width="110" height="80" class="grid-card" />
+        <text x="55" y="35" class="icon" text-anchor="middle" fill="#3182CE">🏭</text>
+        <text x="55" y="60" class="text-small" text-anchor="middle" fill="#2d3748">厂房租售</text>
+      </g>
+      <g transform="translate(125, 0)">
+        <rect x="0" y="0" width="110" height="80" class="grid-card" />
+        <text x="55" y="35" class="icon" text-anchor="middle" fill="#E53E3E"></text>
+        <text x="55" y="60" class="text-small" text-anchor="middle" fill="#2d3748">紧急维修</text>
+      </g>
+      <g transform="translate(250, 0)">
+        <rect x="0" y="0" width="110" height="80" class="grid-card" />
+        <text x="55" y="35" class="icon" text-anchor="middle" fill="#38A169">📦</text>
+        <text x="55" y="60" class="text-small" text-anchor="middle" fill="#2d3748">外协订单</text>
+      </g>
+
+      <!-- Row 2 -->
+      <g transform="translate(0, 90)">
+        <rect x="0" y="0" width="110" height="80" class="grid-card" />
+        <text x="55" y="35" class="icon" text-anchor="middle" fill="#38A169"></text>
+        <text x="55" y="60" class="text-small" text-anchor="middle" fill="#2d3748">货源直购</text>
+      </g>
+      <g transform="translate(125, 90)">
+        <rect x="0" y="0" width="110" height="80" class="grid-card" />
+        <text x="55" y="35" class="icon" text-anchor="middle" fill="#D69E2E">👥</text>
+        <text x="55" y="60" class="text-small" text-anchor="middle" fill="#2d3748">招贤纳士</text>
+      </g>
+      <g transform="translate(250, 90)">
+        <rect x="0" y="0" width="110" height="80" class="grid-card" />
+        <text x="55" y="35" class="icon" text-anchor="middle" fill="#718096">️</text>
+        <text x="55" y="60" class="text-small" text-anchor="middle" fill="#2d3748">二手机械</text>
+      </g>
+
+      <!-- Row 3 -->
+      <g transform="translate(0, 180)">
+        <rect x="0" y="0" width="110" height="80" class="grid-card" />
+        <text x="55" y="35" class="icon" text-anchor="middle" fill="#DD6B20">🍵</text>
+        <text x="55" y="60" class="text-small" text-anchor="middle" fill="#2d3748">商务接待</text>
+      </g>
+      <g transform="translate(125, 180)">
+        <rect x="0" y="0" width="110" height="80" class="grid-card" />
+        <text x="55" y="35" class="icon" text-anchor="middle" fill="#3182CE">🏢</text>
+        <text x="55" y="60" class="text-small" text-anchor="middle" fill="#2d3748">直连大厂</text>
+      </g>
+      <g transform="translate(250, 180)">
+        <rect x="0" y="0" width="110" height="80" class="grid-card" />
+        <text x="55" y="35" class="icon" text-anchor="middle" fill="#805AD5">💰</text>
+        <text x="55" y="60" class="text-small" text-anchor="middle" fill="#2d3748">金融助力</text>
+      </g>
+
+      <!-- Ad Banner -->
+      <g transform="translate(0, 280)">
+        <rect x="0" y="0" width="360" height="100" fill="url(#adGrad)" rx="12" filter="url(#shadow-sm)" />
+        <text x="180" y="45" class="text-title" text-anchor="middle" fill="#2C7A7B">📢 广告展览位</text>
+        <text x="180" y="70" class="text-small" text-anchor="middle" fill="#4A5568">优质服务商推荐 / 展会活动预告</text>
+        <rect x="310" y="10" width="40" height="20" rx="10" fill="#fff" opacity="0.6" />
+        <text x="330" y="24" class="text-small" text-anchor="middle" fill="#2C7A7B">Ad</text>
+      </g>
+
+      <!-- Info Scroll -->
+      <g transform="translate(0, 395)">
+        <rect x="0" y="0" width="360" height="50" fill="#FFF5F5" rx="12" stroke="#FEB2B2" stroke-width="1" filter="url(#shadow-sm)" />
+        <text x="20" y="30" class="text-small" fill="#C53030">🔥 南浔电机厂急需数控机床维修...</text>
+        <polygon points="330, 15 345, 25 330, 35" fill="#C53030" />
+      </g>
+
+    </g>
+
+    <!-- Bottom Navigation Bar -->
+    <g transform="translate(0, 720)">
+      <rect x="0" y="0" width="400" height="80" fill="#fff" filter="url(#shadow)" />
+      
+      <!-- Nav Items -->
+      <g transform="translate(20, 20)">
+        <text x="30" y="25" class="icon" text-anchor="middle" fill="#718096"></text>
+        <text x="30" y="45" class="text-small" text-anchor="middle" fill="#718096">需求发布</text>
+      </g>
+      <g transform="translate(100, 20)">
+        <text x="30" y="25" class="icon" text-anchor="middle" fill="#718096">📋</text>
+        <text x="30" y="45" class="text-small" text-anchor="middle" fill="#718096">订单</text>
+      </g>
+      
+      <!-- AI Button (Center, Elevated) -->
+      <g transform="translate(160, -10)">
+        <rect x="0" y="0" width="80" height="50" class="nav-active" />
+        <text x="40" y="22" class="icon" text-anchor="middle" fill="#fff">✨</text>
+        <text x="40" y="38" class="text-small" text-anchor="middle" fill="#fff" font-weight="bold">AI 交互</text>
+      </g>
+      
+      <g transform="translate(260, 20)">
+        <text x="30" y="25" class="icon" text-anchor="middle" fill="#718096">💬</text>
+        <text x="30" y="45" class="text-small" text-anchor="middle" fill="#718096">消息</text>
+      </g>
+      <g transform="translate(340, 20)">
+        <text x="30" y="25" class="icon" text-anchor="middle" fill="#718096">👤</text>
+        <text x="30" y="45" class="text-small" text-anchor="middle" fill="#718096">我的</text>
+      </g>
+    </g>
+  </g>
+
+</svg>

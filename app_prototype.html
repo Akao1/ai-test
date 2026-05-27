@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>浔智 - 本地工厂智能服务平台</title>
+    <style>
+        /* 全局重置 */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+
+        /* 手机外壳 */
+        .phone-frame {
+            width: 375px; height: 812px; background: #fff; border-radius: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2); position: relative; overflow: hidden; border: 8px solid #1a202c;
+        }
+
+        /* 顶部刘海 */
+        .notch {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 150px; height: 30px; background: #1a202c; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; z-index: 100;
+        }
+
+        /* 页面容器 */
+        .page {
+            width: 100%; height: 100%; overflow-y: auto; padding-bottom: 80px; display: none;
+            background: #f8f9fa;
+        }
+        .page.active { display: block; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 首页头部 */
+        .header {
+            background: linear-gradient(135deg, #0F4C75, #3282B8);
+            padding: 50px 20px 30px; color: white; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+        }
+        .header h1 { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
+        .header p { font-size: 12px; opacity: 0.8; }
+
+        /* 搜索框 */
+        .search-bar {
+            margin: -20px 20px 20px; background: white; border-radius: 20px;
+            padding: 10px 15px; display: flex; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .search-bar input { border: none; outline: none; flex: 1; font-size: 14px; color: #666; margin-left: 10px; }
+        .search-btn { background: #3182CE; color: white; border: none; padding: 5px 15px; border-radius: 15px; font-size: 12px; }
+
+        /* 九宫格 */
+        .grid-container {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 0 20px; margin-bottom: 20px;
+        }
+        .grid-item {
+            background: white; border-radius: 12px; padding: 15px 5px; text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s; cursor: pointer;
+        }
+        .grid-item:active { transform: scale(0.95); }
+        .grid-icon { font-size: 24px; margin-bottom: 8px; display: block; }
+        .grid-text { font-size: 12px; color: #333; font-weight: 500; }
+
+        /* 广告位 */
+        .ad-banner {
+            margin: 0 20px 20px; background: linear-gradient(to right, #E0F7FA, #B2EBF2);
+            border-radius: 12px; padding: 20px; text-align: center; position: relative;
+        }
+        .ad-tag { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.6); padding: 2px 8px; border-radius: 10px; font-size: 10px; color: #2C7A7B; }
+
+        /* 滚动信息 */
+        .scroll-info {
+            margin: 0 20px 20px; background: #FFF5F5; border: 1px solid #FEB2B2;
+            border-radius: 12px; padding: 12px 15px; display: flex; align-items: center;
+        }
+        .scroll-icon { color: #C53030; margin-right: 10px; font-size: 16px; }
+        .scroll-text { font-size: 12px; color: #C53030; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 70px; background: white;
+            display: flex; justify-content: space-around; align-items: center;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05); border-top: 1px solid #eee; z-index: 50;
+        }
+        .nav-item { text-align: center; color: #718096; cursor: pointer; width: 20%; }
+        .nav-item.active { color: #3182CE; }
+        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
+        .nav-text { font-size: 10px; }
+
+        /* AI 特殊按钮 */
+        .nav-item.ai-btn {
+            position: relative; top: -20px;
+        }
+        .ai-circle {
+            width: 56px; height: 56px; background: linear-gradient(135deg, #00B4D8, #0077B6);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 5px 15px rgba(0,119,182,0.4); margin: 0 auto 5px;
+        }
+        .ai-circle span { color: white; font-size: 24px; }
+        .ai-text { color: #0077B6; font-weight: bold; }
+
+        /* 子页面样式 */
+        .sub-header {
+            background: white; padding: 50px 20px 15px; border-bottom: 1px solid #eee;
+            font-size: 18px; font-weight: bold; text-align: center;
+        }
+        .content-card {
+            background: white; margin: 15px 20px; padding: 20px; border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .upload-area {
+            border: 2px dashed #ddd; border-radius: 8px; padding: 20px; text-align: center;
+            color: #999; margin-bottom: 15px; cursor: pointer;
+        }
+        .btn-primary {
+            width: 100%; background: #3182CE; color: white; border: none; padding: 12px;
+            border-radius: 8px; font-size: 16px; cursor: pointer;
+        }
+        .profile-menu-item {
+            display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #f0f0f0;
+        }
+        .tag { padding: 4px 8px; border-radius: 4px; font-size: 10px; margin-right: 5px; }
+        .tag-blue { background: #EBF8FF; color: #3182CE; }
+        .tag-green { background: #F0FFF4; color: #38A169; }
+        .tag-orange { background: #FFFAF0; color: #DD6B20; }
+
+    </style>
+</head>
+<body>
+
+    <div class="phone-frame">
+        <div class="notch"></div>
+
+        <!-- 首页 -->
+        <div id="home" class="page active">
+            <div class="header">
+                <h1>智 · 本地工厂智能服务平台</h1>
+                <p>📍 定位：南浔</p>
+            </div>
+            
+            <div class="search-bar">
+                <span>🔍</span>
+                <input type="text" placeholder="搜索厂房、维修、订单...">
+                <button class="search-btn">搜索</button>
+            </div>
+
+            <div class="grid-container">
+                <div class="grid-item"><span class="grid-icon"></span><span class="grid-text">厂房租售</span></div>
+                <div class="grid-item"><span class="grid-icon">🔧</span><span class="grid-text">紧急维修</span></div>
+                <div class="grid-item"><span class="grid-icon">📦</span><span class="grid-text">外协订单</span></div>
+                <div class="grid-item"><span class="grid-icon">🛒</span><span class="grid-text">货源直购</span></div>
+                <div class="grid-item"><span class="grid-icon">👥</span><span class="grid-text">招贤纳士</span></div>
+                <div class="grid-item"><span class="grid-icon">⚙️</span><span class="grid-text">二手机械</span></div>
+                <div class="grid-item"><span class="grid-icon">🍵</span><span class="grid-text">商务接待</span></div>
+                <div class="grid-item"><span class="grid-icon">🏢</span><span class="grid-text">直连大厂</span></div>
+                <div class="grid-item"><span class="grid-icon"></span><span class="grid-text">金融助力</span></div>
+            </div>
+
+            <div class="ad-banner">
+                <span class="ad-tag">Ad</span>
+                <h3>📢 广告展览位</h3>
+                <p style="font-size: 12px; color: #4A5568; margin-top: 5px;">优质服务商推荐 / 展会活动预告</p>
+            </div>
+
+            <div class="scroll-info">
+                <span class="scroll-icon">🔥</span>
+                <span class="scroll-text">南浔电机厂急需数控机床维修，请有经验的师傅联系...</span>
+            </div>
+        </div>
+
+        <!-- 需求发布页 -->
+        <div id="demand" class="page">
+            <div class="sub-header">发布需求</div>
+            <div class="content-card">
+                <h3 style="margin-bottom: 15px;">我能帮您找什么？</h3>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <span class="tag tag-blue">抢修</span>
+                    <span class="tag tag-green">找货</span>
+                    <span class="tag tag-orange">找人</span>
+                </div>
+                <textarea style="width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; resize: none;" placeholder="请描述您的具体需求..."></textarea>
+                <div class="upload-area" style="margin-top: 15px;">
+                    📷 点击上传图片/视频
+                </div>
+                <button class="btn-primary">立即发布</button>
+            </div>
+        </div>
+
+        <!-- 消息页 -->
+        <div id="message" class="page">
+            <div class="sub-header">消息中心</div>
+            <div class="content-card">
+                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                    <div style="width: 40px; height: 40px; background: #EBF8FF; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px;">🤖</div>
+                    <div>
+                        <h4>AI 智能助手</h4>
+                        <p style="font-size: 12px; color: #999;">为您匹配到 3 位维修师傅...</p>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <div style="width: 40px; height: 40px; background: #FFF5F5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px;">📢</div>
+                    <div>
+                        <h4>系统通知</h4>
+                        <p style="font-size: 12px; color: #999;">您的订单 #20260520 已完成</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 我的页 -->
+        <div id="profile" class="page">
+            <div class="sub-header">个人中心</div>
+            <div style="background: white; padding: 20px; text-align: center; margin-bottom: 10px;">
+                <div style="width: 60px; height: 60px; background: #ddd; border-radius: 50%; margin: 0 auto 10px;"></div>
+                <h3>南浔某工厂</h3>
+                <p style="font-size: 12px; color: #666;">ID: 8829102</p>
+            </div>
+            <div class="content-card">
+                <div class="profile-menu-item"><span>我要入驻</span><span>></span></div>
+                <div class="profile-menu-item"><span>店铺和企业资料</span><span>></span></div>
+                <div class="profile-menu-item"><span>意见反馈</span><span>></span></div>
+                <div class="profile-menu-item"><span>设置</span><span>></span></div>
+            </div>
+            <div class="content-card">
+                <h4 style="margin-bottom: 10px; font-size: 14px; color: #666;">入驻身份选择</h4>
+                <div style="display: flex; justify-content: space-around;">
+                    <div style="text-align: center;"><div style="width: 40px; height: 40px; background: #EBF8FF; border-radius: 8px; margin: 0 auto 5px;"></div><span style="font-size: 12px;">工厂</span></div>
+                    <div style="text-align: center;"><div style="width: 40px; height: 40px; background: #F0FFF4; border-radius: 8px; margin: 0 auto 5px;"></div><span style="font-size: 12px;">工程师</span></div>
+                    <div style="text-align: center;"><div style="width: 40px; height: 40px; background: #FFFAF0; border-radius: 8px; margin: 0 auto 5px;"></div><span style="font-size: 12px;">服务商</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <div class="bottom-nav">
+            <div class="nav-item" onclick="switchTab('demand', this)">
+                <span class="nav-icon">📝</span>
+                <span class="nav-text">需求发布</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('home', this)">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">首页</span>
+            </div>
+            <div class="nav-item ai-btn" onclick="alert('AI 交互功能启动中...')">
+                <div class="ai-circle"><span>✨</span></div>
+                <span class="nav-text ai-text">AI 交互</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('message', this)">
+                <span class="nav-icon">💬</span>
+                <span class="nav-text">消息</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('profile', this)">
+                <span class="nav-icon">👤</span>
+                <span class="nav-text">我的</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(pageId, element) {
+            // 隐藏所有页面
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            // 显示目标页面
+            document.getElementById(pageId).classList.add('active');
+            
+            // 更新导航状态
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            if(element) element.classList.add('active');
+        }
+    </script>
+</body>
+</html>

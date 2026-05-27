@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>社交闲置交易小程序原型</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
+function SocialIdleMarketplacePrototype() {
+  const tabs = ['首页', '分类', '发布', '消息', '我的']
+  const cards = [
+    {
+      title: '用户端',
+      items: ['首页推荐', '分类浏览', '商品详情', '购物车', '订单管理', '售后申请', '我的收藏']
+    },
+    {
+      title: '创作者端',
+      items: ['作品上传', '作品管理', '订单处理', '收益提现', '粉丝互动', '消息通知']
+    },
+    {
+      title: '后台管理',
+      items: ['用户管理', '商品审核', '订单管理', '创作者审核', '公告管理', '数据统计']
+    }
+  ]
+
+  const userFlow = [
+    '微信授权登录',
+    '浏览首页推荐',
+    '查看商品详情',
+    '加入购物车/立即购买',
+    '填写收货信息',
+    '支付订单',
+    '订单跟踪与评价'
+  ]
+
+  const creatorFlow = [
+    '申请创作者',
+    '提交作品资料',
+    '后台审核通过',
+    '发布作品',
+    '接收订单',
+    '处理发货/售后',
+    '收益结算提现'
+  ]
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border">
+            <div className="bg-gradient-to-r from-black to-gray-700 text-white p-5">
+              <div className="text-sm opacity-70">微信小程序</div>
+              <div className="text-2xl font-bold mt-1">用户首页</div>
+            </div>
+
+            <div className="p-4 space-y-4">
+              <div className="bg-gray-100 rounded-2xl h-40 flex items-center justify-center text-gray-400 text-lg">
+                Banner活动区
+              </div>
+
+              <div className="grid grid-cols-5 gap-2 text-center text-xs">
+                {['数码', '服饰', '手办', '摄影', '更多'].map((item, i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="w-12 h-12 rounded-2xl bg-gray-100 mx-auto"></div>
+                    <div>{item}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-3">
+                {[1,2,3].map((item)=> (
+                  <div key={item} className="border rounded-2xl overflow-hidden bg-white">
+                    <div className="h-36 bg-gray-100"></div>
+                    <div className="p-3">
+                      <div className="font-semibold">Sony A7M4 微单相机</div>
+                      <div className="text-sm text-gray-500 mt-1">95新 · 东京</div>
+                      <div className="flex justify-between items-center mt-3">
+                        <div className="text-red-500 font-bold text-xl">¥ 13,999</div>
+                        <button className="bg-black text-white px-4 py-2 rounded-xl text-sm">
+                          立即购买
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="border-t bg-white px-2 py-3 grid grid-cols-5 text-center text-xs">
+              {tabs.map((tab, i)=>(
+                <div key={i} className={`${i===0 ? 'text-black font-bold' : 'text-gray-400'}`}>
+                  <div className="w-6 h-6 rounded-full bg-gray-100 mx-auto mb-1"></div>
+                  {tab}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border">
+            <div className="bg-gradient-to-r from-gray-900 to-gray-600 text-white p-5">
+              <div className="text-sm opacity-70">创作者中心</div>
+              <div className="text-2xl font-bold mt-1">作品管理</div>
+            </div>
+
+            <div className="p-4 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  ['今日订单','23'],
+                  ['待发货','5'],
+                  ['本月收益','¥12,830'],
+                  ['粉丝数量','2,451']
+                ].map((item,i)=>(
+                  <div key={i} className="bg-gray-50 rounded-2xl p-4 border">
+                    <div className="text-gray-500 text-sm">{item[0]}</div>
+                    <div className="font-bold text-2xl mt-2">{item[1]}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border rounded-2xl p-4 space-y-3">
+                <div className="font-bold text-lg">上传新作品</div>
+                <div className="h-28 border-2 border-dashed rounded-2xl flex items-center justify-center text-gray-400">
+                  点击上传图片
+                </div>
+                <input className="w-full border rounded-xl p-3" placeholder="输入作品标题" />
+                <input className="w-full border rounded-xl p-3" placeholder="输入价格" />
+                <textarea className="w-full border rounded-xl p-3 h-24" placeholder="作品描述"></textarea>
+                <button className="w-full bg-black text-white py-3 rounded-2xl font-semibold">
+                  发布作品
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border">
+            <div className="bg-black text-white p-5">
+              <div className="text-sm opacity-70">管理后台</div>
+              <div className="text-2xl font-bold mt-1">数据驾驶舱</div>
+            </div>
+
+            <div className="p-5 space-y-5">
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  ['总交易额','¥582,320'],
+                  ['新增用户','+342'],
+                  ['活跃创作者','126'],
+                  ['待审核商品','18']
+                ].map((item,i)=>(
+                  <div key={i} className="bg-gray-50 rounded-2xl p-4 border">
+                    <div className="text-sm text-gray-500">{item[0]}</div>
+                    <div className="text-2xl font-bold mt-2">{item[1]}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl border p-4">
+                <div className="font-bold mb-4">待审核列表</div>
+                <div className="space-y-3 text-sm">
+                  {[1,2,3].map((item)=>(
+                    <div key={item} className="flex justify-between items-center bg-white rounded-xl p-3 border">
+                      <div>
+                        <div className="font-medium">原创摄影作品 #{item}</div>
+                        <div className="text-gray-400">创作者：用户A</div>
+                      </div>
+                      <button className="bg-black text-white px-4 py-2 rounded-lg">
+                        审核
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="bg-black text-white rounded-3xl p-8 shadow-2xl">
+          <h1 className="text-4xl font-bold mb-4">社交闲置交易小程序系统原型</h1>
+          <p className="text-gray-300 text-lg">
+            基于您提供的思维导图，构建的微信小程序 + 后台管理系统原型结构。
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {cards.map((card, index) => (
+            <div key={index} className="bg-white rounded-3xl p-6 shadow-lg border border-gray-200">
+              <h2 className="text-2xl font-bold mb-4">{card.title}</h2>
+              <div className="space-y-3">
+                {card.items.map((item, i) => (
+                  <div
+                    key={i}
+                    className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700"
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          <div className="bg-white rounded-3xl shadow-lg p-6">
+            <h2 className="text-2xl font-bold mb-6">用户端业务流程</h2>
+            <div className="space-y-4">
+              {userFlow.map((step, index) => (
+                <div key={index} className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold">
+                    {index + 1}
+                  </div>
+                  <div className="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-200">
+                    {step}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl shadow-lg p-6">
+            <h2 className="text-2xl font-bold mb-6">创作者业务流程</h2>
+            <div className="space-y-4">
+              {creatorFlow.map((step, index) => (
+                <div key={index} className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold">
+                    {index + 1}
+                  </div>
+                  <div className="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-200">
+                    {step}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
+            <div className="bg-black text-white p-4 text-xl font-bold">
+              小程序首页原型
+            </div>
+
+            <div className="p-4 space-y-4">
+              <div className="bg-gray-100 rounded-2xl h-32 flex items-center justify-center text-gray-500">
+                Banner轮播图
+              </div>
+
+              <div className="grid grid-cols-4 gap-3">
+                {['闲置交易', '创作者专区', '限时活动', '消息中心'].map((item, i) => (
+                  <div
+                    key={i}
+                    className="bg-gray-50 border rounded-2xl p-3 text-center text-sm"
+                  >
+                    {item}
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <h3 className="font-bold text-lg mb-3">热门商品</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {[1, 2, 3, 4].map((item) => (
+                    <div key={item} className="border rounded-2xl overflow-hidden bg-white">
+                      <div className="h-32 bg-gray-100"></div>
+                      <div className="p-3 space-y-2">
+                        <div className="font-medium">商品标题示例</div>
+                        <div className="text-sm text-gray-500">创作者昵称</div>
+                        <div className="text-red-500 font-bold">¥199</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
+            <div className="bg-black text-white p-4 text-xl font-bold">
+              后台管理原型
+            </div>
+
+            <div className="flex min-h-[500px]">
+              <div className="w-56 bg-gray-900 text-white p-4 space-y-3">
+                {['仪表盘', '用户管理', '商品审核', '订单管理', '创作者管理', '财务统计', '系统设置'].map((item, i) => (
+                  <div key={i} className="bg-gray-800 rounded-xl px-4 py-3">
+                    {item}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex-1 p-6 bg-gray-50">
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  {[
+                    ['总用户', '12,580'],
+                    ['订单总数', '8,421'],
+                    ['今日成交额', '¥52,300']
+                  ].map((item, i) => (
+                    <div key={i} className="bg-white rounded-2xl p-5 shadow-sm border">
+                      <div className="text-gray-500 text-sm">{item[0]}</div>
+                      <div className="text-2xl font-bold mt-2">{item[1]}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bg-white rounded-2xl border overflow-hidden">
+                  <div className="grid grid-cols-5 bg-gray-100 p-4 font-semibold text-sm">
+                    <div>订单号</div>
+                    <div>用户</div>
+                    <div>商品</div>
+                    <div>金额</div>
+                    <div>状态</div>
+                  </div>
+
+                  {[1, 2, 3, 4].map((row) => (
+                    <div key={row} className="grid grid-cols-5 p-4 border-t text-sm">
+                      <div>#202605{row}</div>
+                      <div>用户{row}</div>
+                      <div>商品名称</div>
+                      <div>¥299</div>
+                      <div>
+                        <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs">
+                          已完成
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl shadow-lg p-8">
+          <h2 className="text-3xl font-bold mb-6">系统模块结构</h2>
+
+          <div className="grid md:grid-cols-4 gap-6">
+            {[
+              {
+                title: '账户体系',
+                desc: '微信登录、角色权限、实名认证'
+              },
+              {
+                title: '交易系统',
+                desc: '下单、支付、售后、退款'
+              },
+              {
+                title: '内容系统',
+                desc: '作品上传、分类、推荐、审核'
+              },
+              {
+                title: '社交系统',
+                desc: '关注、私信、评论、收藏'
+              }
+            ].map((item, i) => (
+              <div key={i} className="border border-gray-200 rounded-3xl p-6 bg-gray-50">
+                <h3 className="text-xl font-bold mb-3">{item.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<SocialIdleMarketplacePrototype />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "user_id": 3,
+      "shop_name": "李家果园",
+      "shop_logo": "🍎",
+      "shop_desc": "专注优质水果种植，产地直发新鲜到家",
+      "contact_phone": "138****1234",
+      "contact_name": "李掌柜",
+      "status": 1,
+      "created_at": "2026-01-01"
+    },
+    {
+      "id": 2,
+      "user_id": 4,
+      "shop_name": "王家农场",
+      "shop_logo": "🥬",
+      "shop_desc": "绿色有机农产品，从田间到餐桌",
+      "contact_phone": "139****5678",
+      "contact_name": "王掌柜",
+      "status": 1,
+      "created_at": "2026-01-02"
+    },
+    {
+      "id": 3,
+      "user_id": 5,
+      "shop_name": "赵家山货",
+      "shop_logo": "🌲",
+      "shop_desc": "深山珍品，天然好味道",
+      "contact_phone": "137****9012",
+      "contact_name": "赵掌柜",
+      "status": 1,
+      "created_at": "2026-01-03"
+    }
+  ]
+}

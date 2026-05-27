@@ -1,0 +1,14 @@
+{
+  "name": "mall",
+  "version": "1.0.0",
+  "description": "乡村商城系统",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0"
+  }
+}

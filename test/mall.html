@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>乡村多商户商城</title>
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1a7a3a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="乡村商城">
+<style>
+:root{--green:#1a7a3a;--green-light:#2da85c;--green-dark:#0f5c2a;--green-bg:#eaf7ed;--orange:#e67e22;--orange-light:#fef3e7;--red:#e74c3c;--red-light:#fde8e8;--gold:#f39c12;--blue:#3498db;--blue-light:#e8f4fd;--purple:#8e44ad;--purple-light:#f3e8f8;--text:#1a1a2e;--text-light:#636e72;--text-lighter:#b2bec3;--bg:#f0f2f5;--card:#fff;--shadow:0 2px 12px rgba(0,0,0,.06);--shadow-hover:0 8px 28px rgba(0,0,0,.12);--radius:12px;--radius-sm:8px;--radius-xl:16px}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#e8e8e8;font-family:-apple-system,BlinkMacSystemFont,'Microsoft YaHei','PingFang SC',sans-serif;color:var(--text);-webkit-tap-highlight-color:transparent;overflow:hidden;-webkit-font-smoothing:antialiased}
+
+/* Phone Frame */
+.phone-body{width:100%;height:100%;margin:0 auto;position:relative;background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+.phone-notch{display:none;height:44px;background:#0a4a22;flex-shrink:0;position:relative}
+.phone-notch .status-bar{display:flex;justify-content:space-between;padding:8px 20px 0;font-size:11px;color:rgba(255,255,255,.9);font-weight:600}
+.phone-content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
+.phone-content::-webkit-scrollbar{width:0}
+.phone-home-bar{display:none;height:34px;background:var(--card);flex-shrink:0;justify-content:center;align-items:center}
+.phone-home-bar .bar{width:134px;height:5px;border-radius:3px;background:#ddd}
+
+@media(min-width:480px){
+  html,body{background:#1a1a1a;display:flex;align-items:center;justify-content:center;padding:20px}
+  .phone-body{max-width:390px;height:calc(100vh - 40px);border-radius:36px;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 25px 80px rgba(0,0,0,.5);max-height:844px}
+  .phone-notch{display:block}
+  .phone-notch::after{content:'';position:absolute;top:10px;left:50%;margin-left:-50px;width:100px;height:24px;background:#1a1a1a;border-radius:0 0 16px 16px;z-index:1}
+  .phone-home-bar{display:flex}
+}
+
+/* App Container */
+#app{min-height:100%;display:flex;flex-direction:column;background:var(--bg)}
+
+/* Header */
+/* Header */
+.mall-header{background:linear-gradient(135deg,#0a4a22,var(--green));color:#fff;padding:0 14px;height:52px;display:flex;align-items:center;flex-shrink:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(10,74,34,.2)}
+.mall-header .logo{font-size:17px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;flex-shrink:0;margin-right:8px;letter-spacing:.5px}
+.mall-header .logo i{font-size:19px}
+.mall-header .logo small{background:rgba(255,255,255,.2);border-radius:4px;padding:1px 6px;font-size:8px;font-weight:500;letter-spacing:0;backdrop-filter:blur(4px)}
+.mall-header .search-box{display:flex;align-items:center;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border-radius:20px;padding:0 14px;flex:1;max-width:170px;min-width:0;transition:all .3s}
+.mall-header .search-box:focus-within{background:rgba(255,255,255,.28);max-width:200px}
+.mall-header .search-box input{border:none;background:transparent;color:#fff;padding:7px 0;width:100%;outline:none;font-size:12px;min-width:0}
+.mall-header .search-box input::placeholder{color:rgba(255,255,255,.55)}
+.mall-header .search-box i{color:rgba(255,255,255,.65);cursor:pointer;font-size:14px;transition:color .2s}
+.mall-header .search-box i:hover{color:#fff}
+.mall-header .nav-links{display:flex;align-items:center;gap:2px;margin-left:auto}
+.mall-header .nav-links .link{color:rgba(255,255,255,.85);cursor:pointer;font-size:11px;display:flex;align-items:center;gap:3px;position:relative;padding:6px 6px;white-space:nowrap;border-radius:8px;transition:all .2s}
+.mall-header .nav-links .link:hover{background:rgba(255,255,255,.1)}
+.mall-header .nav-links .link.active{background:rgba(255,255,255,.15);color:#ffd700}
+.cart-badge{position:absolute;top:-5px;right:-7px;background:linear-gradient(135deg,#ff4757,#ff6b81);color:#fff;border-radius:10px;font-size:9px;padding:0 5px;min-width:16px;text-align:center;line-height:16px;font-weight:700;box-shadow:0 2px 6px rgba(255,71,87,.4)}
+
+/* Login */
+/* Login */
+.login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px;backdrop-filter:blur(6px)}
+.login-card{background:#fff;border-radius:20px;padding:36px 24px 28px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:modalIn .35s cubic-bezier(.22,1,.36,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.login-card h2{text-align:center;margin-bottom:24px;font-size:20px;color:var(--green);font-weight:700;letter-spacing:.5px}
+.login-card h2 i{margin-right:6px;font-size:22px}
+.login-card .el-input__inner{border-radius:10px;height:44px;font-size:14px}
+.login-card .el-button{border-radius:10px;height:44px;font-size:14px}
+
+/* Main Content */
+.main-content{flex:1;padding:12px 14px;background:var(--bg);padding-bottom:80px}
+
+/* Banner */
+/* Banner */
+.banner-wrap{border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.banner-wrap .el-carousel,.banner-wrap .el-carousel__container{height:165px!important}
+.banner-wrap .el-carousel__item{height:165px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;position:relative}
+.banner-wrap .el-carousel__item:nth-child(1){background:linear-gradient(135deg,#0a4a22,#2dd48a)}
+.banner-wrap .el-carousel__item:nth-child(2){background:linear-gradient(135deg,#b45309,#fbbf24)}
+.banner-wrap .el-carousel__item:nth-child(3){background:linear-gradient(135deg,#5b21b6,#a78bfa)}
+.banner-wrap .el-carousel__item .banner-text{text-align:center;padding:0 24px}
+.banner-wrap .el-carousel__item .banner-text h2{font-size:24px;margin-bottom:8px;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,.2);letter-spacing:.5px}
+.banner-wrap .el-carousel__item .banner-text p{font-size:13px;opacity:.92;text-shadow:0 1px 4px rgba(0,0,0,.1)}
+
+/* Section Title */
+/* Section Title */
+.section-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center}
+.section-title::before{content:'';display:inline-block;width:4px;height:18px;background:linear-gradient(180deg,var(--green),var(--green-light));border-radius:3px;margin-right:10px}
+.section-title .more{margin-left:auto;font-size:11px;color:var(--text-light);font-weight:400;cursor:pointer;transition:color .2s}
+.section-title .more:hover{color:var(--green)}
+
+/* Category Grid */
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.cat-grid .cat-item{background:var(--card);border-radius:16px;padding:14px 4px 12px;text-align:center;cursor:pointer;transition:all .25s cubic-bezier(.22,1,.36,1);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.cat-grid .cat-item:active{transform:scale(.92)}
+.cat-grid .cat-item .icon{font-size:30px;display:block;margin-bottom:5px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.08))}
+.cat-grid .cat-item .name{font-size:11px;color:var(--text-light);font-weight:500}
+@media(min-width:480px){.cat-grid{grid-template-columns:repeat(6,1fr)}}
+
+/* Merchant Grid */
+.merchant-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:18px}
+.merchant-card{background:var(--card);border-radius:16px;padding:16px 18px;cursor:pointer;transition:all .25s cubic-bezier(.22,1,.36,1);box-shadow:0 2px 8px rgba(0,0,0,.04);display:flex;align-items:center;gap:14px;border:1px solid rgba(0,0,0,.02)}
+.merchant-card:active{transform:scale(.98)}
+.merchant-card:hover{box-shadow:var(--shadow-hover)}
+.merchant-card .logo{width:50px;height:50px;border-radius:16px;background:linear-gradient(135deg,var(--green-bg),#c8e6c9);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;box-shadow:0 2px 8px rgba(26,122,58,.12)}
+.merchant-card .info{min-width:0;flex:1}
+.merchant-card .info h4{font-size:15px;font-weight:600;margin-bottom:3px;color:var(--text)}
+.merchant-card .info p{font-size:12px;color:var(--text-light);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.merchant-card .info .count{font-size:11px;color:var(--text-lighter);margin-top:5px;display:inline-flex;align-items:center;gap:4px;background:var(--green-bg);padding:2px 8px;border-radius:10px;color:var(--green);font-weight:500}
+@media(min-width:480px){.merchant-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* Product Grid */
+.prod-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;margin-bottom:18px}
+.prod-card{background:var(--card);border-radius:16px;overflow:hidden;cursor:pointer;transition:all .25s cubic-bezier(.22,1,.36,1);box-shadow:0 2px 8px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.02)}
+.prod-card:active{transform:scale(.96)}
+.prod-card .img-wrap{width:100%;padding-bottom:100%;position:relative;background:linear-gradient(135deg,#f8f9fa,#e9ecef);overflow:hidden}
+.prod-card .img-wrap img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;transition:transform .35s}
+.prod-card:active .img-wrap img{transform:scale(1.08)}
+.prod-card .img-wrap .sold-badge{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);color:#fff;font-size:9px;padding:2px 8px;border-radius:8px;font-weight:500}
+.prod-card .info{padding:10px 12px 12px}
+.prod-card .info .name{font-size:13px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px;line-height:1.3}
+.prod-card .info .shop{font-size:10px;color:var(--text-lighter);margin-bottom:6px;cursor:pointer;display:flex;align-items:center;gap:3px;transition:color .2s}
+.prod-card .info .shop:hover{color:var(--green)}
+.prod-card .info .price{color:var(--red);font-size:17px;font-weight:700;display:flex;align-items:baseline;gap:4px}
+.prod-card .info .price .orig{font-size:11px;color:var(--text-lighter);font-weight:400;text-decoration:line-through}
+.prod-card .info .meta{display:flex;justify-content:space-between;font-size:10px;color:var(--text-lighter);margin-top:6px;padding-top:6px;border-top:1px solid #f5f5f5}
+.prod-card .info .meta .rating{color:var(--gold)}
+@media(min-width:480px){.prod-grid{grid-template-columns:repeat(3,1fr)}}
+
+/* Store Page */
+.store-header{background:linear-gradient(135deg,var(--card),#f0fdf4);border-radius:16px;padding:20px;margin-bottom:14px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 8px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.02)}
+.store-header .logo{width:60px;height:60px;border-radius:18px;background:linear-gradient(135deg,var(--green-bg),#c8e6c9);display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;box-shadow:0 2px 8px rgba(26,122,58,.12)}
+.store-header .info h2{font-size:20px;margin-bottom:4px;color:var(--text);font-weight:700}
+.store-header .info p{font-size:12px;color:var(--text-light);line-height:1.4}
+.store-header .info .stat{font-size:11px;color:var(--text-lighter);margin-top:6px;display:inline-flex;align-items:center;gap:4px;background:var(--green-bg);padding:2px 10px;border-radius:10px;color:var(--green);font-weight:500}
+
+/* Product Detail */
+.prod-detail{background:var(--card);border-radius:16px;overflow:hidden;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.02)}
+.prod-detail .gallery{width:100%;background:#f8f9fa;position:relative}
+.prod-detail .gallery img{width:100%;max-height:350px;object-fit:cover;display:block;transition:transform .3s}
+.prod-detail .gallery:hover img{transform:scale(1.02)}
+.prod-detail .detail-info{padding:16px 18px 18px}
+.prod-detail .detail-info h2{font-size:19px;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.35}
+.prod-detail .detail-info .merchant-link{font-size:12px;color:var(--green);cursor:pointer;margin-bottom:12px;display:inline-flex;align-items:center;gap:4px;font-weight:500;transition:color .2s;padding:4px 10px;background:var(--green-bg);border-radius:8px}
+.prod-detail .detail-info .merchant-link:hover{background:#d4edda}
+.prod-detail .detail-info .price-row{background:linear-gradient(135deg,#fff5f5,#ffe8e8);padding:14px 18px;border-radius:12px;margin-bottom:14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.prod-detail .detail-info .price-row .cur{color:var(--red);font-size:28px;font-weight:800;letter-spacing:-.5px}
+.prod-detail .detail-info .price-row .orig{font-size:13px;color:var(--text-lighter);text-decoration:line-through}
+.prod-detail .detail-info .price-row .sales{margin-left:auto;font-size:11px;color:var(--text-light);background:rgba(0,0,0,.03);padding:2px 10px;border-radius:8px}
+.prod-detail .detail-info .sku-row{margin-bottom:12px}
+.prod-detail .detail-info .sku-row label{display:block;font-size:11px;color:var(--text-light);margin-bottom:6px;font-weight:500}
+.prod-detail .detail-info .qty-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.prod-detail .detail-info .qty-row label{font-size:11px;color:var(--text-light);font-weight:500}
+.prod-detail .detail-info .actions{display:flex;gap:10px}
+.prod-detail .detail-info .actions .el-button{flex:1;font-size:13px;border-radius:12px;height:44px;font-weight:600}
+.prod-detail .detail-info .actions .el-button--success{box-shadow:0 4px 12px rgba(26,122,58,.3)}
+.prod-detail .detail-info .actions .el-button--danger{box-shadow:0 4px 12px rgba(231,76,60,.3)}
+
+/* Section Card */
+.section-card{background:var(--card);border-radius:16px;padding:16px 18px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.02)}
+.section-card .title{font-size:14px;font-weight:600;margin-bottom:10px;color:var(--text);display:flex;align-items:center;gap:6px}
+.section-card .desc-text{font-size:13px;line-height:1.8;color:var(--text-light)}
+
+/* Cart */
+.cart-wrap{background:var(--card);border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.02)}
+.cart-item{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #f0f0f0;gap:10px;font-size:12px;transition:background .2s}
+.cart-item:last-child{border-bottom:none}
+.cart-item:hover{background:#fafafa}
+.cart-item .item-info{flex:1;min-width:0}
+.cart-item .item-info .name{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.cart-item .item-info .shop-name{font-size:10px;color:var(--text-lighter);margin-top:2px}
+.cart-item img{width:54px;height:54px;border-radius:12px;object-fit:cover;flex-shrink:0;background:#f0f0f0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.cart-item .item-price{color:var(--red);font-size:14px;font-weight:700;white-space:nowrap}
+.cart-bottom{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card);border-top:1px solid #f0f0f0;position:sticky;bottom:0;box-shadow:0 -4px 16px rgba(0,0,0,.06)}
+.cart-bottom .total{font-size:13px;color:var(--text-light)}
+.cart-bottom .total .amount{font-size:22px;color:var(--red);font-weight:800}
+.cart-bottom .el-button--danger{box-shadow:0 4px 12px rgba(231,76,60,.3);border-radius:10px}
+
+/* Checkout */
+.checkout-wrap{display:flex;flex-direction:column;gap:12px}
+.address-card{padding:14px 16px;border:2px solid #eee;border-radius:12px;cursor:pointer;margin-bottom:8px;font-size:12px;transition:all .25s}
+.address-card:hover{border-color:#ddd}
+.address-card.selected{border-color:var(--green);background:var(--green-bg);box-shadow:0 0 0 1px var(--green)}
+.summary-card{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.02)}
+.summary-card .total-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text-light);padding:4px 0}
+.summary-card .grand-total{font-size:18px;font-weight:700;color:var(--red);border-top:1px solid #f0f0f0;padding-top:12px;margin-top:8px;display:flex;justify-content:space-between}
+.summary-card .el-button--danger{box-shadow:0 4px 16px rgba(231,76,60,.3);border-radius:12px;height:44px;font-size:15px}
+
+/* Orders */
+.order-list .order-card{background:var(--card);border-radius:16px;margin-bottom:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.02)}
+.order-card .order-header{display:flex;justify-content:space-between;padding:10px 16px;background:linear-gradient(135deg,#fafafa,#f5f5f5);border-bottom:1px solid #eee;font-size:11px;color:var(--text-light)}
+.order-card .order-header .status{font-weight:700}
+.order-card .order-header .status.pending{color:#e6a23c}
+.order-card .order-header .status.shipping{color:var(--green)}
+.order-card .order-header .status.delivered{color:var(--blue)}
+.order-card .order-body{padding:12px 16px}
+.order-card .order-item{display:flex;gap:10px;padding:8px 0;font-size:12px}
+.order-card .order-item+.order-item{border-top:1px solid #f5f5f5;padding-top:12px}
+.order-card .order-item img{width:50px;height:50px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#f0f0f0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.order-card .order-item .info{flex:1;min-width:0}
+.order-card .order-item .info .name{font-size:13px;font-weight:500;color:var(--text)}
+.order-card .order-item .info .shop-name{font-size:10px;color:var(--text-lighter);margin-top:2px}
+.order-card .order-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-top:1px solid #f0f0f0;font-size:12px;background:#fafafa}
+.order-card .order-footer .total{color:var(--text-light)}
+.order-card .order-footer .total b{color:var(--red);font-size:15px}
+
+/* Merchant Center (Mobile) */
+.mc-layout{display:flex;flex-direction:column;gap:10px}
+.mc-sidebar{background:var(--card);border-radius:14px;padding:6px;display:flex;overflow-x:auto;gap:4px;box-shadow:0 2px 8px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.02)}
+.mc-sidebar .mc-item{padding:9px 16px;cursor:pointer;font-size:12px;color:var(--text-light);border-radius:8px;white-space:nowrap;transition:all .2s;font-weight:500}
+.mc-sidebar .mc-item.active{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(26,122,58,.3)}
+.mc-section{background:var(--card);border-radius:16px;padding:16px 18px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.02)}
+.mc-section h4{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text);display:flex;align-items:center;gap:6px}
+
+/* Stat Cards */
+.stat-card{background:#fff;border-radius:14px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.02)}
+
+/* Empty State */
+.empty-state{text-align:center;padding:50px 20px;color:var(--text-lighter)}
+.empty-state i{font-size:52px;display:block;margin-bottom:14px;color:#ddd}
+.empty-state p{font-size:13px;margin-top:4px}
+
+/* Prod Tabs */
+.prod-tabs{display:flex;gap:6px;margin-bottom:14px;background:var(--card);border-radius:14px;padding:5px;overflow-x:auto;box-shadow:0 2px 8px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.02)}
+.prod-tabs .tab{padding:8px 16px;cursor:pointer;border-radius:10px;font-size:12px;color:var(--text-light);white-space:nowrap;flex-shrink:0;transition:all .2s;font-weight:500}
+.prod-tabs .tab.active{background:var(--green);color:#fff;box-shadow:0 2px 10px rgba(26,122,58,.35)}
+
+/* Review */
+.review-item{padding:12px 0;border-bottom:1px solid #f5f5f5}
+.review-item:last-child{border-bottom:none}
+.review-item .meta{font-size:10px;color:var(--text-lighter);margin-bottom:4px}
+.review-item .content{font-size:13px;color:var(--text);line-height:1.6}
+.stars{color:var(--gold);font-size:12px;letter-spacing:1px}
+.stars .empty{color:#eee}
+
+/* Back Button */
+.back-btn{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--text-light);cursor:pointer;padding:8px 0;margin-bottom:6px;transition:color .2s}
+.back-btn:hover{color:var(--green)}
+
+/* Address Dialog etc - via Element UI */
+.el-dialog{border-radius:18px!important;overflow:hidden}
+.el-dialog__header{border-bottom:1px solid #f0f0f0;padding:18px 22px!important}
+.el-dialog__title{font-size:16px!important;font-weight:600!important}
+.el-dialog__body{padding:22px!important}
+.el-dialog__footer{padding:14px 22px!important;border-top:1px solid #f0f0f0}
+
+/* Element Overrides */
+.el-button--success{background:linear-gradient(135deg,var(--green),var(--green-light));border:none;border-radius:10px}
+.el-button--danger{background:linear-gradient(135deg,var(--red),#ff6b6b);border:none;border-radius:10px}
+.el-button--primary{background:linear-gradient(135deg,var(--green),var(--green-light));border:none;border-radius:10px}
+.el-button--default{border-radius:10px}
+.el-tag{border-radius:6px;font-weight:500}
+.el-tag--success{background:var(--green-bg);color:var(--green);border:none}
+.el-tag--warning{background:var(--orange-light);color:var(--orange);border:none}
+.el-tag--danger{background:var(--red-light);color:var(--red);border:none}
+.el-tag--primary{background:var(--blue-light);color:var(--blue);border:none}
+.el-tabs__item.is-active{color:var(--green)!important;font-weight:600}
+.el-tabs__item:hover{color:var(--green-light)!important}
+.el-tabs__active-bar{background:var(--green)!important;height:3px!important}
+.el-tabs__nav-wrap::after{height:1px!important}
+.el-radio-button__orig-radio:checked+.el-radio-button__inner{background:var(--green)!important;border-color:var(--green)!important;box-shadow:-1px 0 0 0 var(--green)!important;border-radius:8px!important}
+.el-radio-button__inner{border-radius:8px!important;border:none!important;margin:2px}
+.el-input-number.is-controls-right .el-input-number__increase,.el-input-number.is-controls-right .el-input-number__decrease{background:var(--green-bg)!important}
+.el-checkbox__input.is-checked .el-checkbox__inner{background:var(--green)!important;border-color:var(--green)!important}
+.el-checkbox__inner{border-radius:4px!important}
+.el-message{min-width:200px!important;border-radius:12px!important;padding:12px 20px!important}
+.el-input__inner{border-radius:10px!important;height:40px}
+.el-select .el-input__inner{border-radius:10px!important}
+.el-table{border-radius:12px!important;overflow:hidden!important}
+.el-table th{background:#fafafa!important;font-weight:600!important;color:var(--text)!important}
+.el-table--striped .el-table__body tr.el-table__row--striped td{background:#f8fdf8!important}
+
+/* AI Chat */
+.ai-float-btn{position:fixed;right:16px;bottom:20px;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--green),#4ade80);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;box-shadow:0 6px 24px rgba(26,122,58,.45);z-index:200;transition:all .3s cubic-bezier(.22,1,.36,1);border:none;outline:none}
+.ai-float-btn:active{transform:scale(.88);box-shadow:0 2px 10px rgba(26,122,58,.3)}
+.ai-float-btn:hover{transform:scale(1.05)}
+.ai-float-btn .badge{position:absolute;top:-4px;right:-4px;background:linear-gradient(135deg,var(--red),#ff6b6b);color:#fff;font-size:9px;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center;font-weight:700;box-shadow:0 2px 6px rgba(231,76,60,.4)}
+@media(min-width:480px){.ai-float-btn{right:24px;bottom:28px}}
+.ai-dialog{position:fixed;right:8px;left:8px;bottom:84px;max-width:380px;margin:0 auto;background:#fff;border-radius:20px;box-shadow:0 16px 56px rgba(0,0,0,.22);z-index:199;display:flex;flex-direction:column;overflow:hidden;animation:aiIn .35s cubic-bezier(.22,1,.36,1);height:65vh;max-height:540px}
+@media(min-width:480px){.ai-dialog{right:24px;left:auto;bottom:88px;width:380px;height:540px}}
+@keyframes aiIn{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.ai-header{background:linear-gradient(135deg,#0a4a22,var(--green));color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ai-header .title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+.ai-header .title i{font-size:18px}
+.ai-header .close-btn{font-size:20px;cursor:pointer;opacity:.7;transition:opacity .2s;padding:4px;border-radius:50%}
+.ai-header .close-btn:hover{opacity:1;background:rgba(255,255,255,.1)}
+.ai-msgs{flex:1;overflow-y:auto;padding:16px 16px;background:#f8faf8;display:flex;flex-direction:column;gap:10px}
+.ai-msgs::-webkit-scrollbar{width:3px}
+.ai-msgs::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px}
+.ai-msg{max-width:88%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.6;animation:msgIn .35s cubic-bezier(.22,1,.36,1);white-space:pre-wrap;word-break:break-word}
+.ai-msg.bot{align-self:flex-start;background:#fff;border:1px solid #e8f0e8;border-bottom-left-radius:4px;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.ai-msg.user{align-self:flex-end;background:linear-gradient(135deg,var(--green),var(--green-light));color:#fff;border-bottom-right-radius:4px;box-shadow:0 2px 8px rgba(26,122,58,.2)}
+.ai-msg .time{font-size:9px;opacity:.5;margin-top:5px;display:block;text-align:right}
+@keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.ai-typing{padding:12px 14px;display:flex;gap:5px;align-items:center;color:var(--text-lighter);font-size:12px;background:#fff;border:1px solid #e8f0e8;border-radius:14px;max-width:120px;align-self:flex-start}
+.ai-typing .dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:typing 1.4s infinite ease-in-out}
+.ai-typing .dot:nth-child(2){animation-delay:.2s}.ai-typing .dot:nth-child(3){animation-delay:.4s}
+@keyframes typing{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-5px)}}
+.ai-input-wrap{display:flex;align-items:center;padding:10px 14px;border-top:1px solid #f0f0f0;background:#fff;flex-shrink:0;gap:8px}
+.ai-input-wrap input{flex:1;border:1px solid #e8e8e8;border-radius:22px;padding:9px 16px;font-size:13px;outline:none;transition:all .25s;background:#f5f5f5}
+.ai-input-wrap input:focus{border-color:var(--green);background:#fff;box-shadow:0 0 0 3px rgba(26,122,58,.12)}
+.ai-input-wrap .send-btn{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green-light));color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;flex-shrink:0;box-shadow:0 2px 8px rgba(26,122,58,.3)}
+.ai-input-wrap .send-btn:active{transform:scale(.88)}
+.ai-input-wrap .send-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.ai-prod-recs{padding:8px 14px;border-top:1px solid #f0f0f0;background:#fafcfa;flex-shrink:0;max-height:130px;overflow-y:auto}
+.ai-prod-recs .rec-title{font-size:11px;color:var(--text-lighter);margin-bottom:6px;font-weight:500}
+.ai-prod-recs .rec-list{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.ai-prod-recs .rec-item{min-width:72px;text-align:center;cursor:pointer;padding:6px;border-radius:10px;transition:all .2s;flex-shrink:0}
+.ai-prod-recs .rec-item:hover{background:var(--green-bg)}
+.ai-prod-recs .rec-item img{width:54px;height:54px;border-radius:10px;object-fit:cover;background:#f0f0f0;box-shadow:0 2px 6px rgba(0,0,0,.08);transition:transform .2s}
+.ai-prod-recs .rec-item:active img{transform:scale(.95)}
+.ai-prod-recs .rec-item .name{font-size:10px;color:var(--text);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:68px}
+.ai-prod-recs .rec-item .price{font-size:10px;color:var(--red);font-weight:600}
+</style>
+</head>
+<body>
+<div class="phone-body">
+  <div class="phone-notch">
+    <div class="status-bar"><span>9:41</span><span>🔋 100%</span></div>
+  </div>
+  <div class="phone-content">
+<div id="app">
+  <!-- Login / Register -->
+  <div class="login-overlay" v-if="showLogin">
+    <div class="login-card">
+      <h2><i class="el-icon-shopping-cart-2"></i> 登录商城</h2>
+      <el-form @keyup.enter.native="doLogin">
+        <el-form-item><el-input v-model="loginForm.username" prefix-icon="el-icon-user" placeholder="用户名" /></el-form-item>
+        <el-form-item><el-input v-model="loginForm.password" prefix-icon="el-icon-lock" type="password" placeholder="密码" show-password /></el-form-item>
+        <el-form-item><el-button type="success" style="width:100%;height:42px;border-radius:10px;font-size:14px" @click="doLogin" :loading="logining">登 录</el-button></el-form-item>
+      </el-form>
+      <div style="text-align:center"><el-button type="text" size="small" style="color:var(--green)" @click="showLogin=false;showRegister=true">没有账号？立即注册</el-button></div>
+      <div style="text-align:center;font-size:10px;color:#bbb;margin-top:8px">演示: admin/admin123 | user/user123</div>
+    </div>
+  </div>
+  <div class="login-overlay" v-if="showRegister">
+    <div class="login-card">
+      <h2><i class="el-icon-user-plus"></i> 注册账号</h2>
+      <el-form @keyup.enter.native="doRegister">
+        <el-form-item><el-input v-model="regForm.username" prefix-icon="el-icon-user" placeholder="用户名" /></el-form-item>
+        <el-form-item><el-input v-model="regForm.nickname" prefix-icon="el-icon-edit" placeholder="昵称" /></el-form-item>
+        <el-form-item><el-input v-model="regForm.password" prefix-icon="el-icon-lock" type="password" placeholder="密码" show-password /></el-form-item>
+        <el-form-item><el-button type="success" style="width:100%;height:42px;border-radius:10px;font-size:14px" @click="doRegister" :loading="reging">注 册</el-button></el-form-item>
+      </el-form>
+      <div style="text-align:center"><el-button type="text" size="small" style="color:var(--green)" @click="showRegister=false;showLogin=true">已有账号？去登录</el-button></div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="mall-header">
+    <div class="logo" @click="goHome"><i class="el-icon-shopping-cart-2"></i>乡村商城<small>多商户</small></div>
+    <div class="search-box"><input v-model="searchWord" placeholder="搜商品..." @keyup.enter="doSearch" /><i class="el-icon-search" @click="doSearch"></i></div>
+    <div class="nav-links">
+      <div class="link" :class="{active:page==='home'}" @click="goHome">首页</div>
+      <div class="link" :class="{active:page==='storeList'}" @click="page='storeList';loadMerchants()">店铺</div>
+      <div class="link" :class="{active:page==='cart'}" @click="goCart"><i class="el-icon-shopping-cart-1"></i><span class="cart-badge" v-if="cartCount">{{cartCount}}</span></div>
+      <div class="link" v-if="user.username" :class="{active:page==='orders'}" @click="page='orders';loadOrders()">订单</div>
+      <div class="link" v-if="isMerchant" :class="{active:page==='mc'}" @click="page='mc';mcPage='dashboard'">商家</div>
+      <div class="link" v-if="user.username && !isMerchant" @click="openShop">开店</div>
+      <div class="link" v-if="user.username" @click="doLogout">{{user.nickname||user.username}}</div>
+      <div class="link" v-else @click="showLogin=true">登录</div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <!-- HOME -->
+    <div v-if="page==='home'">
+      <div class="banner-wrap"><el-carousel :interval="4000" height="165px" indicator-position="none">
+        <el-carousel-item v-for="(b,i) in banners" :key="i"><div class="banner-text"><h2>{{b.title}}</h2><p>{{b.sub}}</p></div></el-carousel-item>
+      </el-carousel></div>
+
+      <div class="section-title">商品分类</div>
+      <div class="cat-grid"><div class="cat-item" v-for="c in topCats" :key="c.id" @click="browseCat(c.id)"><span class="icon">{{c.icon}}</span><span class="name">{{c.name}}</span></div></div>
+
+      <div class="section-title">推荐店铺 <span class="more" @click="page='storeList';loadMerchants()">查看全部 →</span></div>
+      <div class="merchant-grid"><div class="merchant-card" v-for="m in merchants" :key="m.id" @click="viewStore(m.id)">
+        <div class="logo">{{m.shop_logo||'🏪'}}</div>
+        <div class="info"><h4>{{m.shop_name}}</h4><p>{{m.shop_desc}}</p><div class="count">{{m.productCount||0}}件商品</div></div>
+      </div></div>
+
+      <div class="section-title">精选好物</div>
+      <div class="prod-grid"><div class="prod-card" v-for="p in products" :key="p.id" @click="viewDetail(p.id)">
+        <div class="img-wrap"><img :src="p.images?.[0]" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22400%22><rect fill=%22%23eee%22 width=%22400%22 height=%22400%22/><text x=%22200%22 y=%22200%22 text-anchor=%22middle%22 fill=%22%23aaa%22 font-size=%2220%22>暂无</text></svg>'"></div>
+        <div class="info">
+          <div class="name">{{p.name}}</div>
+          <div class="shop" @click.stop="viewStore(p.merchant_id)">{{p.merchant_logo}} {{p.merchant_name}}</div>
+          <div class="price">¥{{p.price}}<span class="orig" v-if="p.original_price>p.price">¥{{p.original_price}}</span></div>
+          <div class="meta"><span>已售 {{p.sales||0}}</span><span>★ {{p.rating||0}}</span></div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- STORE LIST -->
+    <div v-if="page==='storeList'">
+      <div class="section-title">全部店铺</div>
+      <div class="merchant-grid"><div class="merchant-card" v-for="m in merchants" :key="m.id" @click="viewStore(m.id)">
+        <div class="logo">{{m.shop_logo||'🏪'}}</div>
+        <div class="info"><h4>{{m.shop_name}}</h4><p>{{m.shop_desc}}</p><div class="count">{{m.productCount||0}}件商品</div></div>
+      </div></div>
+    </div>
+
+    <!-- STORE DETAIL -->
+    <div v-if="page==='store'">
+      <div class="back-btn" @click="goBack"><i class="el-icon-arrow-left"></i> 返回</div>
+      <div class="store-header">
+        <div class="logo">{{storeInfo.shop_logo||'🏪'}}</div>
+        <div class="info">
+          <h2>{{storeInfo.shop_name}}</h2>
+          <p>{{storeInfo.shop_desc}}</p>
+          <div class="stat">{{storeInfo.products?.length||0}}件商品</div>
+        </div>
+      </div>
+      <div class="prod-grid"><div class="prod-card" v-for="p in storeInfo.products||[]" :key="p.id" @click="viewDetail(p.id)">
+        <div class="img-wrap"><img :src="p.images?.[0]" onerror="this.src='data:image/svg+xml,...'"></div>
+        <div class="info"><div class="name">{{p.name}}</div><div class="price">¥{{p.price}}<span class="orig" v-if="p.original_price>p.price">¥{{p.original_price}}</span></div><div class="meta"><span>已售{{p.sales||0}}</span><span>★{{p.rating||0}}</span></div></div>
+      </div></div>
+      <div v-if="!(storeInfo.products||[]).length" class="empty-state"><i class="el-icon-goods"></i><p>暂无商品</p></div>
+    </div>
+
+    <!-- PRODUCT LIST -->
+    <div v-if="page==='list'">
+      <div class="section-title">{{curCatName||'全部商品'}}</div>
+      <div class="prod-tabs"><div class="tab" :class="{active:!filterCat}" @click="filterCat=null;loadProducts()">全部</div>
+        <div class="tab" v-for="c in topCats" :key="c.id" :class="{active:filterCat===c.id}" @click="filterCat=c.id;loadProducts()">{{c.name}}</div>
+      </div>
+      <div class="prod-grid"><div class="prod-card" v-for="p in products" :key="p.id" @click="viewDetail(p.id)">
+        <div class="img-wrap"><img :src="p.images?.[0]" onerror="this.src='data:image/svg+xml,...'"></div>
+        <div class="info">
+          <div class="name">{{p.name}}</div>
+          <div class="shop" @click.stop="viewStore(p.merchant_id)">{{p.merchant_logo}} {{p.merchant_name}}</div>
+          <div class="price">¥{{p.price}}<span class="orig" v-if="p.original_price>p.price">¥{{p.original_price}}</span></div>
+          <div class="meta"><span>已售 {{p.sales||0}}</span><span>★ {{p.rating||0}}</span></div>
+        </div>
+      </div></div>
+      <div v-if="!products.length" class="empty-state"><i class="el-icon-box"></i><p>暂无商品</p></div>
+    </div>
+
+    <!-- PRODUCT DETAIL -->
+    <div v-if="page==='detail'">
+      <div class="back-btn" @click="goBack"><i class="el-icon-arrow-left"></i> 返回</div>
+      <div class="prod-detail">
+        <div class="gallery"><img :src="detailProduct?.images?.[0]" onerror="this.src='data:image/svg+xml,...'"></div>
+        <div class="detail-info">
+          <h2>{{detailProduct?.name}}</h2>
+          <div class="merchant-link" @click="viewStore(detailProduct?.merchant_id)">{{detailProduct?.merchant_logo}} {{detailProduct?.merchant_name}} →</div>
+          <div class="price-row">
+            <span class="cur">¥{{selectedSku?.price||detailProduct?.price}}</span>
+            <span class="orig" v-if="detailProduct?.original_price>(selectedSku?.price||detailProduct?.price)">¥{{detailProduct?.original_price}}</span>
+            <span class="sales">已售 {{detailProduct?.sales||0}} 件 | ★ {{detailProduct?.rating||0}}</span>
+          </div>
+          <div class="sku-row" v-if="skus.length"><label>选择规格</label>
+            <el-radio-group v-model="selectedSkuId" size="small">
+              <el-radio-button v-for="s in skus" :key="s.id" :label="s.id" :disabled="s.stock<1">{{s.attrs}}</el-radio-button>
+            </el-radio-group>
+          </div>
+          <div class="qty-row"><label>数量</label>
+            <el-input-number v-model="buyQty" :min="1" :max="selectedSku?.stock||detailProduct?.stock||99" size="small"></el-input-number>
+            <span style="font-size:11px;color:var(--text-lighter);margin-left:6px">库存 {{selectedSku?.stock||detailProduct?.stock||0}}</span>
+          </div>
+          <div class="actions"><el-button type="success" @click="addToCart" :disabled="!canBuy">加入购物车</el-button>
+            <el-button type="danger" @click="buyNow" :disabled="!canBuy">立即购买</el-button></div>
+        </div>
+      </div>
+      <div class="section-card"><div class="title"><i class="el-icon-document"></i> 商品描述</div><div class="desc-text">{{detailProduct?.description||'暂无描述'}}</div></div>
+      <div class="section-card"><div class="title"><i class="el-icon-chat-dot-round"></i> 商品评价 ({{reviews.length}})</div>
+        <div v-for="r in reviews" :key="r.id" class="review-item">
+          <div class="meta"><span class="stars">{{'★'.repeat(r.rating)}}<span class="empty">{{'☆'.repeat(5-r.rating)}}</span></span> | {{r.created_at}}</div>
+          <div class="content">{{r.content}}</div>
+        </div>
+        <div v-if="!reviews.length" style="padding:20px 0;text-align:center;color:var(--text-lighter);font-size:13px">暂无评价</div>
+      </div>
+    </div>
+
+    <!-- CART -->
+    <div v-if="page==='cart'">
+      <div class="section-title">购物车</div>
+      <div class="cart-wrap" v-if="cartItems.length">
+        <div class="cart-item" v-for="item in cartItems" :key="item.id">
+          <el-checkbox v-model="item.selected"></el-checkbox>
+          <img :src="item.product?.images?.[0]">
+          <div class="item-info">
+            <div class="name">{{item.product?.name}}</div>
+            <div class="shop-name">{{item.merchant_name}} | {{item.sku?.attrs}}</div>
+          </div>
+          <div style="color:var(--red);font-weight:700;font-size:14px">¥{{item.sku?.price}}</div>
+          <el-input-number v-model="item.quantity" :min="1" :max="item.sku?.stock||99" size="mini" @change="updateCart(item)"></el-input-number>
+        </div>
+      </div>
+      <div v-else class="empty-state"><i class="el-icon-goods"></i><p>购物车是空的</p><el-button type="success" size="small" style="margin-top:12px" @click="goHome">去逛逛</el-button></div>
+      <div class="cart-bottom" v-if="cartItems.length">
+        <div><el-checkbox v-model="allSelected" @change="toggleAll">全选</el-checkbox><span style="margin-left:6px;font-size:11px;color:var(--text-lighter)">已选 {{selectedCartCount}} 件</span></div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="total">合计：<span class="amount">¥{{cartTotal}}</span></div>
+          <el-button type="danger" size="small" @click="checkout" :disabled="!selectedCartCount">结算</el-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHECKOUT -->
+    <div v-if="page==='checkout'">
+      <div class="section-card"><div class="title"><i class="el-icon-location-outline"></i> 收货地址</div>
+        <div class="address-card" v-for="a in addresses" :key="a.id" :class="{selected:checkAddrId===a.id}" @click="checkAddrId=a.id">
+          <div style="font-weight:600;font-size:13px">{{a.name}} {{a.phone}} <el-tag size="mini" type="success" v-if="a.is_default">默认</el-tag></div>
+          <div style="font-size:11px;color:var(--text-light);margin-top:3px">{{a.province}}{{a.city}}{{a.district}}{{a.detail}}</div>
+        </div>
+        <el-button type="text" size="small" icon="el-icon-plus" style="color:var(--green)" @click="showAddrForm=true">新增地址</el-button>
+      </div>
+      <div class="section-card"><div class="title"><i class="el-icon-goods"></i> 商品信息</div>
+        <div v-for="item in checkoutItems" :key="item.id" style="display:flex;align-items:center;padding:6px 0;gap:10px;font-size:13px">
+          <img :src="item.product?.images?.[0]" style="width:44px;height:44px;border-radius:8px;object-fit:cover;background:#f0f0f0">
+          <div style="flex:1;min-width:0"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500">{{item.product?.name}}</div><div style="font-size:10px;color:var(--text-lighter);margin-top:1px">{{item.merchant_name}} | {{item.sku?.attrs}} × {{item.quantity}}</div></div>
+          <div style="color:var(--red);font-weight:600">¥{{(item.sku?.price*item.quantity).toFixed(2)}}</div>
+        </div>
+      </div>
+      <div class="section-card" style="padding:14px 18px"><div style="font-size:12px;color:var(--text-light)">备注</div>
+        <el-input v-model="orderRemark" placeholder="选填，如配送时间要求" size="small" maxlength="100" style="margin-top:6px" /></div>
+      <div class="summary-card">
+        <div class="total-row" v-for="item in checkoutItems"><span>{{item.product?.name}} × {{item.quantity}}</span><span>¥{{(item.sku?.price*item.quantity).toFixed(2)}}</span></div>
+        <div class="grand-total"><span>应付总额</span><span>¥{{checkoutTotal}}</span></div>
+        <el-button type="danger" style="width:100%;margin-top:14px;height:44px;border-radius:12px;font-size:15px" @click="submitOrder" :loading="submitting">提交订单</el-button>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div v-if="page==='orders'">
+      <div class="section-title">我的订单</div>
+      <el-tabs v-model="orderTab" @tab-click="loadOrders" size="small">
+        <el-tab-pane label="全部" name="all"></el-tab-pane>
+        <el-tab-pane label="待付款" name="待付款"></el-tab-pane>
+        <el-tab-pane label="待发货" name="待发货"></el-tab-pane>
+        <el-tab-pane label="待收货" name="待收货"></el-tab-pane>
+        <el-tab-pane label="已完成" name="已完成"></el-tab-pane>
+      </el-tabs>
+      <div class="order-list">
+        <div class="order-card" v-for="o in filteredOrders" :key="o.id">
+          <div class="order-header"><span>{{o.created_at}}</span><span class="status">{{o.status}}</span></div>
+          <div class="order-body">
+            <div class="order-item" v-for="it in o.items||[]" :key="it.id">
+              <img :src="it.product_image">
+              <div class="info">
+                <div class="name">{{it.product_name}}</div>
+                <div class="shop-name">{{it.merchant_name}} | {{it.sku_attrs}} × {{it.quantity}}</div>
+              </div>
+              <div style="color:var(--red);font-size:13px;font-weight:600;margin-left:auto">¥{{(it.price*it.quantity).toFixed(2)}}</div>
+            </div>
+          </div>
+          <div class="order-footer">
+            <div class="total">合计 <b>¥{{o.total_amount}}</b></div>
+            <div class="actions">
+              <el-button size="mini" v-if="o.status==='待付款'" type="primary" @click="payOrder(o)">去付款</el-button>
+              <el-button size="mini" v-if="o.status==='待付款'" @click="cancelOrder(o)">取消</el-button>
+              <el-button size="mini" v-if="o.status==='待收货'" type="success" @click="receiveOrder(o)">确认收货</el-button>
+            </div>
+          </div>
+        </div>
+        <div v-if="!filteredOrders.length" class="empty-state"><i class="el-icon-document"></i><p>暂无订单</p></div>
+      </div>
+    </div>
+
+    <!-- MERCHANT CENTER -->
+    <div v-if="page==='mc'">
+      <div class="mc-layout">
+        <div class="mc-sidebar">
+          <div class="mc-item" :class="{active:mcPage==='dashboard'}" @click="mcPage='dashboard';loadMcData()">概览</div>
+          <div class="mc-item" :class="{active:mcPage==='mc-products'}" @click="mcPage='mc-products';loadMcProducts()">商品</div>
+          <div class="mc-item" :class="{active:mcPage==='mc-orders'}" @click="mcPage='mc-orders';loadMcOrders()">订单</div>
+          <div class="mc-item" :class="{active:mcPage==='mc-info'}" @click="mcPage='mc-info'">设置</div>
+        </div>
+        <div class="mc-content">
+          <div class="mc-section" v-if="mcPage==='dashboard'">
+            <h4>店铺概览</h4>
+            <div v-if="myShop">
+              <p style="margin-bottom:10px"><strong>{{myShop.shop_name}}</strong> <el-tag size="mini" :type="myShop.status===1?'success':'warning'">{{myShop.status===0?'待审核':myShop.status===1?'已开通':'已关闭'}}</el-tag></p>
+              <el-row :gutter="12">
+                <el-col :span="8"><div class="stat-card"><div style="font-size:24px;font-weight:800;color:var(--green)">{{mcProducts.length||0}}</div><div style="font-size:11px;color:var(--text-lighter);margin-top:4px">商品数</div></div></el-col>
+                <el-col :span="8"><div class="stat-card"><div style="font-size:24px;font-weight:800;color:var(--orange)">{{mcOrders.length||0}}</div><div style="font-size:11px;color:var(--text-lighter);margin-top:4px">订单数</div></div></el-col>
+                <el-col :span="8"><div class="stat-card"><div style="font-size:24px;font-weight:800;color:var(--red)">{{mcPendingShip||0}}</div><div style="font-size:11px;color:var(--text-lighter);margin-top:4px">待发货</div></div></el-col>
+              </el-row>
+            </div>
+            <div v-else><p style="font-size:13px;color:var(--text-light)">您尚未开通店铺。<el-button type="success" size="small" style="margin-left:8px" @click="applyShop">立即开店</el-button></p></div>
+          </div>
+          <div class="mc-section" v-if="mcPage==='mc-products'">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h4>我的商品</h4><el-button type="primary" size="mini" icon="el-icon-plus" @click="openMcProdForm()">新增</el-button></div>
+            <div v-for="p in mcProducts" :key="p.id" style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #f5f5f5;gap:10px;font-size:13px">
+              <img :src="p.images?.[0]" style="width:48px;height:48px;border-radius:8px;object-fit:cover;background:#f0f0f0">
+              <div style="flex:1;min-width:0"><div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{p.name}}</div><div style="color:var(--text-lighter);font-size:11px;margin-top:2px">¥{{p.price}} 库存:{{p.stock}} <el-tag :type="p.status===1?'success':'info'" size="mini">{{p.status===1?'上架':'下架'}}</el-tag></div></div>
+              <el-button type="text" size="mini" icon="el-icon-edit" @click="openMcProdForm(p)"></el-button>
+              <el-button type="text" size="mini" icon="el-icon-delete" style="color:var(--red)" @click="delMcProd(p)"></el-button>
+            </div>
+            <div v-if="!mcProducts.length" style="text-align:center;padding:24px;color:var(--text-lighter);font-size:13px"><i class="el-icon-goods" style="font-size:32px;display:block;margin-bottom:8px"></i>暂无商品</div>
+          </div>
+          <div class="mc-section" v-if="mcPage==='mc-orders'">
+            <h4>订单管理</h4>
+            <div v-for="o in mcOrders" :key="o.id" style="padding:10px 0;border-bottom:1px solid #f5f5f5;font-size:12px">
+              <div style="display:flex;justify-content:space-between;color:var(--text-lighter);font-size:10px;margin-bottom:4px"><span>{{o.order_no}}</span><el-tag :type="orderStatusTag(o.status)" size="mini">{{o.status}}</el-tag></div>
+              <div v-for="it in (o.myItems||o.items||[]).slice(0,2)" :key="it.id" style="padding:2px 0;color:var(--text)">{{it.product_name}} {{it.sku_attrs}} × {{it.quantity}}</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><span>合计 <b style="color:var(--red)">¥{{o.total_amount}}</b></span><el-button type="text" size="mini" v-if="o.status==='待发货'" @click="shipMcOrder(o)">发货</el-button></div>
+            </div>
+            <div v-if="!mcOrders.length" style="text-align:center;padding:24px;color:var(--text-lighter);font-size:13px"><i class="el-icon-document" style="font-size:32px;display:block;margin-bottom:8px"></i>暂无订单</div>
+          </div>
+          <div class="mc-section" v-if="mcPage==='mc-info'">
+            <h4>店铺设置</h4>
+            <el-form :model="shopForm" label-width="70px" size="small" style="margin-top:4px">
+              <el-form-item label="店铺名"><el-input v-model="shopForm.shop_name" /></el-form-item>
+              <el-form-item label="描述"><el-input v-model="shopForm.shop_desc" type="textarea" :rows="2" /></el-form-item>
+              <el-form-item label="联系人"><el-input v-model="shopForm.contact_name" /></el-form-item>
+              <el-form-item label="电话"><el-input v-model="shopForm.contact_phone" /></el-form-item>
+              <el-form-item><el-button type="primary" @click="saveShopInfo" :loading="savingShop">保存设置</el-button></el-form-item>
+            </el-form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialogs -->
+  <el-dialog title="收货地址" :visible.sync="showAddrForm" width="95%" top="5vh" :close-on-click-modal="false">
+    <el-form :model="addrForm" label-width="60px" size="small">
+      <el-row :gutter="10"><el-col :span="12"><el-form-item label="收货人"><el-input v-model="addrForm.name" /></el-form-item></el-col><el-col :span="12"><el-form-item label="手机号"><el-input v-model="addrForm.phone" /></el-form-item></el-col></el-row>
+      <el-row :gutter="10"><el-col :span="8"><el-form-item label="省"><el-input v-model="addrForm.province" /></el-form-item></el-col><el-col :span="8"><el-form-item label="市"><el-input v-model="addrForm.city" /></el-form-item></el-col><el-col :span="8"><el-form-item label="区"><el-input v-model="addrForm.district" /></el-form-item></el-col></el-row>
+      <el-form-item label="详细"><el-input v-model="addrForm.detail" /></el-form-item>
+      <el-form-item><el-checkbox v-model="addrForm.is_default">设为默认地址</el-checkbox></el-form-item>
+    </el-form>
+    <span slot="footer"><el-button @click="showAddrForm=false">取消</el-button><el-button type="primary" @click="saveAddr">保存</el-button></span>
+  </el-dialog>
+  <el-dialog :title="mcProdForm.id?'编辑商品':'新增商品'" :visible.sync="mcProdFormVisible" width="95%" top="5vh" :close-on-click-modal="false">
+    <el-form :model="mcProdForm" label-width="70px" size="small">
+      <el-form-item label="商品名"><el-input v-model="mcProdForm.name" /></el-form-item>
+      <el-row :gutter="10"><el-col :span="12"><el-form-item label="分类"><el-select v-model="mcProdForm.category_id" style="width:100%"><el-option v-for="c in allLeafCats" :key="c.id" :label="c.name" :value="c.id" /></el-select></el-form-item></el-col><el-col :span="12"><el-form-item label="状态"><el-select v-model="mcProdForm.status" style="width:100%"><el-option label="上架" :value="1" /><el-option label="下架" :value="0" /></el-select></el-form-item></el-col></el-row>
+      <el-row :gutter="10"><el-col :span="8"><el-form-item label="价格"><el-input-number v-model="mcProdForm.price" :min="0" :step="0.1" :precision="1" style="width:100%" /></el-form-item></el-col><el-col :span="8"><el-form-item label="原价"><el-input-number v-model="mcProdForm.original_price" :min="0" :step="0.1" :precision="1" style="width:100%" /></el-form-item></el-col><el-col :span="8"><el-form-item label="库存"><el-input-number v-model="mcProdForm.stock" :min="0" style="width:100%" /></el-form-item></el-col></el-row>
+      <el-form-item label="图片"><el-input v-model="mcProdForm.imagesText" placeholder="每行一个URL" type="textarea" :rows="2" /></el-form-item>
+      <el-form-item label="描述"><el-input v-model="mcProdForm.description" type="textarea" :rows="2" /></el-form-item>
+    </el-form>
+    <span slot="footer"><el-button @click="mcProdFormVisible=false">取消</el-button><el-button type="primary" @click="saveMcProd">保存</el-button></span>
+  </el-dialog>
+
+  <!-- AI Chat -->
+  <button class="ai-float-btn" @click="toggleAi" v-if="!aiOpen"><i class="el-icon-service"></i><span class="badge" v-if="aiUnread">AI</span></button>
+  <div class="ai-dialog" v-if="aiOpen">
+    <div class="ai-header">
+      <div class="title"><i class="el-icon-service"></i> 智能购物助手</div>
+      <i class="el-icon-close close-btn" @click="closeAi"></i>
+    </div>
+    <div class="ai-msgs" ref="aiMsgs">
+      <div v-for="(m,i) in aiMsgs" :key="i" :class="['ai-msg',m.role]"><span v-if="m.role==='bot'">🤖 </span>{{m.text}}<span class="time">{{m.time}}</span></div>
+      <div class="ai-typing" v-if="aiThinking"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:4px">思考中...</span></div>
+    </div>
+    <div class="ai-prod-recs" v-if="aiProducts.length">
+      <div class="rec-title">📦 相关商品推荐</div>
+      <div class="rec-list"><div class="rec-item" v-for="p in aiProducts" :key="p.id" @click="showProduct(p)"><img :src="p.images?.[0]"><div class="name">{{p.name}}</div><div class="price">¥{{p.price}}</div></div></div>
+    </div>
+    <div class="ai-input-wrap">
+      <input v-model="aiInput" placeholder="输入您的问题..." @keyup.enter="sendAi" :disabled="aiThinking">
+      <button class="send-btn" @click="sendAi" :disabled="!aiInput.trim()||aiThinking"><i class="el-icon-top"></i></button>
+    </div>
+  </div>
+</div>
+  </div>
+  <div class="phone-home-bar"><div class="bar"></div></div>
+</div>
+
+<script>
+const API='/api';
+new Vue({
+  el:'#app',
+  data:{
+    showLogin:false,logining:false,user:{},myShop:null,showRegister:false,reging:false,
+    regForm:{username:'',password:'',nickname:''},
+    loginForm:{username:'admin',password:'admin123'},
+    page:'home',searchWord:'',
+    banners:[{title:'乡村好物 多商户直供',sub:'多家店铺，海量商品，产地直达'},{title:'助农优品 限时特惠',sub:'精选乡村特产，超值优惠'},{title:'开店致富 乡村振兴',sub:'免费开店，助力农产品上行'}],
+    topCats:[],products:[],allProducts:[],categories:[],merchants:[],
+    filterCat:null,storeInfo:{},
+    detailProduct:null,skus:[],selectedSkuId:null,buyQty:1,reviews:[],
+    cartItems:[],cartLoaded:false,
+    checkoutItems:[],checkAddrId:null,orderRemark:'',submitting:false,
+    addresses:[],showAddrForm:false,addrForm:{name:'',phone:'',province:'',city:'',district:'',detail:'',is_default:true},
+    orders:[],orderTab:'all',
+    aiOpen:false,aiUnread:true,aiInput:'',aiThinking:false,aiMsgs:[],aiProducts:[],
+    mcPage:'dashboard',mcProducts:[],mcOrders:[],mcProdForm:{},mcProdFormVisible:false,savingShop:false,
+    shopForm:{}
+  },
+  computed:{
+    isMerchant(){return this.user.role==='merchant'},
+    curCatName(){if(!this.filterCat)return'全部商品';const c=this.topCats.find(x=>x.id===this.filterCat);return c?c.name:'全部商品'},
+    selectedSku(){if(!this.skus.length)return null;return this.skus.find(s=>s.id===this.selectedSkuId)||this.skus[0]},
+    canBuy(){return(this.selectedSku?.stock||this.detailProduct?.stock||0)>0},
+    cartCount(){if(!this.cartLoaded)return 0;return this.cartItems.reduce((s,i)=>s+i.quantity,0)},
+    allSelected:{get(){const s=this.cartItems.filter(i=>i.selected);return this.cartItems.length>0&&s.length===this.cartItems.length},set(v){this.cartItems.forEach(i=>i.selected=v)}},
+    selectedCartCount(){return this.cartItems.filter(i=>i.selected).length},
+    cartTotal(){return this.cartItems.filter(i=>i.selected).reduce((s,i)=>s+(i.sku?.price||0)*i.quantity,0).toFixed(2)},
+    checkoutTotal(){return this.checkoutItems.reduce((s,i)=>s+(i.sku?.price||0)*i.quantity,0).toFixed(2)},
+    filteredOrders(){return this.orderTab==='all'?this.orders:this.orders.filter(o=>o.status===this.orderTab)},
+    allLeafCats(){return this.categories.filter(c=>c.level===2)},
+    mcPendingShip(){return this.mcOrders.filter(o=>o.status==='待发货').length},
+    orderStatusTag(){return(s)=>{const m={'待付款':'warning','待发货':'primary','待收货':'success','已完成':'','已取消':'info'};return m[s]||''}}
+  },
+  watch:{
+    selectedSkuId(){this.buyQty=1},
+    skus(v){if(v.length&&!this.selectedSkuId)this.selectedSkuId=v[0].id}
+  },
+  mounted(){this.checkLogin()},
+  methods:{
+    checkLogin(){
+      fetch(API+'/me',{credentials:'include'}).then(r=>{if(r.ok)return r.json();throw 401})
+        .then(u=>{this.user=u;this.myShop=u.myShop;this.init()}).catch(()=>{this.showLogin=true})
+    },
+    doLogin(){
+      this.logining=true;
+      fetch(API+'/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.loginForm),credentials:'include'})
+        .then(r=>{if(!r.ok)return r.json().then(e=>Promise.reject(e.error||'登录失败'));return r.json()})
+        .then(d=>{this.user=d.user;this.myShop=d.myShop;this.showLogin=false;this.init()})
+        .catch(e=>{this.$message.error(typeof e==='string'?e:'登录失败')}).then(()=>this.logining=false)
+    },
+    doRegister(){
+      if(!this.regForm.username||!this.regForm.password){this.$message.warning('请填写完整');return}
+      this.reging=true;
+      fetch(API+'/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.regForm),credentials:'include'})
+        .then(r=>{if(!r.ok)return r.json().then(e=>Promise.reject(e.error||'注册失败'));return r.json()})
+        .then(d=>{this.user=d.user;this.showRegister=false;this.init();this.$message.success('注册成功')})
+        .catch(e=>{this.$message.error(typeof e==='string'?e:'注册失败')}).then(()=>this.reging=false)
+    },
+    doLogout(){fetch(API+'/logout',{credentials:'include'}).then(()=>{this.user={};this.myShop=null;this.showLogin=true;this.cartLoaded=false})},
+    async init(){
+      const [cats,prods,merchants]=await Promise.all([
+        fetch(API+'/categories').then(r=>r.json()),
+        fetch(API+'/products').then(r=>r.json()),
+        fetch(API+'/merchants').then(r=>r.json()),
+      ]);
+      this.categories=cats;this.topCats=cats.filter(c=>c.parent_id===0);
+      this.allProducts=prods;this.products=prods.filter(p=>p.status===1).slice(0,12);
+      this.merchants=merchants;
+      this.loadCart();this.loadAddresses();
+    },
+    goHome(){this.page='home';this.products=this.allProducts.filter(p=>p.status===1).slice(0,12);this.loadMerchants()},
+    loadMerchants(){fetch(API+'/merchants').then(r=>r.json()).then(d=>this.merchants=d)},
+    doSearch(){
+      if(!this.searchWord.trim()){this.goHome();return}
+      this.page='list';this.filterCat=null;
+      const kw=this.searchWord.trim().toLowerCase();
+      this.products=this.allProducts.filter(p=>p.status===1&&(p.name.toLowerCase().includes(kw)||(p.description||'').toLowerCase().includes(kw)))
+    },
+    browseCat(id){this.filterCat=id;this.page='list';this.loadProducts()},
+    loadProducts(){
+      const all=this.allProducts.filter(p=>p.status===1);
+      if(this.filterCat){const subIds=this.categories.filter(c=>c.parent_id===this.filterCat).map(c=>c.id);subIds.push(this.filterCat);this.products=all.filter(p=>subIds.includes(p.category_id))}
+      else this.products=all
+    },
+    goBack(){this.page=this.fromPage||'home'},
+    async viewDetail(id){
+      this.fromPage=this.page;
+      const [p,skuArr,revArr]=await Promise.all([
+        fetch(API+'/products/'+id).then(r=>r.json()),
+        fetch(API+'/skus').then(r=>r.json()),
+        fetch(API+'/reviews').then(r=>r.json()),
+      ]);
+      this.detailProduct=p;this.skus=skuArr.filter(s=>s.product_id===id);
+      this.selectedSkuId=this.skus.length?this.skus[0].id:null;this.buyQty=1;
+      this.reviews=revArr.filter(r=>r.product_id===id);this.page='detail'
+    },
+    async viewStore(id){
+      const r=await fetch(API+'/merchants/'+id);
+      this.storeInfo=await r.json();this.page='store'
+    },
+    async loadCart(){
+      this.cartLoaded=false;
+      try{const r=await fetch(API+'/cart',{credentials:'include'});if(!r.ok)throw 401;this.cartItems=await r.json();this.cartLoaded=true}
+      catch(e){this.cartItems=[];this.cartLoaded=false}
+    },
+    async addToCart(){
+      const skuId=this.selectedSku?.id||this.skus[0]?.id;
+      if(!skuId)return;
+      if(!this.user.username){this.showLogin=true;return}
+      await fetch(API+'/cart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sku_id:skuId,quantity:this.buyQty}),credentials:'include'});
+      this.$message.success('已加入购物车');this.loadCart()
+    },
+    async updateCart(item){await fetch(API+'/cart/'+item.id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({quantity:item.quantity}),credentials:'include'});this.loadCart()},
+    async removeCartItem(item){await fetch(API+'/cart/'+item.id,{method:'DELETE',credentials:'include'});this.loadCart()},
+    toggleAll(v){this.cartItems.forEach(i=>i.selected=v)},
+    goCart(){this.page='cart';this.loadCart()},
+    checkout(){const selected=this.cartItems.filter(i=>i.selected);if(!selected.length){this.$message.warning('请选择商品');return}this.checkoutItems=selected;this.page='checkout';this.loadAddresses()},
+    async loadAddresses(){try{const r=await fetch(API+'/addresses',{credentials:'include'});if(r.ok){const all=await r.json();this.addresses=all.filter(a=>a.user_id===this.user.id);const def=this.addresses.find(a=>a.is_default);if(def)this.checkAddrId=def.id;else if(this.addresses.length)this.checkAddrId=this.addresses[0].id}}catch(e){}},
+    async saveAddr(){const b={...this.addrForm,user_id:this.user.id};if(b.is_default)this.addresses.forEach(a=>a.is_default=false);await fetch(API+'/addresses',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b),credentials:'include'});this.$message.success('地址已保存');this.showAddrForm=false;this.loadAddresses()},
+    async submitOrder(){
+      if(!this.checkAddrId){this.$message.warning('请选择收货地址');return}this.submitting=true;
+      try{const r=await fetch(API+'/orders/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({skuIds:this.checkoutItems.map(i=>i.id),address_id:this.checkAddrId,remark:this.orderRemark}),credentials:'include'});const d=await r.json();if(d.error)throw d.error;this.$message.success('订单提交成功');this.page='orders';this.orderTab='all';this.loadOrders();this.loadCart()}
+      catch(e){this.$message.error(e||'提交失败')}this.submitting=false
+    },
+    async loadOrders(){try{const r=await fetch(API+'/orders/user',{credentials:'include'});if(r.ok)this.orders=await r.json()}catch(e){}},
+    async payOrder(o){await fetch(API+'/orders/'+o.id+'/pay',{method:'PUT',credentials:'include'});this.$message.success('支付成功');this.loadOrders()},
+    async receiveOrder(o){await fetch(API+'/orders/'+o.id+'/receive',{method:'PUT',credentials:'include'});this.$message.success('已确认收货');this.loadOrders()},
+    async cancelOrder(o){this.$confirm('确定取消该订单？','提示',{type:'warning'}).then(async()=>{await fetch(API+'/orders/'+o.id+'/cancel',{method:'PUT',credentials:'include'});this.$message.success('已取消');this.loadOrders()}).catch(()=>{})},
+    buyNow(){this.addToCart().then(()=>{this.goCart()})},
+    openShop(){this.$confirm('即将入驻成为商家，是否继续？','开店申请',{confirmButtonText:'立即开店',type:'info'}).then(async()=>{try{const r=await fetch(API+'/merchants/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({shop_name:this.user.nickname+'的店铺',shop_desc:'',contact_name:this.user.nickname,contact_phone:''}),credentials:'include'});const d=await r.json();if(d.error)throw d.error;this.myShop=d;this.$message.success('开店申请已提交，等待审核');this.user.role='merchant'}catch(e){this.$message.error(e.error||'开店失败')}}).catch(()=>{})},
+    applyShop(){this.openShop()},
+    async loadMcData(){const[u,o]=await Promise.all([fetch(API+'/products/merchant/'+(this.myShop?.id),{credentials:'include'}).then(r=>r.json()).catch(()=>[]),fetch(API+'/orders/merchant',{credentials:'include'}).then(r=>r.json()).catch(()=>[])]);this.mcProducts=u;this.mcOrders=o},
+    async loadMcProducts(){this.mcProducts=await fetch(API+'/products/merchant/'+(this.myShop?.id),{credentials:'include'}).then(r=>r.json()).catch(()=>[])},
+    async loadMcOrders(){const r=await fetch(API+'/orders/merchant',{credentials:'include'});if(r.ok)this.mcOrders=await r.json()},
+    openMcProdForm(r){
+      if(r){this.mcProdForm={...r,imagesText:(r.images||[]).join('\n')}}else{this.mcProdForm={name:'',category_id:this.allLeafCats[0]?.id||7,price:0,original_price:0,stock:0,status:1,images:[],imagesText:'',description:''}}
+      this.mcProdFormVisible=true
+    },
+    async saveMcProd(){
+      const f=this.mcProdForm;const e=!!f.id;const b={...f};delete b.id;delete b.imagesText;
+      if(f.imagesText)b.images=f.imagesText.split('\n').filter(l=>l.trim());
+      try{const url=e?API+'/products/edit/'+f.id:API+'/products/add';const r=await fetch(url,{method:e?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b),credentials:'include'});if(!r.ok)throw await r.json();this.$message.success(e?'更新成功':'创建成功');this.mcProdFormVisible=false;this.loadMcProducts()}catch(e){this.$message.error(e.error||'操作失败')}
+    },
+    async delMcProd(row){this.$confirm('确定删除「'+row.name+'」？').then(async()=>{await fetch(API+'/products/del/'+row.id,{method:'DELETE',credentials:'include'});this.$message.success('已删除');this.loadMcProducts()}).catch(()=>{})},
+    async shipMcOrder(o){try{const r=await fetch(API+'/orders/'+o.id+'/ship',{method:'PUT',credentials:'include'});if(!r.ok)throw await r.json();this.$message.success('已发货');this.loadMcOrders()}catch(e){this.$message.error(e.error||'发货失败')}},
+    async saveShopInfo(){this.savingShop=true;try{const r=await fetch(API+'/merchants/'+this.myShop.id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.shopForm),credentials:'include'});if(!r.ok){const e=await r.json();throw e.error||'保存失败'}this.$message.success('保存成功')}catch(e){this.$message.error(typeof e==='string'?e:'保存失败')}this.savingShop=false},
+    toggleAi(){this.aiOpen=!this.aiOpen;if(this.aiOpen){this.aiUnread=false;if(!this.aiMsgs.length){const t=new Date().toLocaleTimeString().slice(0,5);this.aiMsgs.push({role:'bot',text:'您好！我是您的智能购物助手🤖\n\n我可以帮您推荐商品、提供烹饪和保存建议、解答农产品问题。\n\n请问有什么可以帮您的？',time:t})}this.$nextTick(()=>{const el=this.$refs.aiMsgs;if(el)el.scrollTop=el.scrollHeight})}},
+    closeAi(){this.aiOpen=false},
+    async sendAi(){
+      const msg=this.aiInput.trim();if(!msg||this.aiThinking)return;
+      this.aiMsgs.push({role:'user',text:msg,time:new Date().toLocaleTimeString().slice(0,5)});
+      this.aiInput='';this.aiThinking=true;this.aiProducts=[];
+      this.$nextTick(()=>{const el=this.$refs.aiMsgs;if(el)el.scrollTop=el.scrollHeight});
+      try{
+        const r=await fetch(API+'/ai/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,context:this.aiMsgs.slice(-6)}),credentials:'include'});
+        if(r.ok){const d=await r.json();this.aiMsgs.push({role:'bot',text:d.reply,time:new Date().toLocaleTimeString().slice(0,5)});if(d.products)this.aiProducts=d.products}
+      }catch(e){this.aiMsgs.push({role:'bot',text:'抱歉，我暂时无法回答问题，请稍后再试。',time:new Date().toLocaleTimeString().slice(0,5)})}
+      this.aiThinking=false;
+      this.$nextTick(()=>{const el=this.$refs.aiMsgs;if(el)el.scrollTop=el.scrollHeight})
+    },
+    showProduct(p){this.closeAi();this.viewDetail(p.id)}
+  }
+});
+
+// PWA Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

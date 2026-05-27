@@ -1,0 +1,37 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "product_id": 1,
+      "order_id": 1,
+      "sku_attrs": "5斤家庭装",
+      "rating": 5,
+      "content": "苹果很新鲜，脆甜好吃！",
+      "images": [],
+      "created_at": "2026-03-20"
+    },
+    {
+      "id": 2,
+      "user_id": 1,
+      "product_id": 3,
+      "order_id": 1,
+      "sku_attrs": "20枚装",
+      "rating": 5,
+      "content": "土鸡蛋品质很好，蛋黄颜色正",
+      "images": [],
+      "created_at": "2026-03-22"
+    },
+    {
+      "id": 3,
+      "user_id": 1,
+      "product_id": 4,
+      "order_id": 2,
+      "sku_attrs": "5kg装",
+      "rating": 4,
+      "content": "大米味道不错，就是物流慢了点",
+      "images": [],
+      "created_at": "2026-04-01"
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "新鲜水果",
+      "parent_id": 0,
+      "level": 1,
+      "sort": 1,
+      "icon": "🍎"
+    },
+    {
+      "id": 2,
+      "name": "蔬菜专区",
+      "parent_id": 0,
+      "level": 1,
+      "sort": 2,
+      "icon": "🥬"
+    },
+    {
+      "id": 3,
+      "name": "粮油调味",
+      "parent_id": 0,
+      "level": 1,
+      "sort": 3,
+      "icon": "🧂"
+    },
+    {
+      "id": 4,
+      "name": "肉禽蛋奶",
+      "parent_id": 0,
+      "level": 1,
+      "sort": 4,
+      "icon": "🥩"
+    },
+    {
+      "id": 5,
+      "name": "农资农具",
+      "parent_id": 0,
+      "level": 1,
+      "sort": 5,
+      "icon": "🔧"
+    },
+    {
+      "id": 6,
+      "name": "手工艺品",
+      "parent_id": 0,
+      "level": 1,
+      "sort": 6,
+      "icon": "🎨"
+    },
+    {
+      "id": 7,
+      "name": "苹果",
+      "parent_id": 1,
+      "level": 2,
+      "sort": 1
+    },
+    {
+      "id": 8,
+      "name": "柑橘橙柚",
+      "parent_id": 1,
+      "level": 2,
+      "sort": 2
+    },
+    {
+      "id": 9,
+      "name": "桃李杏",
+      "parent_id": 1,
+      "level": 2,
+      "sort": 3
+    },
+    {
+      "id": 10,
+      "name": "草莓浆果",
+      "parent_id": 1,
+      "level": 2,
+      "sort": 4
+    },
+    {
+      "id": 11,
+      "name": "叶菜类",
+      "parent_id": 2,
+      "level": 2,
+      "sort": 1
+    },
+    {
+      "id": 12,
+      "name": "根茎类",
+      "parent_id": 2,
+      "level": 2,
+      "sort": 2
+    },
+    {
+      "id": 13,
+      "name": "菌菇类",
+      "parent_id": 2,
+      "level": 2,
+      "sort": 3
+    },
+    {
+      "id": 14,
+      "name": "瓜果类",
+      "parent_id": 2,
+      "level": 2,
+      "sort": 4
+    },
+    {
+      "id": 15,
+      "name": "米面",
+      "parent_id": 3,
+      "level": 2,
+      "sort": 1
+    },
+    {
+      "id": 16,
+      "name": "食用油",
+      "parent_id": 3,
+      "level": 2,
+      "sort": 2
+    },
+    {
+      "id": 17,
+      "name": "调味品",
+      "parent_id": 3,
+      "level": 2,
+      "sort": 3
+    },
+    {
+      "id": 18,
+      "name": "干货",
+      "parent_id": 3,
+      "level": 2,
+      "sort": 4
+    },
+    {
+      "id": 19,
+      "name": "猪肉",
+      "parent_id": 4,
+      "level": 2,
+      "sort": 1
+    },
+    {
+      "id": 20,
+      "name": "禽类",
+      "parent_id": 4,
+      "level": 2,
+      "sort": 2
+    },
+    {
+      "id": 21,
+      "name": "蛋品",
+      "parent_id": 4,
+      "level": 2,
+      "sort": 3
+    },
+    {
+      "id": 22,
+      "name": "乳制品",
+      "parent_id": 4,
+      "level": 2,
+      "sort": 4
+    }
+  ]
+}

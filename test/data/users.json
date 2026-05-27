@@ -1,0 +1,49 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "admin123",
+      "nickname": "管理员",
+      "role": "admin",
+      "status": 1,
+      "created": "2026-01-01"
+    },
+    {
+      "id": 2,
+      "username": "user",
+      "password": "user123",
+      "nickname": "测试用户",
+      "role": "user",
+      "status": 1,
+      "created": "2026-01-01"
+    },
+    {
+      "id": 3,
+      "username": "merchant1",
+      "password": "merch123",
+      "nickname": "李掌柜",
+      "role": "merchant",
+      "status": 1,
+      "created": "2026-01-01"
+    },
+    {
+      "id": 4,
+      "username": "merchant2",
+      "password": "merch123",
+      "nickname": "王掌柜",
+      "role": "merchant",
+      "status": 1,
+      "created": "2026-01-01"
+    },
+    {
+      "id": 5,
+      "username": "merchant3",
+      "password": "merch123",
+      "nickname": "赵掌柜",
+      "role": "merchant",
+      "status": 1,
+      "created": "2026-01-01"
+    }
+  ]
+}

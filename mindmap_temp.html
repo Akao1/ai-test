@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+* { margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; background: white; }
+#mindmap { width: 100%; height: 100%; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/markmap-view@0.18/dist/index.css">
+</head>
+<body>
+<svg id="mindmap"></svg>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markmap-view@0.18/dist/index.js"></script>
+<script>
+const { markmap } = window;
+markmap.Markmap.create('#mindmap', null, {"content":"&#x6570;&#x5b57;&#x4e61;&#x6751;&#x7cfb;&#x7edf;","children":[{"content":"1.&#x660e;&#x786e;&#x9700;&#x6c42;","children":[{"content":"&#x5b57;&#x6bb5;&#x53e3;&#x5f84;","children":[],"payload":{"tag":"li","lines":"3,4"}},{"content":"&#x56fe;&#x5c42;&#x8303;&#x56f4;","children":[],"payload":{"tag":"li","lines":"4,5"}},{"content":"&#x89d2;&#x8272;&#x8303;&#x56f4;","children":[],"payload":{"tag":"li","lines":"5,6"}},{"content":"&#x9875;&#x9762;&#x8fb9;&#x754c;","children":[],"payload":{"tag":"li","lines":"6,7"}},{"content":"&#x5b9e;&#x65bd;&#x6392;&#x671f;","children":[],"payload":{"tag":"li","lines":"7,9"}}],"payload":{"tag":"h2","lines":"2,3"}},{"content":"2.&#x5730;&#x56fe;&#x5e95;&#x5c42;&#x4e0e;&#x5404;&#x56fe;&#x5c42;&#x5efa;&#x8bbe;","children":[{"content":"&#x5168;&#x6751;&#x603b;&#x89c8;&#x56fe;","children":[],"payload":{"tag":"li","lines":"10,11"}},{"content":"&#x5404;&#x81ea;&#x7136;&#x6751;&#x4e8c;&#x7ea7;&#x7a7f;&#x900f;&#x56fe;","children":[],"payload":{"tag":"li","lines":"11,12"}},{"content":"&#x5404;&#x5730;&#x5757;&#x7ec4;&#x6210;&#x56fe;","children":[],"payload":{"tag":"li","lines":"12,13"}},{"content":"&#x56fe;&#x5c42;&#x6302;&#x8f7d;","children":[{"content":"&#x6237;&#x70b9;&#x4f4d;","children":[{"content":"&#x623f;&#x5c4b;","children":[],"payload":{"tag":"li","lines":"15,16"}}],"payload":{"tag":"li","lines":"14,16"}},{"content":"&#x5730;&#x5757;","children":[{"content":"&#x4f5c;&#x7269;","children":[],"payload":{"tag":"li","lines":"17,19"}}],"payload":{"tag":"li","lines":"16,19"}}],"payload":{"tag":"li","lines":"13,19"}}],"payload":{"tag":"h2","lines":"9,10"}},{"content":"3.&#x6570;&#x636e;&#x7ba1;&#x7406;&#x6a21;&#x5757;","children":[{"content":"&#x6237;&#x60c5;","children":[{"content":"&#x4eba;&#x53e3;","children":[],"payload":{"tag":"li","lines":"21,22"}},{"content":"&#x6536;&#x5165;","children":[],"payload":{"tag":"li","lines":"22,23"}},{"content":"&#x52a1;&#x5de5;","children":[],"payload":{"tag":"li","lines":"23,24"}}],"payload":{"tag":"li","lines":"20,24"}},{"content":"&#x623f;&#x5c4b;","children":[],"payload":{"tag":"li","lines":"24,25"}},{"content":"&#x4f5c;&#x7269;","children":[{"content":"&#x53d8;&#x8fc1;","children":[],"payload":{"tag":"li","lines":"26,27"}},{"content":"&#x6536;&#x76ca;","children":[],"payload":{"tag":"li","lines":"27,28"}}],"payload":{"tag":"li","lines":"25,28"}},{"content":"&#x653f;&#x7b56;&#x4fdd;&#x969c;","children":[],"payload":{"tag":"li","lines":"28,30"}}],"payload":{"tag":"h2","lines":"19,20"}},{"content":"4.&#x6570;&#x636e;&#x5c55;&#x793a;","children":[{"content":"&#x7edf;&#x8ba1;","children":[],"payload":{"tag":"li","lines":"31,32"}},{"content":"&#x5c55;&#x793a;","children":[],"payload":{"tag":"li","lines":"32,34"}}],"payload":{"tag":"h2","lines":"30,31"}},{"content":"5.&#x6743;&#x9650;&#x7ba1;&#x7406;&#x4e0e;&#x540e;&#x53f0;","children":[{"content":"&#x6743;&#x9650;&#x7ba1;&#x7406;","children":[{"content":"&#x7ba1;&#x7406;&#x5458;","children":[],"payload":{"tag":"li","lines":"36,37"}},{"content":"&#x53ea;&#x8bfb;&#x7528;&#x6237;","children":[],"payload":{"tag":"li","lines":"37,38"}}],"payload":{"tag":"li","lines":"35,38"}},{"content":"&#x540e;&#x53f0;&#x914d;&#x7f6e;","children":[{"content":"&#x6a21;&#x5757;&#x589e;&#x51cf;","children":[],"payload":{"tag":"li","lines":"39,40"}}],"payload":{"tag":"li","lines":"38,40"}},{"content":"&#x6570;&#x636e;&#x7ef4;&#x62a4;","children":[],"payload":{"tag":"li","lines":"40,42"}}],"payload":{"tag":"h2","lines":"34,35"}},{"content":"6.&#x8fd0;&#x884c;&#x5e73;&#x53f0;&#x4e0e;&#x79fb;&#x52a8;&#x7aef;","children":[{"content":"&#x57fa;&#x7840;&#x5e73;&#x53f0;&#x642d;&#x8f7d;","children":[],"payload":{"tag":"li","lines":"43,44"}},{"content":"&#x79fb;&#x52a8;&#x7aef;&#x8bbf;&#x95ee;&#x9002;&#x914d;","children":[],"payload":{"tag":"li","lines":"44,45"}}],"payload":{"tag":"h2","lines":"42,43"}}],"payload":{"tag":"h1","lines":"0,1"}});
+setTimeout(() => document.title = 'rendered', 2000);
+</script>
+</body>
+</html>

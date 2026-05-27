@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>乡村振兴数字平台 - 综合大屏</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Microsoft YaHei',sans-serif;background:#0a0e17;color:#fff}
+#app{
+  width:100vw;height:100vh;display:grid;
+  grid-template-columns:20vw 1fr 20vw;grid-template-rows:7.5vh 1fr 1fr;
+  gap:1.2vh 1vw;padding:1.5vh 1vw;
+  background:radial-gradient(ellipse at 20% 50%,rgba(255,68,68,.04) 0%,transparent 50%),
+    radial-gradient(ellipse at 80% 20%,rgba(79,195,247,.05) 0%,transparent 50%),
+    radial-gradient(ellipse at 50% 80%,rgba(170,68,170,.04) 0%,transparent 50%),
+    linear-gradient(180deg,#0a0e17 0%,#111827 50%,#0a0e17 100%);
+}
+#header{grid-column:1/-1;display:flex;align-items:center;justify-content:center;position:relative;background:linear-gradient(90deg,transparent,rgba(79,195,247,.06),transparent);border-bottom:1px solid rgba(79,195,247,.15)}
+#header h1{font-size:clamp(16px,2vw,38px);font-weight:700;letter-spacing:0.5vw;background:linear-gradient(90deg,#ff6b6b,#feca57,#48dbfb,#ff9ff3);background-size:300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:rainbow 6s ease-in-out infinite;white-space:nowrap;font-family:'Orbitron','Microsoft YaHei',sans-serif}
+@keyframes rainbow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+#header::before,#header::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(79,195,247,.3),transparent);margin:0 min(24px,1.5vw)}
+.panel{border-radius:4px;padding:0.6vh 0.5vw;position:relative;overflow:hidden;display:flex;flex-direction:column;backdrop-filter:blur(6px)}
+.panel-title{font-size:clamp(10px,0.75vw,14px);margin-bottom:0.3vh;padding-left:0.5vw;letter-spacing:2px;flex-shrink:0;font-weight:600;position:relative;z-index:2}
+.chart-box{width:100%;flex:1;min-height:0;position:relative;z-index:2}
+.panel::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;animation:scan 3s linear infinite;opacity:.6;z-index:1}
+@keyframes scan{0%{top:0;opacity:0}10%{opacity:.6}90%{opacity:.6}100%{top:100%;opacity:0}}
+#chart-pie{background:linear-gradient(135deg,rgba(88,28,135,.25),rgba(30,10,60,.4));border:1px solid rgba(168,85,247,.3);box-shadow:0 0 20px rgba(168,85,247,.08),inset 0 0 30px rgba(168,85,247,.03)}
+#chart-pie .panel-title{color:#c084fc;border-left:3px solid #a855f7;text-shadow:0 0 8px rgba(168,85,247,.3)}
+#chart-pie::after{background:linear-gradient(90deg,transparent,#a855f7,transparent)}
+#chart-bar{background:linear-gradient(135deg,rgba(20,83,45,.25),rgba(5,30,15,.4));border:1px solid rgba(74,222,128,.3);box-shadow:0 0 20px rgba(74,222,128,.08),inset 0 0 30px rgba(74,222,128,.03)}
+#chart-bar .panel-title{color:#86efac;border-left:3px solid #4ade80;text-shadow:0 0 8px rgba(74,222,128,.3)}
+#chart-bar::after{background:linear-gradient(90deg,transparent,#4ade80,transparent)}
+#map-panel{background:linear-gradient(135deg,rgba(8,47,73,.3),rgba(4,20,35,.5));border:1px solid rgba(34,211,238,.3);box-shadow:0 0 25px rgba(34,211,238,.08),inset 0 0 40px rgba(34,211,238,.02);padding:0;grid-column:2;grid-row:2/-1}
+#map-panel .panel-title{position:absolute;top:1.2vh;left:0.6vw;z-index:1000;color:#67e8f9;border-left:3px solid #22d3ee;text-shadow:0 0 10px rgba(34,211,238,.4)}
+#map{width:100%;height:100%}
+#map-panel::after{background:linear-gradient(90deg,transparent,#22d3ee,transparent)}
+#chart-line{background:linear-gradient(135deg,rgba(124,45,18,.25),rgba(40,15,5,.4));border:1px solid rgba(251,146,60,.3);box-shadow:0 0 20px rgba(251,146,60,.08),inset 0 0 30px rgba(251,146,60,.03)}
+#chart-line .panel-title{color:#fdba74;border-left:3px solid #fb923c;text-shadow:0 0 8px rgba(251,146,60,.3)}
+#chart-line::after{background:linear-gradient(90deg,transparent,#fb923c,transparent)}
+#chart-stats{background:linear-gradient(135deg,rgba(131,24,67,.25),rgba(40,8,20,.4));border:1px solid rgba(244,114,182,.3);box-shadow:0 0 20px rgba(244,114,182,.08),inset 0 0 30px rgba(244,114,182,.03)}
+#chart-stats .panel-title{color:#f9a8d4;border-left:3px solid #f472b6;text-shadow:0 0 8px rgba(244,114,182,.3)}
+#chart-stats::after{background:linear-gradient(90deg,transparent,#f472b6,transparent)}
+.kpi-overlay{position:absolute;bottom:2vh;left:50%;transform:translateX(-50%);z-index:1000;display:flex;gap:0.4vw;background:rgba(10,14,23,.88);border:1px solid rgba(34,211,238,.25);border-radius:6px;padding:0.6vh 1vw;backdrop-filter:blur(12px);box-shadow:0 0 30px rgba(34,211,238,.05)}
+.kpi-item{text-align:center;min-width:4.5vw;position:relative;padding:0 0.6vw}
+.kpi-item .num{font-size:clamp(14px,1.3vw,26px);font-weight:700;font-family:'Orbitron',sans-serif}
+.kpi-item .num.c0{color:#ff6b6b;text-shadow:0 0 12px rgba(255,107,107,.4)}
+.kpi-item .num.c1{color:#feca57;text-shadow:0 0 12px rgba(254,202,87,.4)}
+.kpi-item .num.c2{color:#48dbfb;text-shadow:0 0 12px rgba(72,219,251,.4)}
+.kpi-item .num.c3{color:#ff9ff3;text-shadow:0 0 12px rgba(255,159,243,.4)}
+.kpi-item .num.c4{color:#55efc4;text-shadow:0 0 12px rgba(85,239,196,.4)}
+.kpi-item .num.c5{color:#fd79a8;text-shadow:0 0 12px rgba(253,121,168,.4)}
+.kpi-item .num.c6{color:#a29bfe;text-shadow:0 0 12px rgba(162,155,254,.4)}
+.kpi-item .label{font-size:clamp(8px,0.6vw,11px);color:rgba(255,255,255,.5);margin-top:1px;letter-spacing:1px}
+.kpi-item+.kpi-item::before{content:'';position:absolute;left:0;top:20%;height:60%;width:1px;background:linear-gradient(180deg,transparent,rgba(34,211,238,.2),transparent)}
+#parcelLegend{position:absolute;top:5.5vh;left:0.6vw;z-index:1000;background:rgba(10,14,23,.92);border:1px solid rgba(34,211,238,.25);border-radius:4px;padding:6px 8px;min-width:8vw;max-width:13vw;backdrop-filter:blur(12px);max-height:50%;overflow-y:auto;font-size:clamp(9px,0.6vw,12px);box-shadow:0 0 20px rgba(34,211,238,.05)}
+#parcelLegend::-webkit-scrollbar{width:2px}
+#parcelLegend::-webkit-scrollbar-thumb{background:rgba(34,211,238,.3);border-radius:2px}
+#parcelLegend .legend-title{color:#22d3ee;font-weight:600;margin-bottom:5px;font-size:clamp(10px,0.65vw,13px);letter-spacing:1px;text-shadow:0 0 8px rgba(34,211,238,.2)}
+#parcelLegend .v-group{margin-bottom:4px}
+#parcelLegend .v-name{color:#67e8f9;font-size:clamp(8px,0.5vw,11px);margin-bottom:1px;padding-left:4px;opacity:.7}
+#parcelLegend .p-item{display:flex;align-items:center;gap:3px;padding:1px 4px;cursor:pointer;border-radius:2px;color:rgba(255,255,255,.6);transition:all .2s;font-size:clamp(8px,0.5vw,11px)}
+#parcelLegend .p-item:hover{background:rgba(34,211,238,.12);color:#fff}
+#parcelLegend .p-item .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+#parcelLegend .p-item .p-status{font-size:clamp(6px,0.4vw,9px);color:rgba(255,255,255,.25);margin-left:auto}
+.leaflet-control-zoom a{background:rgba(10,14,23,.85)!important;color:#22d3ee!important;border-color:rgba(34,211,238,.25)!important}
+.leaflet-control-zoom a:hover{background:rgba(34,211,238,.15)!important}
+.leaflet-control-attribution{display:none!important}
+.leaflet-tooltip{background:rgba(10,14,23,.95)!important;border:1px solid rgba(34,211,238,.3)!important;border-radius:4px!important;color:#fff!important;box-shadow:0 4px 20px rgba(0,0,0,.6)!important;padding:6px 10px!important;max-width:240px!important;white-space:normal!important;line-height:1.5!important}
+.leaflet-tooltip-top::before{border-top-color:rgba(34,211,238,.3)!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="header"><h1>RURAL VITALIZATION · 乡村振兴</h1></div>
+  <div class="panel" id="chart-pie"><div class="panel-title">◈ 户情分布</div><div class="chart-box" id="pieChart"></div></div>
+  <div class="panel" id="chart-bar"><div class="panel-title">◈ 作物收益对比</div><div class="chart-box" id="barChart"></div></div>
+  <div class="panel" id="map-panel">
+    <div class="panel-title" id="mapTitle">◈ 全村总览</div>
+    <div id="map"></div><div id="parcelLegend"></div>
+    <div class="kpi-overlay" id="kpiOverlay"></div>
+  </div>
+  <div class="panel" id="chart-line"><div class="panel-title">◈ 收入分布</div><div class="chart-box" id="lineChart"></div></div>
+  <div class="panel" id="chart-stats"><div class="panel-title">◈ 政策保障</div><div class="chart-box" id="gaugeChart"></div></div>
+</div>
+<script>
+const API='/api';const tk='bba9bb58a27102852ffef74286a19f9d';
+const map=L.map('map',{crs:L.CRS.EPSG3857,zoomControl:true,attributionControl:false});
+L.tileLayer('https://t0.tianditu.gov.cn/DataServer?T=img_w&X={x}&Y={y}&L={z}&tk='+tk,{maxZoom:18}).addTo(map);
+L.tileLayer('https://t0.tianditu.gov.cn/DataServer?T=cia_w&X={x}&Y={y}&L={z}&tk='+tk,{maxZoom:18}).addTo(map);
+let villages=[],parcels=[],households=[],buildings=[],crops=[],policies=[],mapLayers=[],parcelLayerMap={},statsOverview={};
+const colors=['#ff6b6b','#feca57','#48dbfb','#ff9ff3','#55efc4','#fd79a8','#a29bfe'];
+const pie=echarts.init(document.getElementById('pieChart'));
+const bar=echarts.init(document.getElementById('barChart'));
+const line=echarts.init(document.getElementById('lineChart'));
+const gauge=echarts.init(document.getElementById('gaugeChart'));
+async function init(){await loadData();renderMap('village');renderPie();renderBar();renderLine();renderGauge();renderKPI();buildLegend()}
+async function loadData(){const[v,p,h,b,c,pl,sr,cr]=await Promise.all([fetch(API+'/villages').then(r=>r.json()),fetch(API+'/parcels').then(r=>r.json()),fetch(API+'/households').then(r=>r.json()),fetch(API+'/buildings').then(r=>r.json()),fetch(API+'/crops').then(r=>r.json()),fetch(API+'/policies').then(r=>r.json()),fetch(API+'/stats/overview').then(r=>r.json()),fetch(API+'/stats/crops').then(r=>r.json())]);villages=v;parcels=p;households=h;buildings=b;crops=c;policies=pl;statsOverview=sr;window.cropStats=cr}
+function renderMap(l,f){mapLayers.forEach(l=>map.removeLayer(l));mapLayers=[];const b=[];if(l==='village'){document.getElementById('mapTitle').innerHTML='◈ 全村总览 &gt; 点击下钻';villages.forEach((v,i)=>{const pcl=parcels.filter(p=>p.villageId===v.id),hh=households.filter(h=>h.villageId===v.id),pop=hh.reduce((s,h)=>s+(h.population||0),0);let ac=[];pcl.forEach(p=>{if(p.coords)ac=ac.concat(p.coords)});if(!ac.length)return;const c=ac.reduce((a,c)=>[a[0]+c[0]/ac.length,a[1]+c[1]/ac.length],[0,0]);const m=L.circleMarker(c,{radius:16,color:colors[i],fillColor:colors[i],fillOpacity:.35,weight:2}).addTo(map);m.bindTooltip(`<b style="font-size:14px;color:${colors[i]}">${v.name}</b><br><span style="font-size:10px;color:#888">${v.desc||''}</span><hr style="border:none;border-top:1px solid rgba(255,255,255,.08);margin:3px 0"><table style="font-size:10px;color:#888;line-height:1.6"><tr><td>面积</td><td style="color:#fff;padding-left:8px">${v.area}亩</td></tr><tr><td>人口</td><td style="color:#fff;padding-left:8px">${pop}人</td></tr><tr><td>户数</td><td style="color:#fff;padding-left:8px">${v.households||hh.length}户</td></tr><tr><td>地块</td><td style="color:#fff;padding-left:8px">${pcl.length}块</td></tr></table><div style="text-align:center;margin-top:2px;font-size:10px;color:${colors[i]}">点击下钻 →</div>`,{sticky:true});m.on('click',()=>renderMap('village_detail',v.id));mapLayers.push(m);if(ac.length){const g=L.polygon(ac);b.push(g.getBounds())}})}else if(l==='village_detail'){const v=villages.find(v=>v.id===f);document.getElementById('mapTitle').innerHTML=`◈ ${v?v.name:''} &gt; <a href="javascript:renderMap('village')" style="color:#22d3ee;font-weight:400;font-size:11px">返回</a>`;const pcl=parcels.filter(p=>p.villageId===f),hh=households.filter(h=>h.villageId===f);let ac=[];pcl.forEach((p,i)=>{if(!p.coords||!p.coords.length)return;const poly=L.polygon(p.coords,{color:colors[i],weight:2,fillColor:colors[i],fillOpacity:.13}).addTo(map);poly.bindTooltip(`<b style="font-size:13px;color:${colors[i]}">${p.name}</b><br><span style="font-size:10px;color:#888">${p.owner||''}</span><hr style="border:none;border-top:1px solid rgba(255,255,255,.08);margin:3px 0"><table style="font-size:10px;color:#888;line-height:1.6"><tr><td>面积</td><td style="color:#fff;padding-left:8px">${p.area}亩</td></tr><tr><td>作物</td><td style="color:#fff;padding-left:8px">${p.crop}</td></tr><tr><td>状态</td><td style="color:#fff;padding-left:8px">${p.status}</td></tr></table>`,{sticky:true});poly.on('click',()=>{flyToParcel(p.id);renderLegend(p.id)});parcelLayerMap[p.id]=poly;mapLayers.push(poly);ac=ac.concat(p.coords);const g=poly.getBounds();b.push(g)});hh.forEach(h=>{if(!ac.length)return;const c=[ac.reduce((s,c)=>s+c[0]/ac.length,0),ac.reduce((s,c)=>s+c[1]/ac.length,0)];const m=L.circleMarker(c,{radius:5,color:'#fff',fillColor:'#feca57',fillOpacity:.8,weight:1}).addTo(map);m.bindTooltip(`<b>${h.name}</b><br>人口:${h.population} 收入:${h.income}万`,{sticky:true});mapLayers.push(m)})}else if(l==='parcel'){document.getElementById('mapTitle').innerHTML=`◈ 地块 &gt; <a href="javascript:renderMap('village')" style="color:#22d3ee;font-weight:400;font-size:11px">返回</a>`;const p=parcels.find(p=>p.id===f);if(!p||!p.coords||!p.coords.length)return;const cd=crops.filter(c=>c.parcelId===f),poly=L.polygon(p.coords,{color:'#22d3ee',weight:3,fillColor:'#22d3ee',fillOpacity:.18}).addTo(map);let ci='';cd.forEach(c=>{ci+=`<tr><td>${c.type}(${c.variety||''})</td><td style="color:#fff;padding-left:8px">${c.yield||0}吨/${c.profit||0}万</td></tr>`});poly.bindTooltip(`<b style="font-size:13px;color:#22d3ee">${p.name}</b><br><span style="font-size:10px;color:#888">${p.owner} | ${p.status}</span><hr style="border:none;border-top:1px solid rgba(255,255,255,.08);margin:3px 0"><table style="font-size:10px;color:#888;line-height:1.6"><tr><td>面积</td><td style="color:#fff;padding-left:8px">${p.area}亩</td></tr>${ci}</table>`,{sticky:true});mapLayers.push(poly);b.push(poly.getBounds())}if(b.length)map.fitBounds(b.reduce((a,b)=>a.extend(b)).pad(l==='parcel'?0.02:0.1))}
+function renderKPI(){const k=['自然村','总户数','总人口','户均收入','地块数','政策数','房屋数'];const v=[statsOverview.villageCount||0,statsOverview.householdCount||0,statsOverview.populationTotal||0,(statsOverview.avgIncome||0).toFixed(1),statsOverview.parcelCount||0,statsOverview.policyCount||0,statsOverview.buildingCount||0];document.getElementById('kpiOverlay').innerHTML=v.map((n,i)=>'<div class="kpi-item"><div class="num c'+i+'">'+n+'</div><div class="label">'+k[i]+'</div></div>').join('')}
+function renderLegend(a){document.querySelectorAll('#parcelLegend .p-item').forEach(e=>e.style.background='');if(a){const e=document.querySelector('#parcelLegend .p-item[data-id="'+a+'"]');if(e)e.style.background='rgba(34,211,238,.2)'}}
+function buildLegend(){const el=document.getElementById('parcelLegend');let h='<div class="legend-title">◈ 地块目录</div>';villages.forEach(v=>{const pcl=parcels.filter(p=>p.villageId===v.id);if(!pcl.length)return;h+='<div class="v-group"><div class="v-name">'+v.name+'</div>';pcl.forEach((p,i)=>{h+='<div class="p-item" data-id="'+p.id+'" onclick="flyToParcel('+p.id+')"><span class="dot" style="background:'+colors[i]+'"></span>'+p.name+'<span class="p-status">'+p.area+'亩</span></div>'});h+='</div>'});el.innerHTML=h}
+function flyToParcel(id){const p=parcels.find(p=>p.id===id);if(!p||!p.coords||!p.coords.length)return;renderMap('parcel',id);const cd=crops.filter(c=>c.parcelId===id);setTimeout(()=>{const poly=L.polygon(p.coords);map.fitBounds(poly.getBounds().pad(0.02));let ci='';cd.forEach(d=>{ci+=`<tr><td>${d.type}(${d.variety||''})</td><td style="color:#fff;padding-left:8px">${d.yield||0}吨/${d.profit||0}万</td></tr>`});L.popup({maxWidth:280}).setLatLng(poly.getBounds().getCenter()).setContent(`<b style="font-size:14px;color:#22d3ee">${p.name}</b><br><span style="font-size:11px;color:#888">${p.owner} | ${p.status}</span><hr style="border:none;border-top:1px solid rgba(255,255,255,.08);margin:3px 0"><table style="font-size:11px;color:#888;line-height:1.7"><tr><td>面积</td><td style="color:#fff;padding-left:8px">${p.area}亩</td></tr><tr><td>作物</td><td style="color:#fff;padding-left:8px">${p.crop}</td></tr>${ci}</table>`).openOn(map);renderLegend(id)},300)}
+function renderPie(){const b={};villages.forEach(v=>b[v.name]=0);households.forEach(h=>{const v=villages.find(v=>v.id===h.villageId);if(v)b[v.name]=(b[v.name]||0)+1});pie.setOption({tooltip:{trigger:'item'},legend:{bottom:0,textStyle:{color:'rgba(255,255,255,.5)'},itemWidth:10,itemHeight:10},series:[{type:'pie',radius:['18%','48%'],center:['50%','40%'],avoidLabelOverlap:true,label:{show:true,formatter:'{b}\n{d}%',color:'rgba(255,255,255,.6)',fontSize:9},emphasis:{label:{show:true,fontWeight:'bold'}},data:Object.entries(b).map(([k,v],i)=>({value:v,name:k,itemStyle:{color:colors[i]}}))}]})}
+function renderBar(){const cs=window.cropStats||[];bar.setOption({tooltip:{trigger:'axis'},legend:{bottom:0,textStyle:{color:'rgba(255,255,255,.5)'},itemWidth:10,itemHeight:10},grid:{top:10,bottom:32,left:32,right:4},xAxis:{type:'category',data:cs.map(d=>d.type),axisLabel:{color:'rgba(255,255,255,.5)',fontSize:9},axisLine:{lineStyle:{color:'rgba(255,255,255,.08)'}}},yAxis:{type:'value',axisLabel:{color:'rgba(255,255,255,.4)',fontSize:9},splitLine:{lineStyle:{color:'rgba(255,255,255,.04)',type:'dashed'}}},series:[{name:'收入',type:'bar',data:cs.map(d=>d.income||0),barWidth:10,itemStyle:{borderRadius:[3,3,0,0],color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#55efc4'},{offset:1,color:'#00b894'}])}},{name:'利润',type:'bar',data:cs.map(d=>d.profit||0),barWidth:10,itemStyle:{borderRadius:[3,3,0,0],color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#feca57'},{offset:1,color:'#f39c12'}])}}]})}
+function renderLine(){fetch(API+'/stats/income').then(r=>r.json()).then(d=>{line.setOption({tooltip:{trigger:'axis'},legend:{bottom:0,textStyle:{color:'rgba(255,255,255,.5)'},itemWidth:10,itemHeight:10},grid:{top:10,bottom:32,left:32,right:6},xAxis:{type:'category',data:d.map(d=>d.level),axisLabel:{color:'rgba(255,255,255,.5)',fontSize:8},axisLine:{lineStyle:{color:'rgba(255,255,255,.08)'}}},yAxis:{type:'value',axisLabel:{color:'rgba(255,255,255,.4)',fontSize:9},splitLine:{lineStyle:{color:'rgba(255,255,255,.04)',type:'dashed'}}},series:[{name:'户数',type:'bar',data:d.map(d=>d.count),barWidth:12,itemStyle:{borderRadius:[3,3,0,0],color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#fb923c'},{offset:1,color:'#9a3412'}])}},{name:'占比',type:'line',smooth:true,data:d.map(d=>households.length?((d.count/households.length)*100).toFixed(1):0),symbol:'diamond',symbolSize:5,lineStyle:{width:2,color:'#feca57'},label:{show:true,formatter:'{c}%',color:'#feca57',fontSize:8}}],yAxis:[{type:'value',axisLabel:{color:'rgba(255,255,255,.4)',fontSize:9},splitLine:{lineStyle:{color:'rgba(255,255,255,.04)',type:'dashed'}}},{type:'value',axisLabel:{color:'rgba(255,255,255,.4)',fontSize:9,formatter:'{value}%'},splitLine:{show:false}}]})})}
+function renderGauge(){const t=households.length||1,s=households.filter(h=>h.poverty==='一般户'||h.poverty==='已脱贫').length;const p=new Set();households.forEach(h=>(h.policyIds||[]).forEach(pid=>p.add(h.id)));const c=p.size;gauge.setOption({series:[{type:'gauge',center:['25%','36%'],radius:'65%',startAngle:220,endAngle:-40,min:0,max:100,axisLine:{lineStyle:{width:6,color:[[.4,'#ff6b6b'],[.7,'#feca57'],[1,'#55efc4']]}},axisTick:{show:false},splitLine:{show:false},axisLabel:{show:false},pointer:{length:'55%',width:3,itemStyle:{color:'#48dbfb'}},detail:{formatter:'{value}%',color:'#fff',fontSize:12,offsetCenter:[0,'30%']},title:{show:true,offsetCenter:[0,'48%'],fontSize:9,color:'rgba(255,255,255,.5)'},data:[{value:Math.round(s/t*100),name:'一般/已脱贫'}]},{type:'gauge',center:['75%','36%'],radius:'65%',startAngle:220,endAngle:-40,min:0,max:100,axisLine:{lineStyle:{width:6,color:[[.4,'#ff6b6b'],[.7,'#feca57'],[1,'#55efc4']]}},axisTick:{show:false},splitLine:{show:false},axisLabel:{show:false},pointer:{length:'55%',width:3,itemStyle:{color:'#ff9ff3'}},detail:{formatter:'{value}%',color:'#fff',fontSize:12,offsetCenter:[0,'30%']},title:{show:true,offsetCenter:[0,'48%'],fontSize:9,color:'rgba(255,255,255,.5)'},data:[{value:Math.round(c/t*100),name:'政策覆盖率'}]},{type:'gauge',center:['50%','76%'],radius:'55%',startAngle:220,endAngle:-40,min:0,max:100,axisLine:{lineStyle:{width:6,color:[[.4,'#ff6b6b'],[.7,'#feca57'],[1,'#55efc4']]}},axisTick:{show:false},splitLine:{show:false},axisLabel:{show:false},pointer:{length:'55%',width:3,itemStyle:{color:'#a29bfe'}},detail:{formatter:'{value}%',color:'#fff',fontSize:11,offsetCenter:[0,'26%']},title:{show:true,offsetCenter:[0,'42%'],fontSize:8,color:'rgba(255,255,255,.5)'},data:[{value:Math.round(buildings.filter(b=>b.status==='安全').length/Math.max(buildings.length,1)*100),name:'住房安全率'}]}]})}
+function resizeAll(){pie.resize();bar.resize();line.resize();gauge.resize();map.invalidateSize()}
+const ro=new ResizeObserver(()=>resizeAll());ro.observe(document.getElementById('app'));document.querySelectorAll('.chart-box').forEach(el=>ro.observe(el));
+init();
+</script>
+</body>
+</html>

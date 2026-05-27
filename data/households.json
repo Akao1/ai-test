@@ -1,0 +1,73 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "villageId": 1,
+      "name": "李建国",
+      "population": 4,
+      "income": 8.5,
+      "workCount": 2,
+      "address": "李家村12号",
+      "phone": "138****1234",
+      "poverty": "已脱贫",
+      "policyIds": [
+        1
+      ]
+    },
+    {
+      "id": 2,
+      "villageId": 1,
+      "name": "张大山",
+      "population": 5,
+      "income": 6.2,
+      "workCount": 1,
+      "address": "李家村28号",
+      "phone": "139****5678",
+      "poverty": "一般户",
+      "policyIds": []
+    },
+    {
+      "id": 3,
+      "villageId": 2,
+      "name": "王翠花",
+      "population": 3,
+      "income": 12,
+      "workCount": 2,
+      "address": "王家坪6号",
+      "phone": "137****9012",
+      "poverty": "一般户",
+      "policyIds": [
+        2
+      ]
+    },
+    {
+      "id": 4,
+      "villageId": 2,
+      "name": "赵铁柱",
+      "population": 6,
+      "income": 4.8,
+      "workCount": 1,
+      "address": "王家坪15号",
+      "phone": "136****3456",
+      "poverty": "脱贫监测户",
+      "policyIds": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": 5,
+      "villageId": 3,
+      "name": "刘秀英",
+      "population": 2,
+      "income": 15,
+      "workCount": 1,
+      "address": "赵家沟3号",
+      "phone": "135****7890",
+      "poverty": "一般户",
+      "policyIds": [
+        2
+      ]
+    }
+  ]
+}

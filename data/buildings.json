@@ -1,0 +1,58 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "householdId": 1,
+      "type": "砖混",
+      "area": 120,
+      "floors": 2,
+      "builtYear": 2015,
+      "status": "安全"
+    },
+    {
+      "id": 2,
+      "householdId": 1,
+      "type": "简易房",
+      "area": 30,
+      "floors": 1,
+      "builtYear": 2018,
+      "status": "附属"
+    },
+    {
+      "id": 3,
+      "householdId": 2,
+      "type": "土木",
+      "area": 80,
+      "floors": 1,
+      "builtYear": 2008,
+      "status": "需加固"
+    },
+    {
+      "id": 4,
+      "householdId": 3,
+      "type": "框架",
+      "area": 160,
+      "floors": 3,
+      "builtYear": 2020,
+      "status": "安全"
+    },
+    {
+      "id": 5,
+      "householdId": 4,
+      "type": "砖混",
+      "area": 90,
+      "floors": 1,
+      "builtYear": 2010,
+      "status": "安全"
+    },
+    {
+      "id": 6,
+      "householdId": 5,
+      "type": "砖混",
+      "area": 110,
+      "floors": 2,
+      "builtYear": 2018,
+      "status": "安全"
+    }
+  ]
+}

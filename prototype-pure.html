@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>社交闲置交易小程序原型</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+<div class="min-h-screen bg-gray-100 p-6">
+<div class="max-w-7xl mx-auto space-y-8">
+
+<div class="grid lg:grid-cols-3 gap-6">
+
+<div class="bg-white rounded-3xl shadow-xl overflow-hidden border">
+<div class="bg-gradient-to-r from-black to-gray-700 text-white p-5">
+<div class="text-sm opacity-70">微信小程序</div>
+<div class="text-2xl font-bold mt-1">用户首页</div>
+</div>
+<div class="p-4 space-y-4">
+<div class="bg-gray-100 rounded-2xl h-40 flex items-center justify-center text-gray-400 text-lg">Banner活动区</div>
+<div class="grid grid-cols-5 gap-2 text-center text-xs">
+<div class="space-y-2"><div class="w-12 h-12 rounded-2xl bg-gray-100 mx-auto"></div><div>数码</div></div>
+<div class="space-y-2"><div class="w-12 h-12 rounded-2xl bg-gray-100 mx-auto"></div><div>服饰</div></div>
+<div class="space-y-2"><div class="w-12 h-12 rounded-2xl bg-gray-100 mx-auto"></div><div>手办</div></div>
+<div class="space-y-2"><div class="w-12 h-12 rounded-2xl bg-gray-100 mx-auto"></div><div>摄影</div></div>
+<div class="space-y-2"><div class="w-12 h-12 rounded-2xl bg-gray-100 mx-auto"></div><div>更多</div></div>
+</div>
+<div class="space-y-3">
+<div class="border rounded-2xl overflow-hidden bg-white">
+<div class="h-36 bg-gray-100"></div>
+<div class="p-3">
+<div class="font-semibold">Sony A7M4 微单相机</div>
+<div class="text-sm text-gray-500 mt-1">95新 · 东京</div>
+<div class="flex justify-between items-center mt-3">
+<div class="text-red-500 font-bold text-xl">¥ 13,999</div>
+<button class="bg-black text-white px-4 py-2 rounded-xl text-sm">立即购买</button>
+</div>
+</div>
+</div>
+<div class="border rounded-2xl overflow-hidden bg-white">
+<div class="h-36 bg-gray-100"></div>
+<div class="p-3">
+<div class="font-semibold">Sony A7M4 微单相机</div>
+<div class="text-sm text-gray-500 mt-1">95新 · 东京</div>
+<div class="flex justify-between items-center mt-3">
+<div class="text-red-500 font-bold text-xl">¥ 13,999</div>
+<button class="bg-black text-white px-4 py-2 rounded-xl text-sm">立即购买</button>
+</div>
+</div>
+</div>
+<div class="border rounded-2xl overflow-hidden bg-white">
+<div class="h-36 bg-gray-100"></div>
+<div class="p-3">
+<div class="font-semibold">Sony A7M4 微单相机</div>
+<div class="text-sm text-gray-500 mt-1">95新 · 东京</div>
+<div class="flex justify-between items-center mt-3">
+<div class="text-red-500 font-bold text-xl">¥ 13,999</div>
+<button class="bg-black text-white px-4 py-2 rounded-xl text-sm">立即购买</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="border-t bg-white px-2 py-3 grid grid-cols-5 text-center text-xs">
+<div class="text-black font-bold"><div class="w-6 h-6 rounded-full bg-gray-100 mx-auto mb-1"></div>首页</div>
+<div class="text-gray-400"><div class="w-6 h-6 rounded-full bg-gray-100 mx-auto mb-1"></div>分类</div>
+<div class="text-gray-400"><div class="w-6 h-6 rounded-full bg-gray-100 mx-auto mb-1"></div>发布</div>
+<div class="text-gray-400"><div class="w-6 h-6 rounded-full bg-gray-100 mx-auto mb-1"></div>消息</div>
+<div class="text-gray-400"><div class="w-6 h-6 rounded-full bg-gray-100 mx-auto mb-1"></div>我的</div>
+</div>
+</div>
+
+<div class="bg-white rounded-3xl shadow-xl overflow-hidden border">
+<div class="bg-gradient-to-r from-gray-900 to-gray-600 text-white p-5">
+<div class="text-sm opacity-70">创作者中心</div>
+<div class="text-2xl font-bold mt-1">作品管理</div>
+</div>
+<div class="p-4 space-y-4">
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-gray-50 rounded-2xl p-4 border"><div class="text-gray-500 text-sm">今日订单</div><div class="font-bold text-2xl mt-2">23</div></div>
+<div class="bg-gray-50 rounded-2xl p-4 border"><div class="text-gray-500 text-sm">待发货</div><div class="font-bold text-2xl mt-2">5</div></div>
+<div class="bg-gray-50 rounded-2xl p-4 border"><div class="text-gray-500 text-sm">本月收益</div><div class="font-bold text-2xl mt-2">¥12,830</div></div>
+<div class="bg-gray-50 rounded-2xl p-4 border"><div class="text-gray-500 text-sm">粉丝数量</div><div class="font-bold text-2xl mt-2">2,451</div></div>
+</div>
+<div class="border rounded-2xl p-4 space-y-3">
+<div class="font-bold text-lg">上传新作品</div>
+<div class="h-28 border-2 border-dashed rounded-2xl flex items-center justify-center text-gray-400">点击上传图片</div>
+<input class="w-full border rounded-xl p-3" placeholder="输入作品标题">
+<input class="w-full border rounded-xl p-3" placeholder="输入价格">
+<textarea class="w-full border rounded-xl p-3 h-24" placeholder="作品描述"></textarea>
+<button class="w-full bg-black text-white py-3 rounded-2xl font-semibold">发布作品</button>
+</div>
+</div>
+</div>
+
+<div class="bg-white rounded-3xl shadow-xl overflow-hidden border">
+<div class="bg-black text-white p-5">
+<div class="text-sm opacity-70">管理后台</div>
+<div class="text-2xl font-bold mt-1">数据驾驶舱</div>
+</div>
+<div class="p-5 space-y-5">
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-gray-50 rounded-2xl p-4 border"><div class="text-sm text-gray-500">总交易额</div><div class="text-2xl font-bold mt-2">¥582,320</div></div>
+<div class="bg-gray-50 rounded-2xl p-4 border"><div class="text-sm text-gray-500">新增用户</div><div class="text-2xl font-bold mt-2">+342</div></div>
+<div class="bg-gray-50 rounded-2xl p-4 border"><div class="text-sm text-gray-500">活跃创作者</div><div class="text-2xl font-bold mt-2">126</div></div>
+<div class="bg-gray-50 rounded-2xl p-4 border"><div class="text-sm text-gray-500">待审核商品</div><div class="text-2xl font-bold mt-2">18</div></div>
+</div>
+<div class="bg-gray-50 rounded-2xl border p-4">
+<div class="font-bold mb-4">待审核列表</div>
+<div class="space-y-3 text-sm">
+<div class="flex justify-between items-center bg-white rounded-xl p-3 border">
+<div><div class="font-medium">原创摄影作品 #1</div><div class="text-gray-400">创作者：用户A</div></div>
+<button class="bg-black text-white px-4 py-2 rounded-lg">审核</button>
+</div>
+<div class="flex justify-between items-center bg-white rounded-xl p-3 border">
+<div><div class="font-medium">原创摄影作品 #2</div><div class="text-gray-400">创作者：用户A</div></div>
+<button class="bg-black text-white px-4 py-2 rounded-lg">审核</button>
+</div>
+<div class="flex justify-between items-center bg-white rounded-xl p-3 border">
+<div><div class="font-medium">原创摄影作品 #3</div><div class="text-gray-400">创作者：用户A</div></div>
+<button class="bg-black text-white px-4 py-2 rounded-lg">审核</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
+<div class="bg-black text-white rounded-3xl p-8 shadow-2xl">
+<h1 class="text-4xl font-bold mb-4">社交闲置交易小程序系统原型</h1>
+<p class="text-gray-300 text-lg">基于您提供的思维导图，构建的微信小程序 + 后台管理系统原型结构。</p>
+</div>
+
+<div class="grid md:grid-cols-3 gap-6">
+<div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-200">
+<h2 class="text-2xl font-bold mb-4">用户端</h2>
+<div class="space-y-3">
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">首页推荐</div>
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">分类浏览</div>
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">商品详情</div>
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">购物车</div>
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">订单管理</div>
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">售后申请</div>
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">我的收藏</div>
+</div>
+</div>
+<div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-200">
+<h2 class="text-2xl font-bold mb-4">创作者端</h2>
+<div class="space-y-3">
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">作品上传</div>
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">作品管理</div>
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">订单处理</div>
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">收益提现</div>
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">粉丝互动</div>
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">消息通知</div>
+</div>
+</div>
+<div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-200">
+<h2 class="text-2xl font-bold mb-4">后台管理</h2>
+<div class="space-y-3">
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">用户管理</div>
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">商品审核</div>
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">订单管理</div>
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">创作者审核</div>
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">公告管理</div>
+<div class="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-gray-700">数据统计</div>
+</div>
+</div>
+</div>
+
+<div class="grid lg:grid-cols-2 gap-8">
+
+<div class="bg-white rounded-3xl shadow-lg p-6">
+<h2 class="text-2xl font-bold mb-6">用户端业务流程</h2>
+<div class="space-y-4">
+<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">1</div><div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-200">微信授权登录</div></div>
+<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">2</div><div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-200">浏览首页推荐</div></div>
+<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">3</div><div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-200">查看商品详情</div></div>
+<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">4</div><div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-200">加入购物车/立即购买</div></div>
+<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">5</div><div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-200">填写收货信息</div></div>
+<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">6</div><div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-200">支付订单</div></div>
+<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">7</div><div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-200">订单跟踪与评价</div></div>
+</div>
+</div>
+
+<div class="bg-white rounded-3xl shadow-lg p-6">
+<h2 class="text-2xl font-bold mb-6">创作者业务流程</h2>
+<div class="space-y-4">
+<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">1</div><div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-200">申请创作者</div></div>
+<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">2</div><div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-200">提交作品资料</div></div>
+<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">3</div><div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-200">后台审核通过</div></div>
+<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">4</div><div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-200">发布作品</div></div>
+<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">5</div><div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-200">接收订单</div></div>
+<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">6</div><div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-200">处理发货/售后</div></div>
+<div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">7</div><div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-200">收益结算提现</div></div>
+</div>
+</div>
+
+</div>
+
+<div class="grid lg:grid-cols-2 gap-8">
+
+<div class="bg-white rounded-3xl shadow-lg overflow-hidden">
+<div class="bg-black text-white p-4 text-xl font-bold">小程序首页原型</div>
+<div class="p-4 space-y-4">
+<div class="bg-gray-100 rounded-2xl h-32 flex items-center justify-center text-gray-500">Banner轮播图</div>
+<div class="grid grid-cols-4 gap-3">
+<div class="bg-gray-50 border rounded-2xl p-3 text-center text-sm">闲置交易</div>
+<div class="bg-gray-50 border rounded-2xl p-3 text-center text-sm">创作者专区</div>
+<div class="bg-gray-50 border rounded-2xl p-3 text-center text-sm">限时活动</div>
+<div class="bg-gray-50 border rounded-2xl p-3 text-center text-sm">消息中心</div>
+</div>
+<div>
+<h3 class="font-bold text-lg mb-3">热门商品</h3>
+<div class="grid grid-cols-2 gap-4">
+<div class="border rounded-2xl overflow-hidden bg-white"><div class="h-32 bg-gray-100"></div><div class="p-3 space-y-2"><div class="font-medium">商品标题示例</div><div class="text-sm text-gray-500">创作者昵称</div><div class="text-red-500 font-bold">¥199</div></div></div>
+<div class="border rounded-2xl overflow-hidden bg-white"><div class="h-32 bg-gray-100"></div><div class="p-3 space-y-2"><div class="font-medium">商品标题示例</div><div class="text-sm text-gray-500">创作者昵称</div><div class="text-red-500 font-bold">¥199</div></div></div>
+<div class="border rounded-2xl overflow-hidden bg-white"><div class="h-32 bg-gray-100"></div><div class="p-3 space-y-2"><div class="font-medium">商品标题示例</div><div class="text-sm text-gray-500">创作者昵称</div><div class="text-red-500 font-bold">¥199</div></div></div>
+<div class="border rounded-2xl overflow-hidden bg-white"><div class="h-32 bg-gray-100"></div><div class="p-3 space-y-2"><div class="font-medium">商品标题示例</div><div class="text-sm text-gray-500">创作者昵称</div><div class="text-red-500 font-bold">¥199</div></div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="bg-white rounded-3xl shadow-lg overflow-hidden">
+<div class="bg-black text-white p-4 text-xl font-bold">后台管理原型</div>
+<div class="flex min-h-[500px]">
+<div class="w-56 bg-gray-900 text-white p-4 space-y-3 shrink-0">
+<div class="bg-gray-800 rounded-xl px-4 py-3">仪表盘</div>
+<div class="bg-gray-800 rounded-xl px-4 py-3">用户管理</div>
+<div class="bg-gray-800 rounded-xl px-4 py-3">商品审核</div>
+<div class="bg-gray-800 rounded-xl px-4 py-3">订单管理</div>
+<div class="bg-gray-800 rounded-xl px-4 py-3">创作者管理</div>
+<div class="bg-gray-800 rounded-xl px-4 py-3">财务统计</div>
+<div class="bg-gray-800 rounded-xl px-4 py-3">系统设置</div>
+</div>
+<div class="flex-1 p-6 bg-gray-50">
+<div class="grid grid-cols-3 gap-4 mb-6">
+<div class="bg-white rounded-2xl p-5 shadow-sm border"><div class="text-gray-500 text-sm">总用户</div><div class="text-2xl font-bold mt-2">12,580</div></div>
+<div class="bg-white rounded-2xl p-5 shadow-sm border"><div class="text-gray-500 text-sm">订单总数</div><div class="text-2xl font-bold mt-2">8,421</div></div>
+<div class="bg-white rounded-2xl p-5 shadow-sm border"><div class="text-gray-500 text-sm">今日成交额</div><div class="text-2xl font-bold mt-2">¥52,300</div></div>
+</div>
+<div class="bg-white rounded-2xl border overflow-hidden">
+<div class="grid grid-cols-5 bg-gray-100 p-4 font-semibold text-sm"><div>订单号</div><div>用户</div><div>商品</div><div>金额</div><div>状态</div></div>
+<div class="grid grid-cols-5 p-4 border-t text-sm"><div>#2026051</div><div>用户1</div><div>商品名称</div><div>¥299</div><div><span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs">已完成</span></div></div>
+<div class="grid grid-cols-5 p-4 border-t text-sm"><div>#2026052</div><div>用户2</div><div>商品名称</div><div>¥299</div><div><span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs">已完成</span></div></div>
+<div class="grid grid-cols-5 p-4 border-t text-sm"><div>#2026053</div><div>用户3</div><div>商品名称</div><div>¥299</div><div><span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs">已完成</span></div></div>
+<div class="grid grid-cols-5 p-4 border-t text-sm"><div>#2026054</div><div>用户4</div><div>商品名称</div><div>¥299</div><div><span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs">已完成</span></div></div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
+<div class="bg-white rounded-3xl shadow-lg p-8">
+<h2 class="text-3xl font-bold mb-6">系统模块结构</h2>
+<div class="grid md:grid-cols-4 gap-6">
+<div class="border border-gray-200 rounded-3xl p-6 bg-gray-50"><h3 class="text-xl font-bold mb-3">账户体系</h3><p class="text-gray-600 leading-relaxed">微信登录、角色权限、实名认证</p></div>
+<div class="border border-gray-200 rounded-3xl p-6 bg-gray-50"><h3 class="text-xl font-bold mb-3">交易系统</h3><p class="text-gray-600 leading-relaxed">下单、支付、售后、退款</p></div>
+<div class="border border-gray-200 rounded-3xl p-6 bg-gray-50"><h3 class="text-xl font-bold mb-3">内容系统</h3><p class="text-gray-600 leading-relaxed">作品上传、分类、推荐、审核</p></div>
+<div class="border border-gray-200 rounded-3xl p-6 bg-gray-50"><h3 class="text-xl font-bold mb-3">社交系统</h3><p class="text-gray-600 leading-relaxed">关注、私信、评论、收藏</p></div>
+</div>
+</div>
+
+</div>
+</div>
+</body>
+</html>
