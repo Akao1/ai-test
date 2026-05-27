@@ -659,6 +659,12 @@ html,body{width:100%;height:100%;background:#e8e8e8;font-family:-apple-system,Bl
 
 <script>
 const API='/api';
+function authFetch(url, opt){
+  opt=opt||{};opt.headers=opt.headers||{};
+  var t=localStorage.getItem('token');
+  if(t) opt.headers['Authorization']='Bearer '+t;
+  return fetch(url,opt);
+}
 new Vue({
   el:'#app',
   data:{
@@ -700,25 +706,26 @@ new Vue({
   mounted(){this.checkLogin()},
   methods:{
     checkLogin(){
-      fetch(API+'/me',{credentials:'include'}).then(r=>{if(r.ok)return r.json();throw 401})
-        .then(u=>{this.user=u;this.myShop=u.myShop;this.init()}).catch(()=>{this.showLogin=true})
+      var t=localStorage.getItem('token');if(!t){this.showLogin=true;return}
+      authFetch(API+'/me').then(r=>{if(r.ok)return r.json();throw 401})
+        .then(d=>{this.user=d.user;this.myShop=d.myShop;this.init()}).catch(()=>{localStorage.removeItem('token');this.showLogin=true})
     },
     doLogin(){
       this.logining=true;
-      fetch(API+'/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.loginForm),credentials:'include'})
+      fetch(API+'/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.loginForm)})
         .then(r=>{if(!r.ok)return r.json().then(e=>Promise.reject(e.error||'登录失败'));return r.json()})
-        .then(d=>{this.user=d.user;this.myShop=d.myShop;this.showLogin=false;this.init()})
+        .then(d=>{if(!d.success)throw '登录失败';localStorage.setItem('token',d.token);this.user=d.user;this.myShop=d.myShop;this.showLogin=false;this.init()})
         .catch(e=>{this.$message.error(typeof e==='string'?e:'登录失败')}).then(()=>this.logining=false)
     },
     doRegister(){
       if(!this.regForm.username||!this.regForm.password){this.$message.warning('请填写完整');return}
       this.reging=true;
-      fetch(API+'/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.regForm),credentials:'include'})
+      fetch(API+'/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.regForm)})
         .then(r=>{if(!r.ok)return r.json().then(e=>Promise.reject(e.error||'注册失败'));return r.json()})
-        .then(d=>{this.user=d.user;this.showRegister=false;this.init();this.$message.success('注册成功')})
+        .then(d=>{if(!d.success)throw d.message||'注册失败';localStorage.setItem('token',d.token);this.user=d.user;this.showRegister=false;this.init();this.$message.success('注册成功')})
         .catch(e=>{this.$message.error(typeof e==='string'?e:'注册失败')}).then(()=>this.reging=false)
     },
-    doLogout(){fetch(API+'/logout',{credentials:'include'}).then(()=>{this.user={};this.myShop=null;this.showLogin=true;this.cartLoaded=false})},
+    doLogout(){localStorage.removeItem('token');this.user={};this.myShop=null;this.showLogin=true;this.cartLoaded=false},
     async init(){
       const [cats,prods,merchants]=await Promise.all([
         fetch(API+'/categories').then(r=>r.json()),
@@ -762,38 +769,38 @@ new Vue({
     },
     async loadCart(){
       this.cartLoaded=false;
-      try{const r=await fetch(API+'/cart',{credentials:'include'});if(!r.ok)throw 401;this.cartItems=await r.json();this.cartLoaded=true}
+      try{const r=await authFetch(API+'/cart');if(!r.ok)throw 401;this.cartItems=await r.json();this.cartLoaded=true}
       catch(e){this.cartItems=[];this.cartLoaded=false}
     },
     async addToCart(){
       const skuId=this.selectedSku?.id||this.skus[0]?.id;
       if(!skuId)return;
       if(!this.user.username){this.showLogin=true;return}
-      await fetch(API+'/cart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sku_id:skuId,quantity:this.buyQty}),credentials:'include'});
+      await authFetch(API+'/cart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sku_id:skuId,quantity:this.buyQty})});
       this.$message.success('已加入购物车');this.loadCart()
     },
-    async updateCart(item){await fetch(API+'/cart/'+item.id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({quantity:item.quantity}),credentials:'include'});this.loadCart()},
-    async removeCartItem(item){await fetch(API+'/cart/'+item.id,{method:'DELETE',credentials:'include'});this.loadCart()},
+    async updateCart(item){await authFetch(API+'/cart/'+item.id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({quantity:item.quantity})});this.loadCart()},
+    async removeCartItem(item){await authFetch(API+'/cart/'+item.id,{method:'DELETE'});this.loadCart()},
     toggleAll(v){this.cartItems.forEach(i=>i.selected=v)},
     goCart(){this.page='cart';this.loadCart()},
     checkout(){const selected=this.cartItems.filter(i=>i.selected);if(!selected.length){this.$message.warning('请选择商品');return}this.checkoutItems=selected;this.page='checkout';this.loadAddresses()},
-    async loadAddresses(){try{const r=await fetch(API+'/addresses',{credentials:'include'});if(r.ok){const all=await r.json();this.addresses=all.filter(a=>a.user_id===this.user.id);const def=this.addresses.find(a=>a.is_default);if(def)this.checkAddrId=def.id;else if(this.addresses.length)this.checkAddrId=this.addresses[0].id}}catch(e){}},
-    async saveAddr(){const b={...this.addrForm,user_id:this.user.id};if(b.is_default)this.addresses.forEach(a=>a.is_default=false);await fetch(API+'/addresses',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b),credentials:'include'});this.$message.success('地址已保存');this.showAddrForm=false;this.loadAddresses()},
+    async loadAddresses(){try{const r=await authFetch(API+'/addresses');if(r.ok){const all=await r.json();this.addresses=all.filter(a=>a.user_id===this.user.id);const def=this.addresses.find(a=>a.is_default);if(def)this.checkAddrId=def.id;else if(this.addresses.length)this.checkAddrId=this.addresses[0].id}}catch(e){}},
+    async saveAddr(){const b={...this.addrForm,user_id:this.user.id};if(b.is_default)this.addresses.forEach(a=>a.is_default=false);await authFetch(API+'/addresses',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});this.$message.success('地址已保存');this.showAddrForm=false;this.loadAddresses()},
     async submitOrder(){
       if(!this.checkAddrId){this.$message.warning('请选择收货地址');return}this.submitting=true;
-      try{const r=await fetch(API+'/orders/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({skuIds:this.checkoutItems.map(i=>i.id),address_id:this.checkAddrId,remark:this.orderRemark}),credentials:'include'});const d=await r.json();if(d.error)throw d.error;this.$message.success('订单提交成功');this.page='orders';this.orderTab='all';this.loadOrders();this.loadCart()}
+      try{const r=await authFetch(API+'/orders/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({skuIds:this.checkoutItems.map(i=>i.id),address_id:this.checkAddrId,remark:this.orderRemark})});const d=await r.json();if(d.error)throw d.error;this.$message.success('订单提交成功');this.page='orders';this.orderTab='all';this.loadOrders();this.loadCart()}
       catch(e){this.$message.error(e||'提交失败')}this.submitting=false
     },
-    async loadOrders(){try{const r=await fetch(API+'/orders/user',{credentials:'include'});if(r.ok)this.orders=await r.json()}catch(e){}},
-    async payOrder(o){await fetch(API+'/orders/'+o.id+'/pay',{method:'PUT',credentials:'include'});this.$message.success('支付成功');this.loadOrders()},
-    async receiveOrder(o){await fetch(API+'/orders/'+o.id+'/receive',{method:'PUT',credentials:'include'});this.$message.success('已确认收货');this.loadOrders()},
-    async cancelOrder(o){this.$confirm('确定取消该订单？','提示',{type:'warning'}).then(async()=>{await fetch(API+'/orders/'+o.id+'/cancel',{method:'PUT',credentials:'include'});this.$message.success('已取消');this.loadOrders()}).catch(()=>{})},
+    async loadOrders(){try{const r=await authFetch(API+'/orders/user');if(r.ok)this.orders=await r.json()}catch(e){}},
+    async payOrder(o){await authFetch(API+'/orders/'+o.id+'/pay',{method:'PUT'});this.$message.success('支付成功');this.loadOrders()},
+    async receiveOrder(o){await authFetch(API+'/orders/'+o.id+'/receive',{method:'PUT'});this.$message.success('已确认收货');this.loadOrders()},
+    async cancelOrder(o){this.$confirm('确定取消该订单？','提示',{type:'warning'}).then(async()=>{await authFetch(API+'/orders/'+o.id+'/cancel',{method:'PUT'});this.$message.success('已取消');this.loadOrders()}).catch(()=>{})},
     buyNow(){this.addToCart().then(()=>{this.goCart()})},
-    openShop(){this.$confirm('即将入驻成为商家，是否继续？','开店申请',{confirmButtonText:'立即开店',type:'info'}).then(async()=>{try{const r=await fetch(API+'/merchants/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({shop_name:this.user.nickname+'的店铺',shop_desc:'',contact_name:this.user.nickname,contact_phone:''}),credentials:'include'});const d=await r.json();if(d.error)throw d.error;this.myShop=d;this.$message.success('开店申请已提交，等待审核');this.user.role='merchant'}catch(e){this.$message.error(e.error||'开店失败')}}).catch(()=>{})},
+    openShop(){this.$confirm('即将入驻成为商家，是否继续？','开店申请',{confirmButtonText:'立即开店',type:'info'}).then(async()=>{try{const r=await authFetch(API+'/merchants/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({shop_name:this.user.nickname+'的店铺',shop_desc:'',contact_name:this.user.nickname,contact_phone:''})});const d=await r.json();if(d.error)throw d.error;this.myShop=d;this.$message.success('开店申请已提交，等待审核');this.user.role='merchant'}catch(e){this.$message.error(e.error||'开店失败')}}).catch(()=>{})},
     applyShop(){this.openShop()},
-    async loadMcData(){const[u,o]=await Promise.all([fetch(API+'/products/merchant/'+(this.myShop?.id),{credentials:'include'}).then(r=>r.json()).catch(()=>[]),fetch(API+'/orders/merchant',{credentials:'include'}).then(r=>r.json()).catch(()=>[])]);this.mcProducts=u;this.mcOrders=o},
-    async loadMcProducts(){this.mcProducts=await fetch(API+'/products/merchant/'+(this.myShop?.id),{credentials:'include'}).then(r=>r.json()).catch(()=>[])},
-    async loadMcOrders(){const r=await fetch(API+'/orders/merchant',{credentials:'include'});if(r.ok)this.mcOrders=await r.json()},
+    async loadMcData(){const[u,o]=await Promise.all([authFetch(API+'/products/merchant/'+(this.myShop?.id)).then(r=>r.json()).catch(()=>[]),authFetch(API+'/orders/merchant').then(r=>r.json()).catch(()=>[])]);this.mcProducts=u;this.mcOrders=o},
+    async loadMcProducts(){this.mcProducts=await authFetch(API+'/products/merchant/'+(this.myShop?.id)).then(r=>r.json()).catch(()=>[])},
+    async loadMcOrders(){const r=await authFetch(API+'/orders/merchant');if(r.ok)this.mcOrders=await r.json()},
     openMcProdForm(r){
       if(r){this.mcProdForm={...r,imagesText:(r.images||[]).join('\n')}}else{this.mcProdForm={name:'',category_id:this.allLeafCats[0]?.id||7,price:0,original_price:0,stock:0,status:1,images:[],imagesText:'',description:''}}
       this.mcProdFormVisible=true
@@ -801,11 +808,11 @@ new Vue({
     async saveMcProd(){
       const f=this.mcProdForm;const e=!!f.id;const b={...f};delete b.id;delete b.imagesText;
       if(f.imagesText)b.images=f.imagesText.split('\n').filter(l=>l.trim());
-      try{const url=e?API+'/products/edit/'+f.id:API+'/products/add';const r=await fetch(url,{method:e?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b),credentials:'include'});if(!r.ok)throw await r.json();this.$message.success(e?'更新成功':'创建成功');this.mcProdFormVisible=false;this.loadMcProducts()}catch(e){this.$message.error(e.error||'操作失败')}
+      try{const url=e?API+'/products/edit/'+f.id:API+'/products/add';const r=await authFetch(url,{method:e?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});if(!r.ok)throw await r.json();this.$message.success(e?'更新成功':'创建成功');this.mcProdFormVisible=false;this.loadMcProducts()}catch(e){this.$message.error(e.error||'操作失败')}
     },
-    async delMcProd(row){this.$confirm('确定删除「'+row.name+'」？').then(async()=>{await fetch(API+'/products/del/'+row.id,{method:'DELETE',credentials:'include'});this.$message.success('已删除');this.loadMcProducts()}).catch(()=>{})},
-    async shipMcOrder(o){try{const r=await fetch(API+'/orders/'+o.id+'/ship',{method:'PUT',credentials:'include'});if(!r.ok)throw await r.json();this.$message.success('已发货');this.loadMcOrders()}catch(e){this.$message.error(e.error||'发货失败')}},
-    async saveShopInfo(){this.savingShop=true;try{const r=await fetch(API+'/merchants/'+this.myShop.id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.shopForm),credentials:'include'});if(!r.ok){const e=await r.json();throw e.error||'保存失败'}this.$message.success('保存成功')}catch(e){this.$message.error(typeof e==='string'?e:'保存失败')}this.savingShop=false},
+    async delMcProd(row){this.$confirm('确定删除「'+row.name+'」？').then(async()=>{await authFetch(API+'/products/del/'+row.id,{method:'DELETE'});this.$message.success('已删除');this.loadMcProducts()}).catch(()=>{})},
+    async shipMcOrder(o){try{const r=await authFetch(API+'/orders/'+o.id+'/ship',{method:'PUT'});if(!r.ok)throw await r.json();this.$message.success('已发货');this.loadMcOrders()}catch(e){this.$message.error(e.error||'发货失败')}},
+    async saveShopInfo(){this.savingShop=true;try{const r=await authFetch(API+'/merchants/'+this.myShop.id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.shopForm)});if(!r.ok){const e=await r.json();throw e.error||'保存失败'}this.$message.success('保存成功')}catch(e){this.$message.error(typeof e==='string'?e:'保存失败')}this.savingShop=false},
     toggleAi(){this.aiOpen=!this.aiOpen;if(this.aiOpen){this.aiUnread=false;if(!this.aiMsgs.length){const t=new Date().toLocaleTimeString().slice(0,5);this.aiMsgs.push({role:'bot',text:'您好！我是您的智能购物助手🤖\n\n我可以帮您推荐商品、提供烹饪和保存建议、解答农产品问题。\n\n请问有什么可以帮您的？',time:t})}this.$nextTick(()=>{const el=this.$refs.aiMsgs;if(el)el.scrollTop=el.scrollHeight})}},
     closeAi(){this.aiOpen=false},
     async sendAi(){

@@ -263,6 +263,12 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Microsoft YaHei',s
 
 <script>
 const API='/api';
+function authFetch(url, opt){
+  opt=opt||{};opt.headers=opt.headers||{};
+  var t=localStorage.getItem('token');
+  if(t) opt.headers['Authorization']='Bearer '+t;
+  return fetch(url,opt);
+}
 new Vue({
   el:'#app',
   data:{
@@ -285,14 +291,15 @@ new Vue({
   methods:{
     modVisible(mod){return this.config.modules&&this.config.modules.includes(mod)},
     toggleMod(mod){const i=this.config.modules.indexOf(mod);i>-1?this.config.modules.splice(i,1):this.config.modules.push(mod)},
-    checkLogin(){fetch(API+'/me').then(r=>{if(r.ok)return r.json();throw 401}).then(u=>{this.user=u;this.loggedIn=true;this.loadAll()}).catch(()=>{})},
-    doLogin(){this.$refs.loginForm.validate(v=>{if(!v)return;this.logining=true;fetch(API+'/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.loginForm)}).then(r=>r.json()).then(d=>{if(d.error)throw d.error;this.user=d.user;this.loggedIn=true;this.loadAll()}).catch(e=>{this.$message.error(e||'登录失败')}).then(()=>this.logining=false)})},
-    doLogout(){fetch(API+'/logout').then(()=>{this.loggedIn=false;this.user={}})},
-    async fetchOne(t){const r=await fetch(API+'/'+t);this[t]=await r.json()},
-    async loadAll(){await Promise.all(['villages','parcels','households','buildings','crops','policies','users'].map(t=>this.fetchOne(t)));const r=await fetch(API+'/stats/overview');this.stats=await r.json();await this.fetchOne('sysconfig');this.config=this.sysconfig||{title:'乡村振兴数字平台',modules:['household','building','crop','policy']};this.$nextTick(()=>this.initCharts())},
-    initCharts(){const c1=echarts.init(document.getElementById('dashIncomeChart'));c1.setOption({tooltip:{trigger:'item'},color:['#52c41a','#73d13d','#95de64'],series:[{type:'pie',radius:['35%','60%'],label:{show:true,formatter:'{b}\n{d}%',fontSize:10},data:[{value:this.stats.avgIncome||0,name:'户均收入'},{value:Math.max(this.stats.avgIncome*0.6||0,1),name:'低于平均'},{value:Math.max(this.stats.avgIncome*0.3||0,1),name:'高于平均'}]}]});const r=setTimeout(()=>{c1.resize();clearTimeout(r)},200);fetch(API+'/stats/crops').then(r=>r.json()).then(d=>{const c2=echarts.init(document.getElementById('dashCropChart'));c2.setOption({tooltip:{trigger:'axis'},grid:{top:12,bottom:36,left:36,right:8},xAxis:{type:'category',data:d.map(d=>d.type)},yAxis:{type:'value'},series:[{name:'收入',type:'bar',data:d.map(d=>d.income),barWidth:16,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#52c41a'},{offset:1,color:'#237804'}])}},{name:'利润',type:'bar',data:d.map(d=>d.profit),barWidth:16,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#faad14'},{offset:1,color:'#d48806'}])}}]});const s=setTimeout(()=>{c2.resize();clearTimeout(s)},200)})},
-    async saveItem(t,f,r){const e=!!f.id;const b={...f};delete b.id;try{const s=await fetch(API+'/'+t+(e?'/'+f.id:''),{method:e?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});if(!s.ok)throw await s.json();this.$message.success(e?'更新成功':'创建成功');this[r]=false;await this.fetchOne(t);if(t==='households'||t==='villages'){const s=await fetch(API+'/stats/overview');this.stats=await s.json()}}catch(e){this.$message.error(e.error||'操作失败')}},
-    delItem(t,r,l){this.$confirm('确定删除「'+(r.name||r.username||l)+'」？','提示',{confirmButtonText:'删除',cancelButtonText:'取消',type:'warning'}).then(async()=>{await fetch(API+'/'+t+'/'+r.id,{method:'DELETE'});this.$message.success('已删除');await this.fetchOne(t)}).catch(()=>{})},
+    checkLogin(){var t=localStorage.getItem('token');if(!t){this.loggedIn=false;return}
+      authFetch(API+'/me').then(r=>{if(r.ok)return r.json();throw 401}).then(d=>{this.user=d.user;this.loggedIn=true;this.loadAll()}).catch(()=>{localStorage.removeItem('token');this.loggedIn=false})},
+    doLogin(){this.$refs.loginForm.validate(v=>{if(!v)return;this.logining=true;fetch(API+'/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.loginForm)}).then(r=>r.json()).then(d=>{if(!d.success)throw '登录失败';localStorage.setItem('token',d.token);this.user=d.user;this.loggedIn=true;this.loadAll()}).catch(e=>{this.$message.error(e||'登录失败')}).then(()=>this.logining=false)})},
+    doLogout(){localStorage.removeItem('token');this.loggedIn=false;this.user={}},
+    async fetchOne(t){const r=await authFetch(API+'/'+t);this[t]=await r.json()},
+    async loadAll(){await Promise.all(['villages','parcels','households','buildings','crops','policies','users'].map(t=>this.fetchOne(t)));const r=await authFetch(API+'/stats/overview');this.stats=await r.json();await this.fetchOne('sysconfig');this.config=this.sysconfig||{title:'乡村振兴数字平台',modules:['household','building','crop','policy']};this.$nextTick(()=>this.initCharts())},
+    initCharts(){const c1=echarts.init(document.getElementById('dashIncomeChart'));c1.setOption({tooltip:{trigger:'item'},color:['#52c41a','#73d13d','#95de64'],series:[{type:'pie',radius:['35%','60%'],label:{show:true,formatter:'{b}\n{d}%',fontSize:10},data:[{value:this.stats.avgIncome||0,name:'户均收入'},{value:Math.max(this.stats.avgIncome*0.6||0,1),name:'低于平均'},{value:Math.max(this.stats.avgIncome*0.3||0,1),name:'高于平均'}]}]});const r=setTimeout(()=>{c1.resize();clearTimeout(r)},200);authFetch(API+'/stats/crops').then(r=>r.json()).then(d=>{const c2=echarts.init(document.getElementById('dashCropChart'));c2.setOption({tooltip:{trigger:'axis'},grid:{top:12,bottom:36,left:36,right:8},xAxis:{type:'category',data:d.map(d=>d.type)},yAxis:{type:'value'},series:[{name:'收入',type:'bar',data:d.map(d=>d.income),barWidth:16,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#52c41a'},{offset:1,color:'#237804'}])}},{name:'利润',type:'bar',data:d.map(d=>d.profit),barWidth:16,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#faad14'},{offset:1,color:'#d48806'}])}}]});const s=setTimeout(()=>{c2.resize();clearTimeout(s)},200)})},
+    async saveItem(t,f,r){const e=!!f.id;const b={...f};delete b.id;try{const s=await authFetch(API+'/'+t+(e?'/'+f.id:''),{method:e?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});if(!s.ok)throw await s.json();this.$message.success(e?'更新成功':'创建成功');this[r]=false;await this.fetchOne(t);if(t==='households'||t==='villages'){const s=await authFetch(API+'/stats/overview');this.stats=await s.json()}}catch(e){this.$message.error(e.error||'操作失败')}},
+    delItem(t,r,l){this.$confirm('确定删除「'+(r.name||r.username||l)+'」？','提示',{confirmButtonText:'删除',cancelButtonText:'取消',type:'warning'}).then(async()=>{await authFetch(API+'/'+t+'/'+r.id,{method:'DELETE'});this.$message.success('已删除');await this.fetchOne(t)}).catch(()=>{})},
     openHhForm(r){this.hhForm=r?{...r}:{villageId:1,name:'',population:1,income:0,workCount:0,poverty:'一般户',phone:'',address:''};this.hhFormVisible=true},
     openBldForm(r){this.bldForm=r?{...r}:{householdId:this.households[0]?.id||1,type:'砖混',area:0,floors:1,builtYear:'',status:'安全'};this.bldFormVisible=true},
     openPclForm(r){if(r){this.pclForm={...r};this.pclCoordText=(r.coords||[]).map(c=>c.join(',')).join('\n')}else{this.pclForm={villageId:1,name:'',area:0,crop:'',owner:'',status:'种植中',coords:[]};this.pclCoordText=''}this.pclFormVisible=true},
@@ -301,8 +308,8 @@ new Vue({
     openCropForm(r){this.cropForm=r?{...r}:{parcelId:this.parcels[0]?.id||1,type:'',variety:'',area:0,plantDate:'',harvestDate:'',yield:0,income:0,cost:0,profit:0};this.cropFormVisible=true},
     openPolForm(r){this.polForm=r?{...r}:{name:'',type:'生活保障',amount:0,unit:'元/年',applyTime:'',desc:''};this.polFormVisible=true},
     openUserForm(r){this.userForm=r?{...r}:{username:'',password:'123456',nickname:'',role:'viewer',status:1};this.userFormVisible=true},
-    async saveUser(){const f=this.userForm;const e=!!f.id;const b={...f};delete b.id;try{const r=await fetch(API+'/users'+(e?'/'+f.id:''),{method:e?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});if(!r.ok)throw await r.json();this.$message.success(e?'更新成功':'创建成功');this.userFormVisible=false;await this.fetchOne('users')}catch(e){this.$message.error(e.error||'操作失败')}},
-    async saveConfig(){this.configSaving=true;try{const cfg=await(await fetch(API+'/sysconfig/1')).json();await fetch(API+'/sysconfig/1',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...cfg,title:this.config.title,mapKey:this.config.mapKey,modules:this.config.modules})});this.$message.success('配置已保存')}catch(e){this.$message.error('保存失败')}this.configSaving=false}
+    async saveUser(){const f=this.userForm;const e=!!f.id;const b={...f};delete b.id;try{const r=await authFetch(API+'/users'+(e?'/'+f.id:''),{method:e?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});if(!r.ok)throw await r.json();this.$message.success(e?'更新成功':'创建成功');this.userFormVisible=false;await this.fetchOne('users')}catch(e){this.$message.error(e.error||'操作失败')}},
+    async saveConfig(){this.configSaving=true;try{const cfg=await(await authFetch(API+'/sysconfig/1')).json();await authFetch(API+'/sysconfig/1',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...cfg,title:this.config.title,mapKey:this.config.mapKey,modules:this.config.modules})});this.$message.success('配置已保存')}catch(e){this.$message.error('保存失败')}this.configSaving=false}
   }
 });
 </script>
