@@ -1,0 +1,2638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>合同全生命周期管理系统</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --primary: #1A3C6D;
+  --primary-light: #4A6FA5;
+  --primary-dark: #0F2440;
+  --sidebar-bg: #132b4a;
+  --sidebar-hover: #1e3f64;
+  --sidebar-active: #244d7a;
+  --bg: #f0f2f5;
+  --card-bg: #fff;
+  --border: #e8e8e8;
+  --text: #333;
+  --text-light: #666;
+  --text-muted: #999;
+  --success: #52c41a;
+  --warning: #faad14;
+  --danger: #f5222d;
+  --info: #1890ff;
+  --orange: #fa8c16;
+  --teal: #13c2c2;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --radius: 6px;
+  --radius-lg: 10px;
+  --header-h: 56px;
+  --sidebar-w: 230px;
+  --transition: 0.2s ease;
+}
+html, body { height:100%; }
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+/* Layout */
+.app { display:flex; height:100vh; }
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--sidebar-bg);
+  flex-shrink:0;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  z-index:100;
+}
+.sidebar-logo {
+  height: var(--header-h);
+  display:flex;
+  align-items:center;
+  padding:0 16px;
+  background: var(--primary-dark);
+  flex-shrink:0;
+}
+.sidebar-logo span {
+  color:#fff;
+  font-size:16px;
+  font-weight:700;
+  letter-spacing:1px;
+}
+.sidebar-logo small {
+  color: rgba(255,255,255,0.6);
+  font-size:11px;
+  margin-left:6px;
+}
+.sidebar-nav {
+  flex:1;
+  overflow-y:auto;
+  padding:8px 0;
+}
+.sidebar-nav::-webkit-scrollbar { width:4px; }
+.sidebar-nav::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:2px; }
+
+.nav-item { cursor:pointer; }
+.nav-item a {
+  display:flex;
+  align-items:center;
+  padding:10px 18px;
+  color: rgba(255,255,255,0.7);
+  text-decoration:none;
+  font-size:13.5px;
+  transition: all var(--transition);
+  position:relative;
+  border-left:3px solid transparent;
+}
+.nav-item a:hover {
+  background: var(--sidebar-hover);
+  color:#fff;
+}
+.nav-item.active > a {
+  background: var(--sidebar-active);
+  color:#fff;
+  border-left-color: var(--primary-light);
+}
+.nav-item .icon { margin-right:10px; font-size:16px; width:20px; text-align:center; }
+.nav-item .arrow {
+  margin-left:auto;
+  font-size:10px;
+  transition: transform var(--transition);
+}
+.nav-item.open .arrow { transform:rotate(90deg); }
+.nav-sub {
+  max-height:0;
+  overflow:hidden;
+  transition: max-height 0.3s ease;
+  background: rgba(0,0,0,0.15);
+}
+.nav-item.open .nav-sub { max-height:400px; }
+.nav-sub a {
+  padding:8px 18px 8px 50px;
+  font-size:13px;
+}
+.nav-sub a:hover { background: rgba(255,255,255,0.08); }
+.nav-sub a.active { color:#fff; background: rgba(255,255,255,0.1); }
+
+/* Header */
+.header {
+  height: var(--header-h);
+  background: var(--card-bg);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  padding:0 24px;
+  flex-shrink:0;
+  box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+.header-title { font-size:16px; font-weight:600; color:var(--text); }
+.header-search {
+  margin-left:40px;
+  position:relative;
+  flex:1;
+  max-width:320px;
+}
+.header-search input {
+  width:100%;
+  height:34px;
+  border:1px solid var(--border);
+  border-radius:17px;
+  padding:0 36px 0 14px;
+  font-size:13px;
+  outline:none;
+  background:#f5f5f5;
+  transition: all var(--transition);
+}
+.header-search input:focus { background:#fff; border-color:var(--primary-light); }
+.header-search .search-icon {
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  color:var(--text-muted);
+  font-size:14px;
+}
+.header-actions {
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.header-actions .btn-icon {
+  width:36px;height:36px;border:none;background:transparent;border-radius:50%;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:var(--text-light);transition:all var(--transition);position:relative;
+}
+.header-actions .btn-icon:hover { background:#f0f0f0; }
+.badge-dot {
+  position:absolute;top:6px;right:6px;width:8px;height:8px;
+  background:var(--danger);border-radius:50%;border:2px solid #fff;
+}
+.user-avatar {
+  display:flex;align-items:center;gap:8px;cursor:pointer;
+  padding:4px 10px 4px 4px;border-radius:20px;transition:all var(--transition);
+}
+.user-avatar:hover { background:#f0f0f0; }
+.avatar {
+  width:32px;height:32px;border-radius:50%;
+  background: var(--primary);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:600;
+}
+.user-name { font-size:13px; color:var(--text); font-weight:500; }
+
+/* Main Content */
+.main {
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.content {
+  flex:1;
+  padding:20px 24px;
+  overflow-y:auto;
+}
+.page { display:none; animation:fadeIn 0.25s ease; }
+.page.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+/* Page Header */
+.page-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:20px;
+}
+.page-header h2 { font-size:20px; font-weight:600; color:var(--text); }
+.page-header p { font-size:13px; color:var(--text-light); margin-top:2px; }
+
+/* Buttons */
+.btn {
+  display:inline-flex;align-items:center;gap:5px;
+  height:34px;padding:0 16px;border:1px solid var(--border);
+  border-radius:var(--radius);font-size:13px;cursor:pointer;
+  transition:all var(--transition);font-family:inherit;
+  background:#fff;color:var(--text);white-space:nowrap;
+}
+.btn:hover { border-color:var(--primary-light); color:var(--primary); }
+.btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.btn-primary:hover { background:var(--primary-light); border-color:var(--primary-light); color:#fff; }
+.btn-success { background:var(--success); color:#fff; border-color:var(--success); }
+.btn-success:hover { opacity:0.85; color:#fff; }
+.btn-danger { color:var(--danger); border-color:var(--danger); }
+.btn-danger:hover { background:var(--danger); color:#fff; }
+.btn-warning { color:var(--orange); border-color:var(--orange); }
+.btn-warning:hover { background:var(--orange); color:#fff; }
+.btn-sm { height:28px; padding:0 10px; font-size:12px; }
+btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.btn-link { border:none; background:transparent; color:var(--info); padding:0 4px; height:auto; }
+.btn-link:hover { text-decoration:underline; }
+
+.btn-group { display:flex; gap:8px; }
+
+/* Cards */
+.card {
+  background:var(--card-bg);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.card-header {
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.card-header h3 { font-size:15px; font-weight:600; }
+.card-body { padding:16px 20px; }
+
+/* Stats Cards */
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px; }
+.stat-card {
+  background:var(--card-bg);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);
+  padding:18px 20px;
+  transition: all var(--transition);
+  cursor:default;
+  border-left:4px solid var(--primary);
+  display:flex;
+  flex-direction:column;
+}
+.stat-card:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.1); }
+.stat-card .stat-label { font-size:13px; color:var(--text-light); }
+.stat-card .stat-value { font-size:30px; font-weight:700; color:var(--text); margin:4px 0 2px; }
+.stat-card .stat-change { font-size:12px; }
+.stat-card:nth-child(1) { border-left-color:var(--primary); }
+.stat-card:nth-child(2) { border-left-color:var(--orange); }
+.stat-card:nth-child(3) { border-left-color:var(--danger); }
+.stat-card:nth-child(4) { border-left-color:var(--success); }
+
+/* Status Badges */
+.badge {
+  display:inline-block;padding:2px 10px;border-radius:10px;
+  font-size:12px;font-weight:500;text-align:center;
+}
+.badge-gray { background:#f0f0f0; color:#666; }
+.badge-orange { background:#fff7e6; color:#d46b08; }
+.badge-green { background:#f6ffed; color:#389e0d; }
+.badge-blue { background:#e6f7ff; color:#096dd9; }
+.badge-teal { background:#e6fffb; color:#08979c; }
+.badge-red { background:#fff1f0; color:#cf1322; }
+.badge-purple { background:#f9f0ff; color:#531dab; }
+
+/* Table */
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+thead th {
+  background:#fafafa;
+  padding:11px 12px;
+  text-align:left;
+  font-weight:600;
+  color:var(--text-light);
+  border-bottom:2px solid var(--border);
+  white-space:nowrap;
+}
+tbody td {
+  padding:10px 12px;
+  border-bottom:1px solid var(--border);
+  vertical-align:middle;
+}
+tbody tr:hover { background:#fafafa; }
+tbody tr:last-child td { border-bottom:none; }
+
+/* Search bar */
+.search-bar {
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+.search-bar input, .search-bar select {
+  height:34px;border:1px solid var(--border);border-radius:var(--radius);
+  padding:0 12px;font-size:13px;outline:none;background:#fff;font-family:inherit;
+  transition:border-color var(--transition);
+}
+.search-bar input:focus, .search-bar select:focus { border-color:var(--primary-light); }
+.search-bar input { min-width:200px; }
+.search-bar select { min-width:120px; }
+
+/* Pagination */
+.pagination {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 0 0;
+  border-top:1px solid var(--border);
+  margin-top:12px;
+}
+.pagination-info { font-size:13px; color:var(--text-light); }
+.pagination-btns { display:flex; gap:4px; }
+.pagination-btns button {
+  min-width:32px;height:32px;border:1px solid var(--border);
+  border-radius:var(--radius);background:#fff;cursor:pointer;
+  font-size:13px;transition:all var(--transition);color:var(--text);
+}
+.pagination-btns button:hover { border-color:var(--primary-light); color:var(--primary); }
+.pagination-btns button.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+/* Modal */
+.modal-overlay {
+  display:none;
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+  animation:fadeIn 0.15s ease;
+  align-items:center;justify-content:center;
+}
+.modal-overlay.show { display:flex; }
+.modal {
+  background:var(--card-bg);
+  border-radius:var(--radius-lg);
+  box-shadow:0 8px 30px rgba(0,0,0,0.2);
+  width:90%;max-width:780px;
+  max-height:85vh;
+  display:flex;flex-direction:column;
+  animation:modalIn 0.2s ease;
+}
+@keyframes modalIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+.modal-sm { max-width:500px; }
+.modal-header {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 24px;border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.modal-header h3 { font-size:16px; font-weight:600; }
+.modal-close {
+  width:32px;height:32px;border:none;background:transparent;
+  border-radius:50%;cursor:pointer;font-size:20px;color:var(--text-muted);
+  display:flex;align-items:center;justify-content:center;
+  transition:all var(--transition);
+}
+.modal-close:hover { background:#f0f0f0; color:var(--text); }
+.modal-body { padding:20px 24px; overflow-y:auto; flex:1; }
+.modal-footer {
+  padding:14px 24px;border-top:1px solid var(--border);
+  display:flex;justify-content:flex-end;gap:10px;flex-shrink:0;
+}
+
+/* Tabs */
+.tabs {
+  display:flex;
+  border-bottom:2px solid var(--border);
+  margin-bottom:18px;
+  gap:0;
+}
+.tab-item {
+  padding:10px 20px;
+  cursor:pointer;
+  font-size:14px;
+  color:var(--text-light);
+  border-bottom:2px solid transparent;
+  margin-bottom:-2px;
+  transition:all var(--transition);
+  white-space:nowrap;
+}
+.tab-item:hover { color:var(--primary); }
+.tab-item.active { color:var(--primary); border-bottom-color:var(--primary); font-weight:600; }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+
+/* Forms */
+.form-group { margin-bottom:15px; }
+.form-group label {
+  display:block;
+  font-size:13px;
+  font-weight:500;
+  color:var(--text);
+  margin-bottom:5px;
+}
+.form-group label .required { color:var(--danger); margin-left:2px; }
+.form-control {
+  width:100%;height:36px;border:1px solid var(--border);
+  border-radius:var(--radius);padding:0 12px;font-size:13px;
+  outline:none;background:#fff;font-family:inherit;
+  transition:border-color var(--transition);
+}
+.form-control:focus { border-color:var(--primary-light); }
+textarea.form-control { height:auto; padding:10px 12px; resize:vertical; min-height:80px; }
+select.form-control { appearance:auto; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.form-row-3 { grid-template-columns:1fr 1fr 1fr; }
+
+/* Dashboard Chart */
+.chart-area {
+  display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:20px;
+}
+.chart-card {
+  background:var(--card-bg);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);
+  padding:18px 20px;
+}
+.chart-card h3 { font-size:15px; font-weight:600; margin-bottom:12px; }
+.chart-bars {
+  display:flex;align-items:flex-end;gap:12px;height:160px;
+  padding:0 10px;margin-top:10px;
+}
+.bar-wrap {
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;
+  justify-content:flex-end;
+}
+.bar {
+  width:100%;max-width:44px;
+  border-radius:4px 4px 0 0;
+  background: linear-gradient(to top, var(--primary), var(--primary-light));
+  min-height:4px;
+  transition: all 0.6s ease;
+  position:relative;
+  cursor:pointer;
+}
+.bar:hover { opacity:0.8; }
+.bar-label { font-size:11px; color:var(--text-muted); white-space:nowrap; }
+.bar-value {
+  position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+  font-size:11px;color:var(--text);font-weight:600;display:none;
+}
+.bar:hover .bar-value { display:block; }
+
+/* Activity Feed */
+.activity-list { list-style:none; }
+.activity-list li {
+  display:flex;gap:12px;padding:10px 0;
+  border-bottom:1px solid var(--border);
+  align-items:flex-start;
+}
+.activity-list li:last-child { border-bottom:none; }
+.activity-dot {
+  width:8px;height:8px;border-radius:50%;
+  margin-top:6px;flex-shrink:0;
+}
+.activity-content { flex:1; }
+.activity-content .act-text { font-size:13px; color:var(--text); }
+.activity-content .act-time { font-size:12px; color:var(--text-muted); margin-top:2px; }
+
+/* Timeline */
+.timeline { position:relative; padding-left:28px; }
+.timeline::before {
+  content:'';position:absolute;left:8px;top:0;bottom:0;
+  width:2px;background:var(--border);
+}
+.timeline-item { position:relative; padding:0 0 20px 16px; }
+.timeline-item:last-child { padding-bottom:0; }
+.timeline-dot {
+  position:absolute;left:-24px;top:4px;width:14px;height:14px;
+  border-radius:50%;border:2px solid var(--primary);background:#fff;
+}
+.timeline-dot.green { border-color:var(--success); background:#f6ffed; }
+.timeline-dot.orange { border-color:var(--warning); background:#fffbe6; }
+.timeline-dot.red { border-color:var(--danger); background:#fff1f0; }
+.timeline-item h4 { font-size:14px; font-weight:600; }
+.timeline-item p { font-size:13px; color:var(--text-light); margin-top:2px; }
+.timeline-item .meta { font-size:12px; color:var(--text-muted); margin-top:4px; }
+
+/* Progress */
+.progress {
+  height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden;
+  margin:8px 0;
+}
+.progress-bar {
+  height:100%;border-radius:4px;background:var(--primary);
+  transition:width 0.6s ease;
+}
+.progress-bar.green { background:var(--success); }
+.progress-bar.orange { background:var(--orange); }
+.progress-bar.red { background:var(--danger); }
+
+/* Quick Actions */
+.quick-actions {
+  display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;
+}
+.quick-actions .btn {
+  height:40px;padding:0 20px;font-size:14px;border-radius:var(--radius);
+}
+
+/* Scrollable table container */
+.table-scroll {
+  max-height:420px;
+  overflow-y:auto;
+}
+.table-scroll thead { position:sticky; top:0; z-index:2; }
+
+/* Misc */
+.text-center { text-align:center; }
+.text-right { text-align:right; }
+.mt-12 { margin-top:12px; }
+.mb-16 { margin-bottom:16px; }
+.ml-auto { margin-left:auto; }
+.flex { display:flex; align-items:center; gap:10px; }
+.gap-8 { gap:8px; }
+.w-full { width:100%; }
+
+/* Approval timeline in detail modal */
+.approval-steps { display:flex; gap:0; align-items:flex-start; padding:10px 0; }
+.approval-step { flex:1; text-align:center; position:relative; }
+.approval-step::after {
+  content:'';position:absolute;top:16px;left:50%;width:100%;
+  height:2px;background:var(--border);z-index:0;
+}
+.approval-step:last-child::after { display:none; }
+.approval-step .step-dot {
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 6px;position:relative;z-index:1;
+  font-size:14px;
+}
+.step-done { background:var(--success); color:#fff; }
+.step-active { background:var(--info); color:#fff; box-shadow:0 0 0 4px rgba(24,144,255,0.2); }
+.step-pending { background:#f0f0f0; color:var(--text-muted); }
+.step-label { font-size:12px; color:var(--text-light); }
+.step-name { font-size:12px; font-weight:500; color:var(--text); }
+
+/* File upload area */
+.upload-area {
+  border:2px dashed var(--border);
+  border-radius:var(--radius);
+  padding:40px 20px;
+  text-align:center;
+  cursor:pointer;
+  transition:all var(--transition);
+  color:var(--text-muted);
+}
+.upload-area:hover { border-color:var(--primary-light); color:var(--primary); }
+
+/* Tags */
+.tag {
+  display:inline-block;padding:1px 8px;border-radius:3px;
+  font-size:12px;background:#f5f5f5;color:var(--text-light);margin:2px;
+}
+
+/* Responsive */
+@media (max-width:1200px) {
+  .stats-row { grid-template-columns:repeat(2,1fr); }
+  .chart-area { grid-template-columns:1fr; }
+}
+@media (max-width:768px) {
+  .sidebar { width:60px; }
+  .sidebar-logo span, .sidebar-logo small, .nav-item a span:not(.icon), .nav-item .arrow { display:none; }
+  .nav-item a { justify-content:center; padding:12px; }
+  .nav-sub a { padding-left:12px; }
+  .content { padding:16px; }
+  .stats-row { grid-template-columns:1fr; }
+  .form-row { grid-template-columns:1fr; }
+}
+
+/* Tab content form layout */
+.form-tab { min-height:200px; }
+
+/* Contract detail expanded row */
+.detail-row { display:none; }
+.detail-row.show { display:table-row; }
+.detail-cell { padding:16px 20px; background:#fafafa; }
+.detail-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+.detail-grid dt { font-size:12px; color:var(--text-muted); }
+.detail-grid dd { font-size:14px; color:var(--text); font-weight:500; }
+
+/* User/Dept tags in tables */
+.dept-tag {
+  display:inline-block;padding:1px 8px;border-radius:3px;
+  font-size:12px;background:#e6f7ff;color:#096dd9;
+}
+.role-tag {
+  display:inline-block;padding:1px 8px;border-radius:3px;
+  font-size:12px;background:#f9f0ff;color:#531dab;
+}
+.urgency-high { color:var(--danger); font-weight:600; }
+.urgency-mid { color:var(--orange); font-weight:500; }
+.urgency-low { color:var(--text-muted); }
+
+/* Inline expand toggle */
+.expand-toggle {
+  cursor:pointer;color:var(--info);font-size:13px;user-select:none;
+  transition: all var(--transition);
+}
+.expand-toggle:hover { color:var(--primary); text-decoration:underline; }
+
+/* =============================================================
+   ENHANCEMENTS - Added per review and polish goals
+   ============================================================= */
+
+/* Sidebar toggle button */
+.sidebar-toggle {
+  background:none;border:none;color:rgba(255,255,255,0.7);font-size:18px;
+  cursor:pointer;padding:0;margin-right:10px;line-height:1;
+  transition:all var(--transition);flex-shrink:0;
+}
+.sidebar-toggle:hover { color:#fff; }
+.sidebar.collapsed .sidebar-toggle { margin-right:0; }
+.sidebar.collapsed { width:56px; }
+.sidebar.collapsed .sidebar-logo span,
+.sidebar.collapsed .sidebar-logo small,
+.sidebar.collapsed .nav-item a span:not(.icon),
+.sidebar.collapsed .nav-item .arrow,
+.sidebar.collapsed .nav-sub { display:none; }
+.sidebar.collapsed .nav-item a { justify-content:center; padding:12px; }
+.sidebar.collapsed + .main .header-title { font-size:14px; }
+
+/* Breadcrumb */
+.breadcrumb {
+  display:flex;align-items:center;gap:6px;
+  margin-bottom:14px;font-size:12px;color:var(--text-muted);
+  flex-wrap:wrap;
+}
+.breadcrumb-item { cursor:pointer; transition:color var(--transition); }
+.breadcrumb-item:hover { color:var(--primary); }
+.breadcrumb-current { color:var(--text); font-weight:500; cursor:default; }
+.breadcrumb-current:hover { color:var(--text); }
+.breadcrumb-sep { color:var(--border); font-size:10px; }
+
+/* Enhanced page transitions */
+.page {
+  display:none;
+  animation:pageIn 0.3s ease;
+}
+.page.active { display:block; }
+@keyframes pageIn {
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* Enhanced stat card */
+.stat-card {
+  transition: all 0.25s ease;
+}
+.stat-card:hover {
+  transform:translateY(-3px);
+  box-shadow:0 8px 24px rgba(0,0,0,0.12);
+}
+
+/* Enhanced card shadows */
+.card {
+  transition: box-shadow 0.25s ease;
+}
+.card:hover {
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Table row enhanced hover */
+tbody tr {
+  transition: background 0.15s ease;
+}
+tbody tr:hover {
+  background:#f0f5ff;
+}
+tbody tr:active {
+  background:#e6f0ff;
+}
+
+/* Sortable table headers */
+th.sortable {
+  cursor:pointer;user-select:none;
+  position:relative;
+  padding-right:22px !important;
+}
+th.sortable::after {
+  content:'↕';position:absolute;right:8px;top:50%;
+  transform:translateY(-50%);font-size:11px;color:var(--text-muted);
+  opacity:0.4;
+}
+th.sortable:hover { background:#f0f0f0; }
+th.sortable.asc::after { content:'↑'; opacity:1; color:var(--primary); }
+th.sortable.desc::after { content:'↓'; opacity:1; color:var(--primary); }
+
+/* Enhanced form field focus */
+.form-control {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.form-control:focus {
+  border-color:var(--primary-light);
+  box-shadow:0 0 0 3px rgba(74,111,165,0.15);
+}
+
+/* Search input enhanced focus */
+.header-search input:focus {
+  background:#fff;
+  border-color:var(--primary-light);
+  box-shadow:0 0 0 3px rgba(74,111,165,0.12);
+}
+
+/* Smooth scrollbar for content area */
+.content::-webkit-scrollbar { width:6px; }
+.content::-webkit-scrollbar-track { background:transparent; }
+.content::-webkit-scrollbar-thumb {
+  background:rgba(0,0,0,0.15);
+  border-radius:3px;
+}
+.content::-webkit-scrollbar-thumb:hover { background:rgba(0,0,0,0.25); }
+
+/* Modal enhanced - glass effect */
+.modal {
+  box-shadow:0 12px 40px rgba(0,0,0,0.25);
+  border:1px solid rgba(255,255,255,0.1);
+}
+
+/* 倒签 (backdate) badge */
+.badge-backdate {
+  display:inline-flex;align-items:center;gap:3px;
+  padding:2px 8px;border-radius:10px;
+  font-size:11px;font-weight:600;
+  background:#fff1f0;color:#cf1322;
+  border:1px solid #ffa39e;
+}
+.badge-backdate::before { content:'⚠'; font-size:11px; }
+
+/* Tooltip wrapper */
+.tooltip-wrap { position:relative; display:inline-block; }
+.tooltip-text {
+  visibility:hidden;opacity:0;
+  position:absolute;bottom:calc(100% + 6px);left:50%;
+  transform:translateX(-50%);
+  padding:5px 10px;border-radius:4px;
+  background:#333;color:#fff;font-size:12px;
+  white-space:nowrap;z-index:200;
+  transition: all 0.15s ease;
+  pointer-events:none;
+}
+.tooltip-wrap:hover .tooltip-text {
+  visibility:visible;opacity:1;
+}
+
+/* Skeleton loading */
+.skeleton-wrap { padding:10px 0; }
+.skeleton {
+  background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);
+  background-size:200% 100%;
+  animation:skeletonShimmer 1.5s infinite;
+  border-radius:4px;margin-bottom:12px;
+}
+@keyframes skeletonShimmer {
+  0%{background-position:200% 0}
+  100%{background-position:-200% 0}
+}
+.skeleton-title { height:24px; width:40%; }
+.skeleton-text { height:14px; width:60%; }
+.skeleton-card { height:180px; width:100%; }
+
+/* Empty state */
+.empty-state {
+  text-align:center;padding:60px 20px;color:var(--text-muted);
+}
+.empty-icon { font-size:48px; margin-bottom:12px; }
+.empty-text { font-size:14px; }
+
+/* Notification dropdown */
+.notif-wrap { position:relative; }
+.notif-dropdown {
+  display:none;position:absolute;top:calc(100% + 8px);right:-10px;
+  width:320px;background:#fff;border-radius:var(--radius-lg);
+  box-shadow:0 8px 30px rgba(0,0,0,0.15);z-index:500;
+  border:1px solid var(--border);overflow:hidden;
+}
+.notif-dropdown.show { display:block; animation:modalIn 0.15s ease; }
+.notif-header { padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600; }
+.notif-list { max-height:300px;overflow-y:auto; }
+.notif-item {
+  display:flex;gap:10px;padding:10px 16px;
+  border-bottom:1px solid var(--border);cursor:pointer;
+  transition:background 0.15s ease;
+}
+.notif-item:hover { background:#f5f5f5; }
+.notif-item:last-child { border-bottom:none; }
+.notif-dot {
+  width:8px;height:8px;border-radius:50%;
+  flex-shrink:0;margin-top:5px;
+}
+.notif-content { flex:1; }
+.notif-content .notif-title { font-size:13px;color:var(--text); }
+.notif-content .notif-time { font-size:11px;color:var(--text-muted);margin-top:2px; }
+.notif-footer {
+  padding:10px 16px;text-align:center;font-size:13px;
+  color:var(--info);cursor:pointer;border-top:1px solid var(--border);
+  transition:background 0.15s ease;
+}
+.notif-footer:hover { background:#f5f5f5; }
+
+/* Version history timeline styles */
+.version-item {
+  display:flex;gap:12px;padding:10px 0;
+  border-bottom:1px solid var(--border);
+  align-items:flex-start;
+}
+.version-item:last-child { border-bottom:none; }
+.version-dot {
+  width:10px;height:10px;border-radius:50%;
+  margin-top:5px;flex-shrink:0;
+  background:var(--primary-light);
+}
+.version-dot.current { background:var(--success); box-shadow:0 0 0 3px rgba(82,196,26,0.2); }
+.version-content { flex:1; }
+.version-content .ver-num { font-size:13px;font-weight:600;color:var(--text); }
+.version-content .ver-info { font-size:12px;color:var(--text-light);margin-top:2px; }
+.version-content .ver-time { font-size:11px;color:var(--text-muted);margin-top:2px; }
+.version-content .ver-rollback {
+  margin-top:4px;font-size:12px;color:var(--info);
+  cursor:pointer;transition:color var(--transition);
+}
+.version-content .ver-rollback:hover { text-decoration:underline; }
+
+/* Anomaly impact tags */
+.impact-tag {
+  display:inline-block;padding:1px 8px;border-radius:3px;
+  font-size:12px;
+}
+.impact-mild { background:#f6ffed;color:#389e0d; }
+.impact-normal { background:#fff7e6;color:#d46b08; }
+.impact-serious { background:#fff1f0;color:#cf1322; }
+.impact-fatal { background:#fff1f0;color:#a8071a;font-weight:600; }
+
+/* Enhanced mobile responsiveness */
+@media (max-width:1200px) {
+  .stats-row { grid-template-columns:repeat(2,1fr); }
+  .chart-area { grid-template-columns:1fr; }
+}
+@media (max-width:992px) {
+  .sidebar:not(.collapsed) { width:200px; }
+  .form-row-3 { grid-template-columns:1fr 1fr; }
+  .detail-grid { grid-template-columns:1fr 1fr; }
+}
+@media (max-width:768px) {
+  .sidebar, .sidebar.collapsed { width:0; overflow:hidden; }
+  .sidebar-logo { padding:0 8px; justify-content:center; }
+  .sidebar-toggle { margin-right:0; }
+  .content { padding:12px; }
+  .stats-row { grid-template-columns:1fr; }
+  .form-row { grid-template-columns:1fr; }
+  .chart-area { grid-template-columns:1fr; }
+  .header { padding:0 12px; }
+  .header-search { max-width:160px; margin-left:16px; }
+  .header-search input { min-width:0; }
+  .header-actions .btn-icon { width:30px;height:30px;font-size:16px; }
+  .user-name { display:none; }
+  .page-header { flex-direction:column;align-items:flex-start;gap:8px; }
+  .search-bar { flex-direction:column;align-items:stretch; }
+  .search-bar input { min-width:0; }
+  .search-bar select { min-width:0; }
+  .notif-dropdown { width:280px; right:-60px; }
+  .approval-steps { flex-wrap:wrap; gap:8px; }
+  .approval-step { flex:0 0 calc(50% - 8px); }
+  .approval-step::after { display:none; }
+  .quick-actions { flex-direction:column; }
+  .quick-actions .btn { width:100%; justify-content:center; }
+  .btn-group { flex-wrap:wrap; }
+  table { font-size:12px; }
+  thead th, tbody td { padding:8px 8px; }
+  .pagination { flex-direction:column;gap:8px;align-items:flex-start; }
+}
+@media (max-width:480px) {
+  .header-title { font-size:13px; }
+  .header-search { max-width:120px; margin-left:8px; }
+  .header-search input { height:30px; font-size:12px; }
+  .content { padding:8px; }
+  .stat-card .stat-value { font-size:24px; }
+  .modal { width:95%; max-height:90vh; }
+  .modal-body { padding:14px 16px; }
+  .notif-dropdown { width:260px; right:-50px; }
+}
+
+/* Quick search suggestions */
+.quick-search-suggest {
+  position:absolute;top:calc(100% + 4px);left:0;right:0;
+  background:#fff;border-radius:var(--radius);
+  box-shadow:0 4px 16px rgba(0,0,0,0.12);
+  border:1px solid var(--border);z-index:300;
+  display:none;overflow:hidden;
+}
+.quick-search-suggest.show { display:block; }
+.quick-search-item {
+  padding:8px 14px;font-size:13px;cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  transition:background 0.1s ease;
+}
+.quick-search-item:hover { background:#f0f5ff; }
+.quick-search-item .qs-icon { font-size:14px; }
+.quick-search-item .qs-text { flex:1; }
+.quick-search-item .qs-type { font-size:11px;color:var(--text-muted); }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <button class="sidebar-toggle" title="收起/展开侧边栏">☰</button>
+      <span>合同管理系统</span>
+      <small>v2.0</small>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" data-page="dashboard">
+        <a><span class="icon">📊</span><span>仪表盘</span></a>
+      </div>
+      <div class="nav-item" data-page="contract">
+        <a><span class="icon">📄</span><span>合同管理</span><span class="arrow">▶</span></a>
+        <div class="nav-sub">
+          <a data-page="contract-list">合同列表</a>
+          <a data-page="contract-new">发起合同</a>
+          <a data-page="contract-approve">待我审批</a>
+        </div>
+      </div>
+      <div class="nav-item" data-page="signing">
+        <a><span class="icon">✍️</span><span>合同签署</span><span class="arrow">▶</span></a>
+        <div class="nav-sub">
+          <a data-page="signing-pending">待签署</a>
+          <a data-page="signing-progress">签署中</a>
+          <a data-page="signing-done">已签署</a>
+        </div>
+      </div>
+      <div class="nav-item" data-page="performance">
+        <a><span class="icon">📋</span><span>合同履行</span><span class="arrow">▶</span></a>
+        <div class="nav-sub">
+          <a data-page="perf-plan">履行计划</a>
+          <a data-page="perf-track">履行跟踪</a>
+          <a data-page="perf-exception">异常处理</a>
+        </div>
+      </div>
+      <div class="nav-item" data-page="archive">
+        <a><span class="icon">📁</span><span>合同归档</span><span class="arrow">▶</span></a>
+        <div class="nav-sub">
+          <a data-page="archive-pending">待归档</a>
+          <a data-page="archive-done">已归档</a>
+          <a data-page="archive-borrow">借阅管理</a>
+        </div>
+      </div>
+      <div class="nav-item" data-page="termination">
+        <a><span class="icon">🔚</span><span>合同解除</span><span class="arrow">▶</span></a>
+        <div class="nav-sub">
+          <a data-page="term-start">解除发起</a>
+          <a data-page="term-records">解除记录</a>
+        </div>
+      </div>
+      <div class="nav-item" data-page="handover">
+        <a><span class="icon">🔄</span><span>合同交接</span><span class="arrow">▶</span></a>
+        <div class="nav-sub">
+          <a data-page="handover-start">交接发起</a>
+          <a data-page="handover-records">交接记录</a>
+        </div>
+      </div>
+      <div class="nav-item" data-page="system">
+        <a><span class="icon">⚙️</span><span>系统管理</span><span class="arrow">▶</span></a>
+        <div class="nav-sub">
+          <a data-page="sys-user">用户管理</a>
+          <a data-page="sys-role">角色管理</a>
+          <a data-page="sys-perm">权限配置</a>
+          <a data-page="sys-config">系统配置</a>
+          <a data-page="sys-log">日志管理</a>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="header">
+      <div class="header-title">合同全生命周期管理系统</div>
+      <div class="header-search">
+        <input type="text" placeholder="搜索合同编号、名称...">
+        <span class="search-icon">🔍</span>
+      </div>
+      <div class="header-actions">
+        <div class="notif-wrap">
+          <button class="btn-icon" title="通知" onclick="toggleNotifDropdown()">🔔<span class="badge-dot"></span></button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">消息通知 <small style="color:var(--text-muted);font-weight:400;">共 <span id="notifCount">5</span> 条未读</small></div>
+            <div class="notif-list" id="notifList"></div>
+            <div class="notif-footer" onclick="alert('查看全部消息')">查看全部消息 →</div>
+          </div>
+        </div>
+        <button class="btn-icon" title="帮助">❓</button>
+        <button class="btn-icon" title="设置">⚙️</button>
+        <div class="user-avatar">
+          <div class="avatar">张</div>
+          <span class="user-name">张明</span>
+        </div>
+      </div>
+    </header>
+    <div class="content">
+
+      <!-- Breadcrumb Navigation -->
+      <div class="breadcrumb" id="breadcrumbNav">
+        <span class="breadcrumb-item" onclick="switchPage('dashboard')">首页</span>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-item breadcrumb-current">仪表盘</span>
+      </div>
+
+      <!-- ====== DASHBOARD ====== -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <div><h2>仪表盘</h2><p>合同全生命周期概览</p></div>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="switchPage('contract-new')">+ 新建合同</button>
+            <button class="btn" onclick="switchPage('contract-approve')">待办事项</button>
+          </div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-label">合同总数</div><div class="stat-value">1,286</div><div class="stat-change">较上月 <span style="color:var(--success)">↑ 12.5%</span></div></div>
+          <div class="stat-card"><div class="stat-label">待我审批</div><div class="stat-value">23</div><div class="stat-change">较昨日 <span style="color:var(--orange)">↑ 5</span></div></div>
+          <div class="stat-card"><div class="stat-label">即将到期</div><div class="stat-value">18</div><div class="stat-change">30天内到期 <span style="color:var(--danger)">⚠️ 需关注</span></div></div>
+          <div class="stat-card"><div class="stat-label">履行中</div><div class="stat-value">342</div><div class="stat-change">完成率 <span style="color:var(--success)">78.3%</span></div></div>
+        </div>
+        <div class="chart-area">
+          <div class="chart-card">
+            <h3>月度合同签约统计</h3>
+            <div class="chart-bars" id="dashboardChart"></div>
+            <div style="display:flex;justify-content:space-between;margin-top:4px;padding:0 10px;">
+              <span style="font-size:12px;color:var(--text-muted)">1月</span>
+              <span style="font-size:12px;color:var(--text-muted)">2月</span>
+              <span style="font-size:12px;color:var(--text-muted)">3月</span>
+              <span style="font-size:12px;color:var(--text-muted)">4月</span>
+              <span style="font-size:12px;color:var(--text-muted)">5月</span>
+              <span style="font-size:12px;color:var(--text-muted)">6月</span>
+              <span style="font-size:12px;color:var(--text-muted)">7月</span>
+              <span style="font-size:12px;color:var(--text-muted)">8月</span>
+              <span style="font-size:12px;color:var(--text-muted)">9月</span>
+              <span style="font-size:12px;color:var(--text-muted)">10月</span>
+              <span style="font-size:12px;color:var(--text-muted)">11月</span>
+              <span style="font-size:12px;color:var(--text-muted)">12月</span>
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3>最新动态</h3>
+            <ul class="activity-list" id="activityFeed"></ul>
+          </div>
+        </div>
+        <div class="quick-actions">
+          <button class="btn btn-primary" onclick="switchPage('contract-new')">📄 发起新合同</button>
+          <button class="btn btn-success" onclick="switchPage('contract-approve')">✅ 待审批事项</button>
+          <button class="btn" style="border-color:var(--teal);color:var(--teal);" onclick="switchPage('perf-track')">📋 履行跟踪</button>
+          <button class="btn" style="border-color:var(--primary);color:var(--primary);" onclick="switchPage('archive-pending')">📁 待归档合同</button>
+        </div>
+      </div>
+
+      <!-- ====== CONTRACT LIST ====== -->
+      <!-- Loading Skeleton -->
+      <div class="skeleton-wrap" id="skeletonLoader" style="display:none;">
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-text"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+      </div>
+
+      <!-- Empty State Template -->
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <div class="empty-icon">📭</div>
+        <div class="empty-text" id="emptyText">暂无数据</div>
+      </div>
+
+      <div class="page" id="page-contract-list">
+        <div class="page-header">
+          <div><h2>合同列表</h2><p>查看和管理所有合同</p></div>
+          <button class="btn btn-primary" onclick="switchPage('contract-new')">+ 新建合同</button>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="search-bar">
+              <input type="text" id="contractSearch" placeholder="搜索合同编号/名称..." oninput="filterContractTable()">
+              <select id="contractStatusFilter" onchange="filterContractTable()">
+                <option value="">全部状态</option>
+                <option value="草稿">草稿</option>
+                <option value="审批中">审批中</option>
+                <option value="已驳回">已驳回</option>
+                <option value="已签署">已签署</option>
+                <option value="履行中">履行中</option>
+                <option value="变更中">变更中</option>
+                <option value="已归档">已归档</option>
+                <option value="已解除">已解除</option>
+              </select>
+              <select id="contractTypeFilter" onchange="filterContractTable()">
+                <option value="">全部类型</option>
+                <option value="采购">采购</option>
+                <option value="服务">服务</option>
+                <option value="销售">销售</option>
+                <option value="租赁">租赁</option>
+                <option value="外包">外包</option>
+              </select>
+              <button class="btn btn-sm" onclick="filterContractTable()">🔍 查询</button>
+              <button class="btn btn-sm" onclick="document.getElementById('contractSearch').value='';document.getElementById('contractStatusFilter').value='';document.getElementById('contractTypeFilter').value='';filterContractTable()">↻ 重置</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>合同编号</th><th>合同名称</th><th>对方单位</th><th>合同金额</th><th>签订日期</th><th>状态</th><th>操作</th></tr>
+                </thead>
+                <tbody id="contractTableBody"></tbody>
+              </table>
+            </div>
+            <div class="pagination">
+              <div class="pagination-info">共 <span id="contractTotalCount">0</span> 条</div>
+              <div class="pagination-btns">
+                <button onclick="changeContractPage(-1)">‹</button>
+                <button class="active">1</button>
+                <button onclick="changeContractPage(1)">›</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== NEW CONTRACT ====== -->
+      <div class="page" id="page-contract-new">
+        <div class="page-header">
+          <div><h2>发起合同</h2><p>填写合同信息并提交审批</p></div>
+          <button class="btn" onclick="switchPage('contract-list')">← 返回列表</button>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="tabs">
+              <div class="tab-item active" onclick="switchFormTab(this,'tab-basic')">基本信息</div>
+              <div class="tab-item" onclick="switchFormTab(this,'tab-clause')">合同条款</div>
+              <div class="tab-item" onclick="switchFormTab(this,'tab-attach')">附件上传</div>
+              <div class="tab-item" onclick="switchFormTab(this,'tab-flow')">签署流程</div>
+            </div>
+            <div class="tab-content active" id="tab-basic">
+              <div class="form-row">
+                <div class="form-group"><label>合同名称 <span class="required">*</span></label><input class="form-control" id="newContractName" placeholder="请输入合同名称"></div>
+                <div class="form-group"><label>合同类型 <span class="required">*</span></label><select class="form-control" id="newContractType"><option>采购合同</option><option>服务合同</option><option>销售合同</option><option>租赁合同</option><option>外包合同</option></select></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>对方单位 <span class="required">*</span></label><input class="form-control" id="newContractParty" placeholder="请输入单位名称"></div>
+                <div class="form-group"><label>合同金额（元）<span class="required">*</span></label><input class="form-control" id="newContractAmount" placeholder="请输入金额"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>签订日期</label><input class="form-control" type="date" id="newContractDate"></div>
+                <div class="form-group"><label>有效期至</label><input class="form-control" type="date" id="newContractExpiry"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>经办人</label><input class="form-control" id="newContractHandler" value="张明"></div>
+                <div class="form-group"><label>经办部门</label><input class="form-control" id="newContractDept" value="采购部"></div>
+              </div>
+              <div class="form-group"><label>备注</label><textarea class="form-control" id="newContractRemark" rows="3" placeholder="请输入备注信息"></textarea></div>
+            </div>
+            <div class="tab-content" id="tab-clause">
+              <div class="form-group"><label>合同条款内容</label><textarea class="form-control" rows="8" placeholder="请输入合同主要条款..." style="min-height:160px;">第一条 服务内容
+乙方根据甲方需求提供IT系统运维支持服务，包括但不限于：服务器维护、网络管理、安全防护等。
+
+第二条 服务期限
+本合同服务期限为壹年，自2026年5月20日起至2027年5月19日止。
+
+第三条 服务费用及支付
+合同总金额为人民币1,680,000.00元整。甲方按季度支付，每季度支付420,000.00元。
+
+第四条 保密条款
+双方应对本合同内容及履行过程中获悉的对方商业秘密严格保密。
+
+第五条 违约责任
+任何一方违反本合同约定，应向对方支付合同总金额10%的违约金。</textarea></div>
+            </div>
+            <div class="tab-content" id="tab-attach">
+              <div class="upload-area" onclick="alert('在实际系统中此处将打开文件选择对话框')">
+                <div style="font-size:36px;margin-bottom:8px;">📎</div>
+                <div style="font-size:14px;font-weight:500;">点击或拖拽文件到此区域上传</div>
+                <div style="font-size:12px;margin-top:4px;">支持 PDF、DOC、XLS、JPG 格式，单个文件不超过20MB</div>
+              </div>
+              <div style="margin-top:12px;">
+                <div class="tag">合同草案_v2.0.pdf</div>
+                <div class="tag">报价单.xlsx</div>
+                <div class="tag">技术方案.docx</div>
+              </div>
+            </div>
+            <div class="tab-content" id="tab-flow">
+              <div class="form-group"><label>审批流程</label>
+                <select class="form-control">
+                  <option>标准审批流（经办人→部门经理→法务→财务→总经理）</option>
+                  <option>简易审批流（经办人→部门经理→总经理）</option>
+                  <option>紧急审批流（经办人→总经理）</option>
+                </select>
+              </div>
+              <div class="approval-steps" style="margin-top:20px;">
+                <div class="approval-step"><div class="step-dot step-done">✓</div><div class="step-name">张明</div><div class="step-label">经办人</div></div>
+                <div class="approval-step"><div class="step-dot step-active">2</div><div class="step-name">李经理</div><div class="step-label">部门经理</div></div>
+                <div class="approval-step"><div class="step-dot step-pending">3</div><div class="step-name">王法务</div><div class="step-label">法务审核</div></div>
+                <div class="approval-step"><div class="step-dot step-pending">4</div><div class="step-name">赵财务</div><div class="step-label">财务审核</div></div>
+                <div class="approval-step"><div class="step-dot step-pending">5</div><div class="step-name">刘总经理</div><div class="step-label">总经理</div></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:16px;border-top:1px solid var(--border);">
+              <button class="btn" onclick="saveContractAsDraft()">💾 保存草稿</button>
+              <button class="btn btn-primary" onclick="submitContractForApproval()">📤 提交审批</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== PENDING APPROVAL ====== -->
+      <div class="page" id="page-contract-approve">
+        <div class="page-header">
+          <div><h2>待我审批</h2><p>您有 <span id="approveCount" style="color:var(--orange)">23</span> 份合同待审批</p></div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>合同编号</th><th>合同名称</th><th>提交人</th><th>提交时间</th><th>紧急程度</th><th>操作</th></tr></thead>
+                <tbody id="approveTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== SIGNING PENDING ====== -->
+      <div class="page" id="page-signing-pending">
+        <div class="page-header"><div><h2>待签署</h2><p>等待各方签署的合同</p></div></div>
+        <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>合同编号</th><th>合同名称</th><th>对方单位</th><th>我方签署人</th><th>发起时间</th><th>状态</th></tr></thead><tbody id="signingPendingBody"></tbody></table></div></div></div>
+      </div>
+      <div class="page" id="page-signing-progress">
+        <div class="page-header"><div><h2>签署中</h2><p>正在签署过程中的合同</p></div></div>
+        <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>合同编号</th><th>合同名称</th><th>对方单位</th><th>当前签署方</th><th>进度</th></tr></thead><tbody id="signingProgressBody"></tbody></table></div></div></div>
+      </div>
+      <div class="page" id="page-signing-done">
+        <div class="page-header"><div><h2>已签署</h2><p>已完成签署的合同</p></div></div>
+        <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>合同编号</th><th>合同名称</th><th>对方单位</th><th>签署日期</th><th>有效期至</th></tr></thead><tbody id="signingDoneBody"></tbody></table></div></div></div>
+      </div>
+
+      <!-- ====== PERFORMANCE ====== -->
+      <div class="page" id="page-perf-plan">
+        <div class="page-header"><div><h2>履行计划</h2><p>合同履行任务计划</p></div></div>
+        <div class="card"><div class="card-body">
+          <div class="tabs"><div class="tab-item active">进行中</div><div class="tab-item">已完成</div><div class="tab-item">全部</div></div>
+          <div class="table-wrap"><table><thead><tr><th>合同名称</th><th>节点名称</th><th>计划开始</th><th>计划完成</th><th>负责人</th><th>状态</th></tr></thead><tbody id="perfPlanBody"></tbody></table></div>
+        </div></div>
+      </div>
+      <div class="page" id="page-perf-track">
+        <div class="page-header"><div><h2>履行跟踪</h2><p>实时跟踪合同履行进度</p></div></div>
+        <div class="card"><div class="card-body">
+          <div id="perfTrackList"></div>
+        </div></div>
+      </div>
+      <div class="page" id="page-perf-exception">
+        <div class="page-header"><div><h2>异常处理</h2><p>履行异常合同列表</p></div>
+          <button class="btn btn-primary" onclick="openAnomalyReportModal()">+ 上报异常</button>
+        </div>
+        <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>合同编号</th><th>合同名称</th><th>异常类型</th><th>异常描述</th><th>发现时间</th><th>处理状态</th></tr></thead><tbody id="perfExceptionBody"></tbody></table></div></div></div>
+      </div>
+
+      <!-- ====== ARCHIVE ====== -->
+      <div class="page" id="page-archive-pending">
+        <div class="page-header"><div><h2>待归档</h2><p>等待归档的合同</p></div></div>
+        <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>合同编号</th><th>合同名称</th><th>对方单位</th><th>签署日期</th><th>归档截止日</th><th>操作</th></tr></thead><tbody id="archivePendingBody"></tbody></table></div></div></div>
+      </div>
+      <div class="page" id="page-archive-done">
+        <div class="page-header"><div><h2>已归档</h2><p>已完成归档的合同</p></div></div>
+        <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>合同编号</th><th>合同名称</th><th>归档编号</th><th>归档日期</th><th>保管期限</th><th>归档人</th></tr></thead><tbody id="archiveDoneBody"></tbody></table></div></div></div>
+      </div>
+      <div class="page" id="page-archive-borrow">
+        <div class="page-header"><div><h2>借阅管理</h2><p>合同借阅申请与记录</p></div>
+          <button class="btn btn-primary" onclick="openBorrowModal()">+ 申请借阅</button>
+        </div>
+        <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>借阅编号</th><th>合同名称</th><th>借阅人</th><th>借阅日期</th><th>预计归还日</th><th>状态</th></tr></thead><tbody id="archiveBorrowBody"></tbody></table></div></div></div>
+      </div>
+
+      <!-- ====== TERMINATION ====== -->
+      <div class="page" id="page-term-start">
+        <div class="page-header"><div><h2>解除发起</h2><p>发起合同解除申请</p></div>
+          <button class="btn btn-primary" onclick="alert('请选择需要解除的合同')">+ 发起解除</button>
+        </div>
+        <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>合同编号</th><th>合同名称</th><th>对方单位</th><th>合同金额</th><th>当前状态</th><th>操作</th></tr></thead><tbody id="termStartBody"></tbody></table></div></div></div>
+      </div>
+      <div class="page" id="page-term-records">
+        <div class="page-header"><div><h2>解除记录</h2><p>合同解除历史记录</p></div></div>
+        <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>解除编号</th><th>原合同编号</th><th>合同名称</th><th>解除日期</th><th>解除原因</th><th>审批状态</th></tr></thead><tbody id="termRecordsBody"></tbody></table></div></div></div>
+      </div>
+
+      <!-- ====== HANDOVER ====== -->
+      <div class="page" id="page-handover-start">
+        <div class="page-header"><div><h2>交接发起</h2><p>发起合同交接</p></div>
+          <button class="btn btn-primary" onclick="alert('请填写交接申请表单')">+ 发起交接</button>
+        </div>
+        <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>合同编号</th><th>合同名称</th><th>当前负责人</th><th>交接对象</th><th>状态</th></tr></thead><tbody id="handoverStartBody"></tbody></table></div></div></div>
+      </div>
+      <div class="page" id="page-handover-records">
+        <div class="page-header"><div><h2>交接记录</h2><p>合同交接历史记录</p></div></div>
+        <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>交接编号</th><th>合同名称</th><th>原负责人</th><th>新负责人</th><th>交接日期</th><th>状态</th></tr></thead><tbody id="handoverRecordsBody"></tbody></table></div></div></div>
+      </div>
+
+      <!-- ====== SYSTEM USERS ====== -->
+      <div class="page" id="page-sys-user">
+        <div class="page-header"><div><h2>用户管理</h2><p>管理系统用户账号</p></div>
+          <button class="btn btn-primary" onclick="openUserModal()">+ 新建用户</button>
+        </div>
+        <div class="card"><div class="card-body">
+          <div class="search-bar">
+            <input type="text" id="userSearch" placeholder="搜索用户名/姓名..." oninput="filterUserTable()">
+            <select id="userDeptFilter" onchange="filterUserTable()"><option value="">全部部门</option><option>管理部</option><option>采购部</option><option>法务部</option><option>财务部</option><option>技术部</option><option>销售部</option></select>
+            <button class="btn btn-sm" onclick="filterUserTable()">🔍 查询</button>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>用户名</th><th>姓名</th><th>部门</th><th>角色</th><th>状态</th><th>操作</th></tr></thead><tbody id="userTableBody"></tbody></table></div>
+        </div></div>
+      </div>
+
+      <!-- ====== SYSTEM ROLE ====== -->
+      <div class="page" id="page-sys-role">
+        <div class="page-header"><div><h2>角色管理</h2><p>管理系统角色</p></div>
+          <button class="btn btn-primary">+ 新建角色</button>
+        </div>
+        <div class="card"><div class="card-body"><div class="table-wrap"><table><thead><tr><th>角色名称</th><th>角色编码</th><th>用户数</th><th>创建时间</th><th>描述</th><th>操作</th></tr></thead><tbody id="roleTableBody"></tbody></table></div></div></div>
+      </div>
+
+      <!-- ====== SYSTEM PERMISSION ====== -->
+      <div class="page" id="page-sys-perm">
+        <div class="page-header"><div><h2>权限配置</h2><p>配置角色权限</p></div></div>
+        <div class="card"><div class="card-body">
+          <div class="tabs"><div class="tab-item active" onclick="switchPermTab(this,'perm-table')">权限矩阵</div><div class="tab-item" onclick="switchPermTab(this,'perm-tree')">权限树</div></div>
+          <div class="tab-content active" id="perm-table">
+            <div class="table-wrap"><table><thead><tr><th>模块</th><th>查看</th><th>新建</th><th>编辑</th><th>删除</th><th>审批</th></tr></thead>
+            <tbody><tr><td>合同管理</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td></tr><tr><td>合同签署</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>✅</td></tr><tr><td>合同履行</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr><tr><td>合同归档</td><td>✅</td><td>❌</td><td>✅</td><td>❌</td><td>✅</td></tr><tr><td>合同解除</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td></tr><tr><td>合同交接</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr><tr><td>系统管理</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td></tr></tbody></table></div>
+          </div>
+          <div class="tab-content" id="perm-tree">
+            <div style="padding:10px 0;">请选择一个角色查看权限树...</div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- ====== SYSTEM CONFIG ====== -->
+      <div class="page" id="page-sys-config">
+        <div class="page-header"><div><h2>系统配置</h2><p>系统运行参数设置</p></div>
+          <button class="btn btn-primary" onclick="alert('配置已保存')">💾 保存配置</button>
+        </div>
+        <div class="card"><div class="card-body">
+          <div class="form-row">
+            <div class="form-group"><label>系统名称</label><input class="form-control" value="合同全生命周期管理系统"></div>
+            <div class="form-group"><label>管理员邮箱</label><input class="form-control" value="admin@company.com"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>合同编号前缀</label><input class="form-control" value="HT-2026-"></div>
+            <div class="form-group"><label>审批超时提醒（天）</label><input class="form-control" value="3"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>自动归档（签署后天数）</label><input class="form-control" value="30"></div>
+            <div class="form-group"><label>日志保留天数</label><input class="form-control" value="365"></div>
+          </div>
+          <div class="form-group"><label>系统描述</label><textarea class="form-control" rows="3">企业合同全生命周期管理系统，涵盖合同起草、审批、签署、履行、归档、解除、交接等全流程管理。</textarea></div>
+        </div></div>
+      </div>
+
+      <!-- ====== SYSTEM LOG ====== -->
+      <div class="page" id="page-sys-log">
+        <div class="page-header"><div><h2>日志管理</h2><p>系统操作审计日志</p></div>
+          <button class="btn" onclick="alert('日志导出中...')">📥 导出日志</button>
+        </div>
+        <div class="card"><div class="card-body">
+          <div class="search-bar">
+            <input type="text" placeholder="搜索操作内容..." style="min-width:240px;">
+            <select><option>全部操作类型</option><option>登录</option><option>新增</option><option>编辑</option><option>删除</option><option>审批</option></select>
+            <button class="btn btn-sm">🔍 查询</button>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>时间</th><th>操作人</th><th>操作类型</th><th>操作内容</th><th>IP地址</th></tr></thead>
+          <tbody id="logTableBody"></tbody></table></div>
+        </div></div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ====== APPROVAL MODAL ====== -->
+<div class="modal-overlay" id="approvalModal">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3>合同审批</h3><button class="modal-close" onclick="closeModal('approvalModal')">✕</button></div>
+    <div class="modal-body">
+      <div style="margin-bottom:12px;"><span style="font-weight:600;">合同编号：</span><span id="approvalContractCode">HT-2026-0042</span></div>
+      <div style="margin-bottom:12px;"><span style="font-weight:600;">合同名称：</span><span id="approvalContractName">2026年度IT服务外包合同</span></div>
+      <div style="margin-bottom:12px;"><span style="font-weight:600;">合同金额：</span><span id="approvalContractAmount">1,680,000.00</span></div>
+      <div style="margin-bottom:12px;"><span style="font-weight:600;">提交人：</span><span id="approvalSubmitter">张明</span></div>
+      <div style="margin-bottom:8px;"><span style="font-weight:600;">合同摘要：</span></div>
+      <div style="background:#f5f5f5;padding:10px;border-radius:4px;font-size:13px;margin-bottom:16px;">乙方根据甲方需求提供IT系统运维支持服务，包括服务器维护、网络管理、安全防护等。合同期限壹年，总金额1,680,000.00元，按季度支付。</div>
+      <div class="form-group"><label>审批意见 <span class="required">*</span></label><textarea class="form-control" id="approvalOpinion" rows="3" placeholder="请输入审批意见..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('approvalModal')">取消</button>
+      <button class="btn btn-danger" onclick="doReject()">驳回</button>
+      <button class="btn btn-success" onclick="doApprove()">✓ 通过</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== USER MODAL ====== -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3 id="userModalTitle">新建用户</h3><button class="modal-close" onclick="closeModal('userModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>用户名 <span class="required">*</span></label><input class="form-control" id="userModalUsername" placeholder="请输入用户名"></div>
+      <div class="form-group"><label>姓名 <span class="required">*</span></label><input class="form-control" id="userModalName" placeholder="请输入姓名"></div>
+      <div class="form-row">
+        <div class="form-group"><label>部门</label><select class="form-control" id="userModalDept"><option>管理部</option><option>采购部</option><option>法务部</option><option>财务部</option><option>技术部</option><option>销售部</option></select></div>
+        <div class="form-group"><label>角色</label><select class="form-control" id="userModalRole"><option>超级管理员</option><option>系统管理员</option><option>合同经办人</option><option>审批人</option><option>归档管理员</option><option>查看人员</option><option>履行责任人</option></select></div>
+      </div>
+      <div class="form-group"><label>密码 <span class="required">*</span></label><input class="form-control" type="password" id="userModalPwd" placeholder="请输入密码"></div>
+      <div class="form-group"><label>状态</label><select class="form-control" id="userModalStatus"><option>启用</option><option>禁用</option></select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('userModal')">取消</button>
+      <button class="btn btn-primary" onclick="saveUser()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== DETAIL MODAL ====== -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <div class="modal-header"><h3>合同详情</h3><button class="modal-close" onclick="closeModal('detailModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="tabs">
+        <div class="tab-item active" onclick="switchDetailTab(this,'detail-info')">基本信息</div>
+        <div class="tab-item" onclick="switchDetailTab(this,'detail-clause')">合同条款</div>
+        <div class="tab-item" onclick="switchDetailTab(this,'detail-flow')">审批记录</div>
+        <div class="tab-item" onclick="switchDetailTab(this,'detail-perf')">履行进度</div>
+        <div class="tab-item" onclick="switchDetailTab(this,'detail-version');renderVersionHistory()">版本历史</div>
+      </div>
+      <div class="tab-content active" id="detail-info">
+        <div class="detail-grid">
+          <div><dt>合同编号</dt><dd id="dtCode">HT-2026-0042</dd></div>
+          <div><dt>合同名称</dt><dd id="dtName">2026年度IT服务外包合同</dd></div>
+          <div><dt>对方单位</dt><dd id="dtParty">北京华信科技有限公司</dd></div>
+          <div><dt>合同类型</dt><dd id="dtType">服务合同</dd></div>
+          <div><dt>合同金额</dt><dd id="dtAmount">1,680,000.00 元</dd></div>
+          <div><dt>签订日期</dt><dd id="dtDate">2026-05-20</dd></div>
+          <div><dt>有效期</dt><dd id="dtDuration">2026-05-20 ~ 2027-05-19</dd></div>
+          <div><dt>经办人</dt><dd id="dtHandler">张明</dd></div>
+          <div><dt>状态</dt><dd id="dtStatus"><span class="badge badge-blue">履行中</span></dd></div>
+          <div style="grid-column:span 3;"><dt>履行进度</dt><dd><div class="progress" style="margin:4px 0 0;"><div class="progress-bar green" id="dtProgress" style="width:0%"></div></div><span id="dtProgressLabel" style="font-size:12px;color:var(--text-light);">0%</span></dd></div>
+        </div>
+      </div>
+      <div class="tab-content" id="detail-clause">
+        <div style="background:#f5f5f5;padding:12px;border-radius:4px;font-size:13px;line-height:1.8;">第一条 服务内容<br>乙方根据甲方需求提供IT系统运维支持服务，包括但不限于：服务器维护、网络管理、安全防护等。<br><br>第二条 服务期限<br>本合同服务期限为壹年，自2026年5月20日起至2027年5月19日止。<br><br>第三条 服务费用及支付<br>合同总金额为人民币1,680,000.00元整。甲方按季度支付，每季度支付420,000.00元。</div>
+      </div>
+      <div class="tab-content" id="detail-version">
+        <div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+          <h4 style="font-size:14px;font-weight:600;">版本历史</h4>
+          <button class="btn btn-sm btn-primary" onclick="alert('当前版本已备份，可回滚到此版本')">↺ 回滚到此版本</button>
+        </div>
+        <div id="versionHistoryList" class="timeline"></div>
+      </div>
+      <div class="tab-content" id="detail-perf">
+        <div id="detailPerfContent"><p style="color:var(--text-muted);">暂无履行数据</p></div>
+      </div>
+      <div class="tab-content" id="detail-flow">
+        <div class="approval-steps">
+          <div class="approval-step"><div class="step-dot step-done">✓</div><div class="step-name">张明</div><div class="step-label">经办人·已提交</div></div>
+          <div class="approval-step"><div class="step-dot step-done">✓</div><div class="step-name">李经理</div><div class="step-label">部门经理·已通过</div></div>
+          <div class="approval-step"><div class="step-dot step-active">3</div><div class="step-name">王法务</div><div class="step-label">待审核</div></div>
+          <div class="approval-step"><div class="step-dot step-pending">4</div><div class="step-name">赵财务</div><div class="step-label">待审核</div></div>
+          <div class="approval-step"><div class="step-dot step-pending">5</div><div class="step-name">刘总经理</div><div class="step-label">待审核</div></div>
+        </div>
+        <div style="margin-top:16px;"><h4 style="font-size:14px;margin-bottom:8px;">审批历史</h4>
+          <div style="padding:8px 0;border-bottom:1px solid var(--border);">
+            <div style="display:flex;justify-content:space-between;font-size:13px;"><span><strong>李经理</strong> 已通过</span><span style="color:var(--text-muted)">2026-05-18 14:30</span></div>
+            <div style="font-size:12px;color:var(--text-light);margin-top:2px;">同意，按流程处理。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('detailModal')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== ANOMALY REPORT MODAL ====== -->
+<div class="modal-overlay" id="anomalyReportModal">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3>上报履行异常</h3><button class="modal-close" onclick="closeModal('anomalyReportModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>异常合同 <span class="required">*</span></label>
+        <select class="form-control" id="anomalyContract">
+          <option value="">请选择合同</option>
+        </select>
+      </div>
+      <div class="form-group"><label>异常类型 <span class="required">*</span></label>
+        <select class="form-control" id="anomalyType">
+          <option>进度滞后</option><option>质量不达标</option><option>费用超支</option><option>人员变更</option><option>其他</option>
+        </select>
+      </div>
+      <div class="form-group"><label>异常描述 <span class="required">*</span></label><textarea class="form-control" id="anomalyDesc" rows="3" placeholder="请详细描述异常情况..."></textarea></div>
+      <div class="form-group"><label>影响程度</label>
+        <select class="form-control" id="anomalyImpact"><option>轻微</option><option>一般</option><option>严重</option><option>致命</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('anomalyReportModal')">取消</button>
+      <button class="btn btn-danger" onclick="submitAnomalyReport()">✓ 提交异常报告</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== BORROW APPLICATION MODAL ====== -->
+<div class="modal-overlay" id="borrowModal">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3>申请借阅合同</h3><button class="modal-close" onclick="closeModal('borrowModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>选择合同 <span class="required">*</span></label>
+        <select class="form-control" id="borrowContract">
+          <option value="">请选择合同</option>
+        </select>
+      </div>
+      <div class="form-group"><label>借阅人 <span class="required">*</span></label><input class="form-control" id="borrowPerson" placeholder="请输入借阅人姓名" value="张明"></div>
+      <div class="form-row">
+        <div class="form-group"><label>借阅日期 <span class="required">*</span></label><input class="form-control" type="date" id="borrowDate"></div>
+        <div class="form-group"><label>预计归还日 <span class="required">*</span></label><input class="form-control" type="date" id="borrowReturnDate"></div>
+      </div>
+      <div class="form-group"><label>借阅事由 <span class="required">*</span></label><textarea class="form-control" id="borrowReason" rows="3" placeholder="请说明借阅原因..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('borrowModal')">取消</button>
+      <button class="btn btn-primary" onclick="submitBorrowApplication()">✓ 提交申请</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== EVIDENCE MODAL ====== -->
+<div class="modal-overlay" id="evidenceModal">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3>上传履行证据</h3><button class="modal-close" onclick="closeModal('evidenceModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>节点名称</label><input class="form-control" id="evidenceNode" readonly></div>
+      <div class="form-group"><label>完成说明</label><textarea class="form-control" rows="3" placeholder="请描述该节点的完成情况..."></textarea></div>
+      <div class="form-group"><label>上传文件</label>
+        <div class="upload-area" onclick="alert('选择文件对话框')">
+          <div style="font-size:24px;">📎</div>
+          <div style="font-size:13px;">点击上传证据文件</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('evidenceModal')">取消</button>
+      <button class="btn btn-primary" onclick="submitEvidence()">提交</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== CHANGE REQUEST MODAL ====== -->
+<div class="modal-overlay" id="changeModal">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3>合同变更申请</h3><button class="modal-close" onclick="closeModal('changeModal')">✕</button></div>
+    <div class="modal-body">
+      <div style="margin-bottom:12px;"><span style="font-weight:600;">合同编号：</span><span id="changeContractCode">-</span></div>
+      <div style="margin-bottom:12px;"><span style="font-weight:600;">合同名称：</span><span id="changeContractName">-</span></div>
+      <div class="form-group"><label>变更类型 <span class="required">*</span></label>
+        <select class="form-control" id="changeType">
+          <option>合同金额变更</option><option>合同期限变更</option><option>合同条款变更</option><option>合同主体变更</option><option>其他变更</option>
+        </select>
+      </div>
+      <div class="form-group"><label>变更内容 <span class="required">*</span></label><textarea class="form-control" id="changeContent" rows="4" placeholder="请详细描述变更内容..."></textarea></div>
+      <div class="form-group"><label>变更原因 <span class="required">*</span></label><textarea class="form-control" id="changeReason" rows="3" placeholder="请说明变更原因..."></textarea></div>
+      <div class="form-group"><label>附件说明</label><div class="upload-area" onclick="alert('请选择变更相关文件')"><div style="font-size:24px;">📎</div><div style="font-size:13px;">点击上传变更附件</div></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('changeModal')">取消</button>
+      <button class="btn btn-primary" onclick="submitChangeRequest()">✓ 提交变更申请</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== TERMINATION MODAL ====== -->
+<div class="modal-overlay" id="terminationModal">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3>发起合同解除</h3><button class="modal-close" onclick="closeModal('terminationModal')">✕</button></div>
+    <div class="modal-body">
+      <div style="margin-bottom:12px;"><span style="font-weight:600;">合同编号：</span><span id="termContractCode">-</span></div>
+      <div style="margin-bottom:12px;"><span style="font-weight:600;">合同名称：</span><span id="termContractName">-</span></div>
+      <div class="form-group"><label>解除原因 <span class="required">*</span></label>
+        <select class="form-control" id="termReason">
+          <option>双方协商一致解除</option><option>一方违约解除</option><option>合同到期不续签</option><option>业务调整取消</option><option>法律法规变更</option><option>其他原因</option>
+        </select>
+      </div>
+      <div class="form-group"><label>详细说明 <span class="required">*</span></label><textarea class="form-control" id="termDesc" rows="4" placeholder="请详细说明解除原因..."></textarea></div>
+      <div class="form-group"><label>解除证明文件</label><div class="upload-area" onclick="alert('请上传解除协议或相关证明')"><div style="font-size:24px;">📎</div><div style="font-size:13px;">点击上传解除文件</div></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('terminationModal')">取消</button>
+      <button class="btn btn-danger" onclick="submitTermination()">✓ 提交解除申请</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== HANDOVER MODAL ====== -->
+<div class="modal-overlay" id="handoverModal">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3>发起合同交接</h3><button class="modal-close" onclick="closeModal('handoverModal')">✕</button></div>
+    <div class="modal-body">
+      <div style="margin-bottom:12px;"><span style="font-weight:600;">合同编号：</span><span id="handoverContractCode">-</span></div>
+      <div style="margin-bottom:12px;"><span style="font-weight:600;">合同名称：</span><span id="handoverContractName">-</span></div>
+      <div class="form-group"><label>当前负责人</label><input class="form-control" id="handoverFrom" readonly></div>
+      <div class="form-group"><label>交接对象 <span class="required">*</span></label>
+        <select class="form-control" id="handoverTo">
+          <option value="">请选择交接人</option>
+        </select>
+      </div>
+      <div class="form-group"><label>交接说明 <span class="required">*</span></label><textarea class="form-control" id="handoverDesc" rows="3" placeholder="请说明交接事项..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('handoverModal')">取消</button>
+      <button class="btn btn-primary" onclick="submitHandover()">✓ 发起交接</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== ANOMALY RESOLVE MODAL ====== -->
+<div class="modal-overlay" id="anomalyResolveModal">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3>处理异常</h3><button class="modal-close" onclick="closeModal('anomalyResolveModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>处理措施 <span class="required">*</span></label><textarea class="form-control" id="anomalyResolveAction" rows="4" placeholder="请描述处理措施..."></textarea></div>
+      <div class="form-group"><label>处理结果</label>
+        <select class="form-control" id="anomalyResolveResult"><option>已解决</option><option>部分解决</option><option>无法解决</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('anomalyResolveModal')">取消</button>
+      <button class="btn btn-success" onclick="submitAnomalyResolve()">✓ 确认处理</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ======================== DATA ========================
+const contractTypes = ['采购合同','服务合同','销售合同','租赁合同','外包合同'];
+const companies = ['北京华信科技有限公司','上海数联信息技术','深圳创新智造有限公司','杭州云帆数据科技','广州天域软件','成都鼎信科技','南京博远智能','武汉华通网络'];
+const statusBadge = { '草稿':'badge-gray','审批中':'badge-orange','已驳回':'badge-red','已签署':'badge-green','履行中':'badge-blue','变更中':'badge-purple','交接中':'badge-purple','已归档':'badge-teal','已解除':'badge-red' };
+const depts = ['管理部','采购部','法务部','财务部','技术部','销售部'];
+const roles = ['超级管理员','系统管理员','合同经办人','审批人','归档管理员','查看人员','履行责任人'];
+const urgencies = ['紧急','高','中','低'];
+const urgencyClass = {'紧急':'urgency-high','高':'urgency-high','中':'urgency-mid','低':'urgency-low'};
+const userNames = ['张明','李强','王芳','赵敏','刘洋','陈静','杨磊','黄丽','周涛','吴杰','徐晨','胡波','孙悦','高鹏','林欣'];
+const approveNames = ['赵一鸣','钱丽华','孙志强','李芳','周建华','吴敏','郑浩','王蓉'];
+
+function rand(min,max) { return Math.floor(Math.random()*(max-min+1))+min; }
+function pick(arr) { return arr[rand(0,arr.length-1)]; }
+function pad(n) { return String(n).padStart(2,'0'); }
+function dateStr(d) { return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function todayStr() { return dateStr(new Date()); }
+function nowStr() { const d=new Date(); return dateStr(d)+' '+pad(d.getHours())+':'+pad(d.getMinutes()); }
+
+// ======================== CONTRACT DATA ========================
+let contracts = [];
+let nextSerial = 1001;
+let nextArchiveSerial = 1001;
+let nextBorrowSerial = 101;
+let activities = [];
+
+function genContractId() { return 'HT-2026-'+String(nextSerial++).slice(-4); }
+
+function addActivity(text, dotType) {
+  const dots = {'primary':'var(--primary)','orange':'var(--orange)','success':'var(--success)','danger':'var(--danger)','teal':'var(--teal)'};
+  activities.unshift({ text, time: todayStr(), dot: dots[dotType] || dots.primary });
+  if(activities.length > 80) activities.length = 80;
+}
+
+(function initContracts() {
+  const base = [
+    {name:'2026年度IT服务外包合同',comp:0,type:1,amt:1680000},
+    {name:'网络设备采购框架协议',comp:1,type:0,amt:890000},
+    {name:'ERP系统实施服务合同',comp:2,type:1,amt:2500000},
+    {name:'办公场地租赁合同',comp:3,type:3,amt:720000},
+    {name:'年度信息安全服务协议',comp:4,type:1,amt:560000},
+    {name:'数据中心服务器采购合同',comp:5,type:0,amt:1850000},
+    {name:'企业云平台开发合同',comp:6,type:2,amt:3200000},
+    {name:'呼叫中心外包服务合同',comp:7,type:4,amt:960000},
+    {name:'智能仓储管理系统采购',comp:0,type:0,amt:1450000},
+    {name:'法律顾问服务合同',comp:1,type:1,amt:300000},
+  ];
+  const seedStatuses = ['草稿','审批中','已签署','履行中','已归档','已解除','已驳回'];
+  base.forEach((b,i) => {
+    const d = new Date(2026,rand(1,5),rand(1,28));
+    const st = seedStatuses[i % seedStatuses.length];
+    contracts.push(makeContract({
+      id: genContractId(), name: b.name, party: companies[b.comp],
+      type: contractTypes[b.type], amount: b.amt.toLocaleString(), amountNum: b.amt,
+      date: dateStr(d), status: st, handler: '张明', dept: '采购部',
+      expiry: dateStr(new Date(d.getFullYear()+1,d.getMonth(),d.getDate()))
+    }));
+  });
+})();
+
+function makeContract(data) {
+  const c = {
+    id: data.id || genContractId(), name: data.name || '', party: data.party || '',
+    type: data.type || '服务合同', amount: data.amount || '0', amountNum: data.amountNum || 0,
+    date: data.date || todayStr(), handler: data.handler || '张明', dept: data.dept || '采购部',
+    status: data.status || '草稿', expiry: data.expiry || '', clause: data.clause || '',
+    remark: data.remark || '', version: 1, approvers: ['李经理','王法务','赵财务','刘总经理'],
+    approvalStep: -1, approvalHistory: [], changeHistory: [],
+    performancePlan: null, archiveInfo: null, terminationInfo: null,
+    handoverInfo: null, anomalies: []
+  };
+  if(['审批中','已签署','履行中','已归档'].includes(c.status)) {
+    c.approvalStep = 0;
+    c.approvalHistory.push({approver:'张明',action:'提交审批',opinion:'请审批',time:dateStr(new Date(c.date))});
+  }
+  if(['已签署','履行中','已归档'].includes(c.status)) {
+    c.approvalHistory.push({approver:'李经理',action:'通过',opinion:'同意，按流程处理。',time:dateStr(new Date(c.date))});
+    c.approvalStep = 1;
+  }
+  if(c.status === '履行中' || c.status === '已归档') {
+    c.performancePlan = generatePerfPlan(c);
+  }
+  if(c.status === '已归档') {
+    c.archiveInfo = { archiveId:'DA-2026-'+String(nextArchiveSerial++).slice(-4),
+      date:dateStr(new Date(c.date)), period:pick(['10年','30年','永久']), archiver:'周涛', status:'已归档' };
+  }
+  if(c.status === '已解除') {
+    c.terminationInfo = { reason:pick(['双方协商一致解除','合同到期不续签','一方违约解除','业务调整']),
+      date:todayStr(), status:'已批准', desc:'经双方协商，合同提前解除。' };
+  }
+  return c;
+}
+
+function generatePerfPlan(contract) {
+  const nodes = [];
+  const nodeNames = ['需求调研','方案设计','系统部署','数据迁移','用户培训','试运行','正式上线','验收交付'];
+  const count = rand(4,6);
+  for(let i=0;i<count;i++) {
+    const due = new Date(); due.setDate(due.getDate() + rand(i*20, (i+1)*20));
+    const isComplete = contract.status === '已归档' || (i < count-2 && contract.status === '履行中');
+    const isOverdue = !isComplete && due < new Date();
+    nodes.push({
+      name: nodeNames[i % nodeNames.length], due: dateStr(due),
+      status: isComplete ? '已完成' : isOverdue ? '逾期' : (i === count-2 ? '进行中' : '待开始'),
+      completed: isComplete ? dateStr(due) : null, evidence: isComplete ? ['验收报告.pdf'] : [], anomaly: null
+    });
+  }
+  return { nodes };
+}
+
+// ======================== BUSINESS LOGIC ========================
+function findContract(id) { return contracts.find(c => c.id === id); }
+
+function getContractPerfProgress(contract) {
+  if(!contract.performancePlan || !contract.performancePlan.nodes.length) return 0;
+  const done = contract.performancePlan.nodes.filter(n => n.status === '已完成').length;
+  return Math.round(done / contract.performancePlan.nodes.length * 100);
+}
+
+function saveContractAsDraft() {
+  const name = document.getElementById('newContractName').value.trim();
+  const party = document.getElementById('newContractParty').value.trim();
+  const amt = document.getElementById('newContractAmount').value.trim();
+  if(!name) { alert('请输入合同名称'); return; }
+  if(!party) { alert('请输入对方单位'); return; }
+  if(!amt) { alert('请输入合同金额'); return; }
+  const amountNum = parseFloat(amt.replace(/,/g,''));
+  if(isNaN(amountNum)) { alert('请输入有效的合同金额'); return; }
+  const c = makeContract({
+    id: genContractId(), name, type: document.getElementById('newContractType').value, party,
+    amount: amountNum.toLocaleString(), amountNum,
+    date: document.getElementById('newContractDate').value || todayStr(),
+    expiry: document.getElementById('newContractExpiry').value || '',
+    handler: document.getElementById('newContractHandler').value || '张明',
+    dept: document.getElementById('newContractDept').value || '采购部',
+    remark: document.getElementById('newContractRemark').value || '', status: '草稿'
+  });
+  contracts.unshift(c);
+  addActivity(name+' 已保存为草稿','primary'); refreshAll(); switchPage('contract-list');
+}
+
+function submitContractForApproval() {
+  const name = document.getElementById('newContractName').value.trim();
+  const party = document.getElementById('newContractParty').value.trim();
+  const amt = document.getElementById('newContractAmount').value.trim();
+  if(!name) { alert('请输入合同名称'); return; }
+  if(!party) { alert('请输入对方单位'); return; }
+  if(!amt) { alert('请输入合同金额'); return; }
+  const amountNum = parseFloat(amt.replace(/,/g,''));
+  if(isNaN(amountNum)) { alert('请输入有效的合同金额'); return; }
+  const c = makeContract({
+    id: genContractId(), name, type: document.getElementById('newContractType').value, party,
+    amount: amountNum.toLocaleString(), amountNum,
+    date: document.getElementById('newContractDate').value || todayStr(),
+    expiry: document.getElementById('newContractExpiry').value || '',
+    handler: document.getElementById('newContractHandler').value || '张明',
+    dept: document.getElementById('newContractDept').value || '采购部',
+    remark: document.getElementById('newContractRemark').value || '', status: '审批中'
+  });
+  c.approvalStep = 0;
+  c.approvalHistory = [{approver:'张明',action:'提交审批',opinion:'请审批',time:nowStr()}];
+  contracts.unshift(c);
+  addActivity(name+' 已提交审批','orange'); refreshAll(); switchPage('contract-list');
+}
+
+function doApprove() {
+  const opinion = document.getElementById('approvalOpinion').value;
+  if(!opinion) { alert('请输入审批意见'); return; }
+  if(!currApproval) return;
+  const c = findContract(currApproval.id);
+  if(!c || c.status !== '审批中') { alert('合同状态不允许审批'); return; }
+  c.approvalHistory.push({approver:'审批人',action:'通过',opinion,time:nowStr()});
+  c.approvalStep = (c.approvalStep||0) + 1;
+  if(c.approvalStep >= c.approvers.length) {
+    c.status = '已签署';
+    addActivity(c.name+' 审批通过，已签署','success');
+  } else {
+    addActivity(c.name+' 审批通过，进入下一环节','success');
+  }
+  closeModal('approvalModal'); refreshAll();
+}
+
+function doReject() {
+  const opinion = document.getElementById('approvalOpinion').value;
+  if(!opinion) { alert('请输入驳回意见'); return; }
+  if(!currApproval) return;
+  const c = findContract(currApproval.id);
+  if(!c) return;
+  c.status = '已驳回';
+  c.approvalHistory.push({approver:'审批人',action:'驳回',opinion,time:nowStr()});
+  addActivity(c.name+' 被驳回','danger');
+  closeModal('approvalModal'); refreshAll();
+}
+
+function resubmitContract(contractId) {
+  const c = findContract(contractId);
+  if(!c) return;
+  c.status = '审批中'; c.approvalStep = 0;
+  c.approvalHistory.push({approver:'张明',action:'重新提交',opinion:'已修改，重新提交审批',time:nowStr()});
+  addActivity(c.name+' 已重新提交审批','orange'); refreshAll();
+}
+
+function submitSingleContract(contractId) {
+  const c = findContract(contractId);
+  if(!c) return;
+  c.status = '审批中'; c.approvalStep = 0;
+  c.approvalHistory = [{approver:'张明',action:'提交审批',opinion:'请审批',time:nowStr()}];
+  addActivity(c.name+' 已提交审批','orange'); refreshAll();
+}
+
+function startSigning(contractId) {
+  const c = findContract(contractId);
+  if(!c || c.status !== '已签署') { alert('合同状态不允许发起签署'); return; }
+  c.status = '履行中'; c.performancePlan = generatePerfPlan(c);
+  addActivity(c.name+' 开始履行','success'); refreshAll();
+}
+
+function archiveContract(contractId) {
+  const c = findContract(contractId);
+  if(!c) return;
+  if(c.status !== '已签署' && c.status !== '履行中') { alert('合同当前状态不允许归档'); return; }
+  c.status = '已归档';
+  c.archiveInfo = { archiveId:'DA-2026-'+String(nextArchiveSerial++).slice(-4),
+    date:todayStr(), period:'10年', archiver:'张明', status:'已归档' };
+  if(!c.performancePlan) c.performancePlan = generatePerfPlan(c);
+  addActivity(c.name+' 已完成归档','teal'); refreshAll();
+}
+
+function requestContractChange(contractId) {
+  const c = findContract(contractId);
+  if(!c || c.status !== '履行中') { alert('合同当前状态不允许变更'); return; }
+  currChangeTarget = contractId;
+  document.getElementById('changeContractCode').textContent = c.id;
+  document.getElementById('changeContractName').textContent = c.name;
+  document.getElementById('changeContent').value = '';
+  document.getElementById('changeReason').value = '';
+  openModal('changeModal');
+}
+
+let currChangeTarget = null;
+
+function submitChangeRequest() {
+  if(!currChangeTarget) return;
+  const content = document.getElementById('changeContent').value.trim();
+  const reason = document.getElementById('changeReason').value.trim();
+  if(!content) { alert('请填写变更内容'); return; }
+  if(!reason) { alert('请填写变更原因'); return; }
+  const c = findContract(currChangeTarget);
+  if(!c) return;
+  c.status = '变更中';
+  c.changeHistory.push({
+    version: c.version+1, changeType: document.getElementById('changeType').value,
+    content, reason, date: todayStr(), status: '待审批', approved: null
+  });
+  addActivity(c.name+' 提交变更申请: '+reason,'orange');
+  closeModal('changeModal'); refreshAll(); currChangeTarget = null;
+}
+
+function approveChange(contractId) {
+  const c = findContract(contractId);
+  if(!c || c.status !== '变更中') return;
+  c.version++; c.status = '履行中';
+  const lastChange = c.changeHistory[c.changeHistory.length-1];
+  if(lastChange) { lastChange.status = '已批准'; lastChange.approved = true; }
+  addActivity(c.name+' 变更已批准，当前版本 v'+c.version,'success'); refreshAll();
+}
+
+function terminateContractShow(contractId) {
+  const c = findContract(contractId);
+  if(!c || (c.status !== '履行中' && c.status !== '已签署')) { alert('合同当前状态不允许解除'); return; }
+  currTermTarget = contractId;
+  document.getElementById('termContractCode').textContent = c.id;
+  document.getElementById('termContractName').textContent = c.name;
+  document.getElementById('termDesc').value = '';
+  openModal('terminationModal');
+}
+
+let currTermTarget = null;
+
+function submitTermination() {
+  if(!currTermTarget) return;
+  const reason = document.getElementById('termReason')?.value;
+  const desc = document.getElementById('termDesc')?.value.trim();
+  if(!desc) { alert('请填写解除说明'); return; }
+  const c = findContract(currTermTarget);
+  if(!c) return;
+  c.status = '已解除';
+  c.terminationInfo = { reason, desc, date: todayStr(), status: '已批准' };
+  addActivity(c.name+' 合同已解除，原因: '+reason,'danger');
+  closeModal('terminationModal'); refreshAll(); currTermTarget = null;
+}
+
+function initHandoverShow(contractId) {
+  const c = findContract(contractId);
+  if(!c || c.status !== '履行中') { alert('合同当前状态不允许交接'); return; }
+  currHandoverTarget = contractId;
+  document.getElementById('handoverContractCode').textContent = c.id;
+  document.getElementById('handoverContractName').textContent = c.name;
+  document.getElementById('handoverFrom').value = c.handler;
+  const sel = document.getElementById('handoverTo');
+  sel.innerHTML = '<option value="">请选择交接人</option>' +
+    userNames.filter(n => n !== c.handler).map(n => '<option value="'+n+'">'+n+'</option>').join('');
+  document.getElementById('handoverDesc').value = '';
+  openModal('handoverModal');
+}
+
+let currHandoverTarget = null;
+
+function submitHandover() {
+  if(!currHandoverTarget) return;
+  const to = document.getElementById('handoverTo')?.value;
+  const desc = document.getElementById('handoverDesc')?.value.trim();
+  if(!to) { alert('请选择交接对象'); return; }
+  if(!desc) { alert('请填写交接说明'); return; }
+  const c = findContract(currHandoverTarget);
+  if(!c) return;
+  c.handoverInfo = { from: c.handler, to, date: todayStr(), desc, status: '交接中' };
+  c.status = '交接中';
+  addActivity(c.name+' 发起交接: '+c.handler+' → '+to,'orange');
+  closeModal('handoverModal'); refreshAll(); currHandoverTarget = null;
+}
+
+function confirmHandover(contractId) {
+  const c = findContract(contractId);
+  if(!c || !c.handoverInfo) return;
+  c.handoverInfo.status = '已完成'; c.handler = c.handoverInfo.to; c.status = '履行中';
+  addActivity(c.name+' 交接完成，新负责人: '+c.handler,'success'); refreshAll();
+}
+
+function updatePerfNode(contractId, nodeIdx, newStatus, evidence) {
+  const c = findContract(contractId);
+  if(!c || !c.performancePlan) return;
+  const node = c.performancePlan.nodes[nodeIdx];
+  if(!node) return;
+  node.status = newStatus || '已完成';
+  if(evidence) { if(!node.evidence) node.evidence = []; node.evidence.push(evidence); }
+  if(newStatus === '已完成') node.completed = todayStr();
+  addActivity(c.name+' - '+node.name+' 状态更新为'+node.status,'teal'); refreshAll();
+}
+
+function openEvidence(contractId, nodeIdx) {
+  currEvidenceContext = { contractId, nodeIdx };
+  const c = findContract(contractId);
+  if(!c || !c.performancePlan) return;
+  document.getElementById('evidenceNode').value = c.performancePlan.nodes[nodeIdx].name;
+  openModal('evidenceModal');
+}
+
+let currEvidenceContext = null;
+
+function submitEvidence() {
+  if(!currEvidenceContext) { alert('请先选择节点'); return; }
+  const desc = document.querySelector('#evidenceModal textarea')?.value || '已完成';
+  updatePerfNode(currEvidenceContext.contractId, currEvidenceContext.nodeIdx, '已完成', desc+'.pdf');
+  closeModal('evidenceModal'); currEvidenceContext = null; refreshAll();
+}
+
+function reportAnomaly(contractId, nodeIdx) {
+  const reason = prompt('请输入异常原因：');
+  if(!reason) return;
+  const c = findContract(contractId);
+  if(!c || !c.performancePlan) return;
+  const node = c.performancePlan.nodes[nodeIdx];
+  if(!node) return;
+  node.anomaly = { reason, reported: todayStr(), status: '待处理' };
+  node.status = '逾期';
+  if(!c.anomalies) c.anomalies = [];
+  c.anomalies.push({ node: node.name, reason, date: todayStr(), status: '待处理' });
+  addActivity(c.name+' - '+node.name+' 上报异常: '+reason,'danger'); refreshAll();
+}
+
+function resolveAnomaly(contractId, nodeIdx) {
+  currAnomalyContext = { contractId, nodeIdx };
+  document.getElementById('anomalyResolveAction').value = '';
+  openModal('anomalyResolveModal');
+}
+
+let currAnomalyContext = null;
+
+function submitAnomalyResolve() {
+  if(!currAnomalyContext) return;
+  const action = document.getElementById('anomalyResolveAction')?.value;
+  if(!action) { alert('请填写处理措施'); return; }
+  const { contractId, nodeIdx } = currAnomalyContext;
+  const c = findContract(contractId);
+  if(c && c.performancePlan && c.performancePlan.nodes[nodeIdx]) {
+    const node = c.performancePlan.nodes[nodeIdx];
+    if(node.anomaly) node.anomaly.status = '已解决';
+    node.status = '已完成'; node.completed = todayStr();
+  }
+  if(c && c.anomalies) { const a = c.anomalies.find(a => a.status === '待处理'); if(a) a.status = '已解决'; }
+  addActivity(c?.name+' 异常已处理','success');
+  closeModal('anomalyResolveModal'); refreshAll(); currAnomalyContext = null;
+}
+
+function submitAnomalyReport() {
+  const contractId = document.getElementById('anomalyContract')?.value;
+  const desc = document.getElementById('anomalyDesc')?.value;
+  if(!contractId) { alert('请选择异常合同'); return; }
+  if(!desc) { alert('请填写异常描述'); return; }
+  const c = findContract(contractId);
+  if(c) {
+    if(!c.anomalies) c.anomalies = [];
+    c.anomalies.push({ node:'全局', reason:desc, type:document.getElementById('anomalyType')?.value||'其他',
+      date:todayStr(), status:'待处理' });
+    addActivity(c.name+' 上报异常: '+desc,'danger');
+  }
+  closeModal('anomalyReportModal'); refreshAll();
+}
+
+function openBorrowModal() {
+  const sel = document.getElementById('borrowContract');
+  if(sel) {
+    sel.innerHTML = '<option value="">请选择合同</option>' +
+      contracts.filter(c => c.status === '已归档').map(c =>
+        '<option value="'+c.id+'">'+c.id+' - '+c.name+'</option>').join('');
+  }
+  document.getElementById('borrowDate').value = todayStr();
+  const ret = new Date(); ret.setMonth(ret.getMonth()+1);
+  document.getElementById('borrowReturnDate').value = dateStr(ret);
+  document.getElementById('borrowPerson').value = '张明';
+  document.getElementById('borrowReason').value = '';
+  openModal('borrowModal');
+}
+
+function openBorrowForContract(contractId) {
+  openBorrowModal();
+  const sel = document.getElementById('borrowContract');
+  if(sel) {
+    sel.innerHTML = '<option value="">请选择合同</option>' +
+      contracts.filter(c => c.status === '已归档').map(c =>
+        '<option value="'+c.id+'" '+(c.id===contractId?'selected':'')+'>'+c.id+' - '+c.name+'</option>').join('');
+  }
+}
+
+function submitBorrowApplication() {
+  const contractId = document.getElementById('borrowContract')?.value;
+  const person = document.getElementById('borrowPerson')?.value.trim();
+  const reason = document.getElementById('borrowReason')?.value.trim();
+  if(!contractId) { alert('请选择借阅合同'); return; }
+  if(!person) { alert('请填写借阅人'); return; }
+  if(!reason) { alert('请填写借阅事由'); return; }
+  const c = findContract(contractId);
+  if(c) {
+    if(!c.archiveInfo) c.archiveInfo = { archiveId:'DA-'+todayStr(), date:todayStr(), period:'10年', archiver:'系统' };
+    if(!c.archiveInfo.borrowRecords) c.archiveInfo.borrowRecords = [];
+    c.archiveInfo.borrowRecords.push({
+      borrowId:'JY-2026-'+String(nextBorrowSerial++).slice(-3), contractId:c.id, name:c.name,
+      borrower:person, date:document.getElementById('borrowDate').value||todayStr(),
+      returnDate:document.getElementById('borrowReturnDate').value||'',
+      reason, status:'借阅中'
+    });
+    addActivity(person+' 借阅了 '+c.name,'primary');
+  }
+  closeModal('borrowModal'); refreshAll();
+}
+
+function returnBorrow(contractId, borrowIdx) {
+  const c = findContract(contractId);
+  if(!c || !c.archiveInfo || !c.archiveInfo.borrowRecords) return;
+  const rec = c.archiveInfo.borrowRecords[borrowIdx];
+  if(!rec) return;
+  rec.status = '已归还'; rec.returnDate = todayStr();
+  addActivity(rec.borrower+' 已归还 '+c.name,'teal'); refreshAll();
+}
+
+// ======================== RENDER ========================
+function renderContractTable(data) {
+  const tbody = document.getElementById('contractTableBody');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  data.forEach(c => {
+    let actions = '';
+    switch(c.status) {
+      case '草稿': actions = `<button class="btn btn-sm btn-link" onclick='showDetail("${c.id}")'>查看</button><button class="btn btn-sm btn-link" onclick='editContract("${c.id}")'>编辑</button><button class="btn btn-sm btn-primary" onclick='submitSingleContract("${c.id}")'>提交审批</button>`; break;
+      case '审批中': actions = `<button class="btn btn-sm btn-link" onclick='showDetail("${c.id}")'>查看</button><button class="btn btn-sm btn-primary" onclick='openApproval("${c.id}")'>审核</button>`; break;
+      case '已驳回': actions = `<button class="btn btn-sm btn-link" onclick='showDetail("${c.id}")'>查看</button><button class="btn btn-sm btn-primary" onclick='resubmitContract("${c.id}")'>重新提交</button>`; break;
+      case '已签署': actions = `<button class="btn btn-sm btn-link" onclick='showDetail("${c.id}")'>查看</button><button class="btn btn-sm btn-success" onclick='startSigning("${c.id}")'>发起签署</button><button class="btn btn-sm btn-link" onclick='archiveContract("${c.id}")'>归档</button>`; break;
+      case '履行中': actions = `<button class="btn btn-sm btn-link" onclick='showDetail("${c.id}")'>查看</button><button class="btn btn-sm btn-link" onclick='requestContractChange("${c.id}")'>变更</button><button class="btn btn-sm btn-danger" onclick='terminateContractShow("${c.id}")'>解除</button><button class="btn btn-sm btn-link" onclick='initHandoverShow("${c.id}")'>交接</button><button class="btn btn-sm btn-link" onclick='archiveContract("${c.id}")'>归档</button>`; break;
+      case '变更中': actions = `<button class="btn btn-sm btn-link" onclick='showDetail("${c.id}")'>查看</button><button class="btn btn-sm btn-success" onclick='approveChange("${c.id}")'>批准变更</button>`; break;
+      case '交接中': actions = `<button class="btn btn-sm btn-link" onclick='showDetail("${c.id}")'>查看</button><button class="btn btn-sm btn-success" onclick='confirmHandover("${c.id}")'>确认交接</button>`; break;
+      case '已归档': actions = `<button class="btn btn-sm btn-link" onclick='showDetail("${c.id}")'>查看</button><button class="btn btn-sm btn-link" onclick='openBorrowForContract("${c.id}")'>借阅</button>`; break;
+      case '已解除': actions = `<button class="btn btn-sm btn-link" onclick='showDetail("${c.id}")'>查看</button>`; break;
+    }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${c.id}</td><td><a class="expand-toggle" onclick='showDetail("${c.id}")'>${c.name}</a></td><td>${c.party}</td><td>¥${c.amount}</td><td>${c.date}</td><td><span class="badge ${statusBadge[c.status]}">${c.status}</span></td><td><div class="btn-group">${actions}</div></td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('contractTotalCount').textContent = data.length;
+}
+
+function editContract(contractId) {
+  const c = findContract(contractId);
+  if(!c) return;
+  switchPage('contract-new');
+  document.getElementById('newContractName').value = c.name;
+  document.getElementById('newContractType').value = c.type;
+  document.getElementById('newContractParty').value = c.party;
+  document.getElementById('newContractAmount').value = c.amountNum;
+  document.getElementById('newContractDate').value = c.date;
+  document.getElementById('newContractExpiry').value = c.expiry;
+  document.getElementById('newContractHandler').value = c.handler;
+  document.getElementById('newContractDept').value = c.dept;
+  document.getElementById('newContractRemark').value = c.remark || '';
+}
+
+function renderApproveTable() {
+  const tbody = document.getElementById('approveTableBody');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  const pending = contracts.filter(c => c.status === '审批中');
+  document.getElementById('approveCount').textContent = pending.length;
+  pending.forEach(c => {
+    tbody.innerHTML += `<tr><td>${c.id}</td><td><a class="expand-toggle" onclick='showDetail("${c.id}")'>${c.name}</a></td><td>${c.handler}</td><td>${c.date}</td><td class="urgency-mid">中</td><td><button class="btn btn-sm btn-primary" onclick='openApproval("${c.id}")'>审批</button></td></tr>`;
+  });
+  if(!pending.length) tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:30px;color:var(--text-muted);">暂无待审批合同</td></tr>';
+}
+
+function renderSigningTables() {
+  const pending = contracts.filter(c => c.status === '已签署');
+  document.getElementById('signingPendingBody').innerHTML = pending.map(s =>
+    `<tr><td>${s.id}</td><td>${s.name}</td><td>${s.party}</td><td>张明</td><td>${s.date}</td><td><span class="badge badge-orange">待我方签署</span></td></tr>`
+  ).join('') || '<tr><td colspan="6" class="text-center" style="padding:30px;color:var(--text-muted);">暂无数据</td></tr>';
+  const progress = contracts.filter(c => c.status === '履行中' || c.status === '变更中' || c.status === '交接中');
+  document.getElementById('signingProgressBody').innerHTML = progress.slice(0,5).map(s =>
+    `<tr><td>${s.id}</td><td>${s.name}</td><td>${s.party}</td><td>我方</td><td><div class="progress"><div class="progress-bar" style="width:${getContractPerfProgress(s)}%"></div></div><span style="font-size:12px">${getContractPerfProgress(s)}%</span></td></tr>`
+  ).join('') || '<tr><td colspan="5" class="text-center" style="padding:30px;color:var(--text-muted);">暂无数据</td></tr>';
+  const done = contracts.filter(c => c.status === '已归档' || c.status === '已解除').slice(0,6);
+  document.getElementById('signingDoneBody').innerHTML = done.map(s =>
+    `<tr><td>${s.id}</td><td>${s.name}</td><td>${s.party}</td><td>${s.date}</td><td>${s.expiry||'-'}</td></tr>`
+  ).join('') || '<tr><td colspan="5" class="text-center" style="padding:30px;color:var(--text-muted);">暂无数据</td></tr>';
+}
+
+function renderPerfPlan() {
+  const tbody = document.getElementById('perfPlanBody');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  contracts.forEach(c => {
+    if(!c.performancePlan) return;
+    c.performancePlan.nodes.forEach(n => {
+      tbody.innerHTML += `<tr><td>${c.name}</td><td>${n.name}</td><td>${c.date}</td><td>${n.due}</td><td>${c.handler}</td><td><span class="badge ${n.status==='已完成'?'badge-green':n.status==='进行中'?'badge-blue':n.status==='逾期'?'badge-red':'badge-gray'}">${n.status}</span></td></tr>`;
+    });
+  });
+  if(!tbody.children.length) tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:30px;color:var(--text-muted);">暂无履行计划</td></tr>';
+}
+
+function renderPerfTrack() {
+  const container = document.getElementById('perfTrackList');
+  if(!container) return;
+  container.innerHTML = '';
+  const perfContracts = contracts.filter(c => c.performancePlan && c.status !== '已归档' && c.status !== '已解除');
+  perfContracts.forEach(c => {
+    const nodes = c.performancePlan.nodes; const progress = getContractPerfProgress(c);
+    const div = document.createElement('div');
+    div.style.cssText = 'margin-bottom:18px;padding:16px;background:#fafafa;border-radius:8px;border:1px solid var(--border);';
+    div.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div><strong style="font-size:14px;">${c.name}</strong><span style="color:var(--text-light);font-size:12px;margin-left:8px;">${c.party}</span><span class="badge ${statusBadge[c.status]}" style="margin-left:8px;">${c.status}</span></div>
+      <div style="text-align:right;"><span style="font-size:12px;color:var(--text-light);">总体进度</span><br><span style="font-size:18px;font-weight:700;color:${progress>=80?'var(--success)':progress>=50?'var(--orange)':'var(--danger)'}">${progress}%</span></div>
+    </div>
+    <div class="progress"><div class="progress-bar ${progress>=80?'green':progress>=50?'orange':'red'}" style="width:${progress}%"></div></div>
+    <div class="timeline" style="margin-top:10px;">${nodes.map((n,idx) => `<div class="timeline-item">
+      <div class="timeline-dot ${n.status==='已完成'?'green':n.status==='进行中'?'orange':'red'}"></div>
+      <h4>${n.name} ${n.anomaly?'<span class="badge badge-red">异常</span>':''}</h4>
+      <p>截止日期：${n.due}</p>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+        <span class="meta">${n.completed?'完成日期：'+n.completed:''}</span>
+        <span class="badge ${n.status==='已完成'?'badge-green':n.status==='进行中'?'badge-blue':n.status==='逾期'?'badge-red':'badge-gray'}">${n.status}</span>
+      </div>
+      <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+        ${n.status!=='已完成'?`<button class="btn btn-sm btn-primary" onclick='openEvidence("${c.id}",${idx})'>📎 上传证据</button>`:''}
+        ${n.status!=='已完成'?`<button class="btn btn-sm btn-danger" onclick='reportAnomaly("${c.id}",${idx})'>⚠️ 异常上报</button>`:''}
+        ${n.anomaly&&n.anomaly.status==='待处理'?`<button class="btn btn-sm btn-success" onclick='resolveAnomaly("${c.id}",${idx})'>处理异常</button>`:''}
+        ${n.evidence&&n.evidence.length?`<span class="tag">📄 ${n.evidence.length}份证据</span>`:''}
+      </div>
+    </div>`).join('')}</div>`;
+    container.appendChild(div);
+  });
+  if(!perfContracts.length) container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">暂无进行中的履行合同</div></div>';
+}
+
+function renderExceptions() {
+  const tbody = document.getElementById('perfExceptionBody');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  contracts.forEach(c => {
+    if(!c.anomalies || !c.anomalies.length) return;
+    c.anomalies.forEach(a => {
+      tbody.innerHTML += `<tr><td>${c.id}</td><td>${c.name}</td><td><span class="badge badge-red">${a.type||a.reason||'异常'}</span></td><td>${a.reason||''}</td><td>${a.date||c.date}</td><td><span class="badge ${a.status==='已解决'?'badge-green':a.status==='处理中'?'badge-blue':'badge-orange'}">${a.status||'待处理'}</span></td></tr>`;
+    });
+  });
+  if(!tbody.children.length) tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:30px;color:var(--text-muted);">暂无异常记录</td></tr>';
+}
+
+function renderArchive() {
+  const pending = contracts.filter(c => c.status === '已签署' || c.status === '履行中');
+  document.getElementById('archivePendingBody').innerHTML = pending.map(a =>
+    `<tr><td>${a.id}</td><td>${a.name}</td><td>${a.party}</td><td>${a.date}</td><td><span style="color:var(--danger)">${a.expiry||'-'}</span></td><td><button class="btn btn-sm btn-primary" onclick="archiveContract('${a.id}')">📁 归档</button></td></tr>`
+  ).join('') || '<tr><td colspan="6" class="text-center" style="padding:30px;color:var(--text-muted);">暂无待归档合同</td></tr>';
+  const done = contracts.filter(c => c.archiveInfo);
+  document.getElementById('archiveDoneBody').innerHTML = done.map(a =>
+    `<tr><td>${a.id}</td><td>${a.name}</td><td>${a.archiveInfo.archiveId}</td><td>${a.archiveInfo.date}</td><td>${a.archiveInfo.period}</td><td>${a.archiveInfo.archiver}</td></tr>`
+  ).join('') || '<tr><td colspan="6" class="text-center" style="padding:30px;color:var(--text-muted);">暂无归档记录</td></tr>';
+  const borrows = [];
+  contracts.forEach(c => { if(c.archiveInfo && c.archiveInfo.borrowRecords) c.archiveInfo.borrowRecords.forEach((b,i) => borrows.push({...b, contractId:c.id, idx:i})); });
+  document.getElementById('archiveBorrowBody').innerHTML = borrows.map(b =>
+    `<tr><td>${b.borrowId}</td><td>${b.name}</td><td>${b.borrower}</td><td>${b.date}</td><td>${b.returnDate}</td><td><span class="badge ${b.status==='已归还'?'badge-green':b.status==='逾期未还'?'badge-red':'badge-blue'}">${b.status}</span>${b.status==='借阅中'?` <button class="btn btn-sm btn-link" onclick="returnBorrow('${b.contractId}',${b.idx})">归还</button>`:''}</td></tr>`
+  ).join('') || '<tr><td colspan="6" class="text-center" style="padding:30px;color:var(--text-muted);">暂无借阅记录</td></tr>';
+}
+
+function renderTermination() {
+  const eligible = contracts.filter(c => c.status === '履行中' || c.status === '已签署');
+  document.getElementById('termStartBody').innerHTML = eligible.map(t =>
+    `<tr><td>${t.id}</td><td>${t.name}</td><td>${t.party}</td><td>¥${t.amount}</td><td><span class="badge ${statusBadge[t.status]}">${t.status}</span></td><td><button class="btn btn-sm btn-danger" onclick="terminateContractShow('${t.id}')">发起解除</button></td></tr>`
+  ).join('') || '<tr><td colspan="6" class="text-center" style="padding:30px;color:var(--text-muted);">暂无可解除合同</td></tr>';
+  const terms = contracts.filter(c => c.terminationInfo);
+  document.getElementById('termRecordsBody').innerHTML = terms.map(t =>
+    `<tr><td>TC-${t.id}</td><td>${t.id}</td><td>${t.name}</td><td>${t.terminationInfo.date}</td><td>${t.terminationInfo.reason}</td><td><span class="badge badge-green">已批准</span></td></tr>`
+  ).join('') || '<tr><td colspan="6" class="text-center" style="padding:30px;color:var(--text-muted);">暂无解除记录</td></tr>';
+}
+
+function renderHandover() {
+  const handovers = contracts.filter(c => c.handoverInfo);
+  document.getElementById('handoverStartBody').innerHTML = handovers.map(h =>
+    `<tr><td>${h.id}</td><td>${h.name}</td><td>${h.handoverInfo.from}</td><td>${h.handoverInfo.to}</td><td><span class="badge ${h.handoverInfo.status==='已完成'?'badge-green':'badge-orange'}">${h.handoverInfo.status}</span></td></tr>`
+  ).join('') || '<tr><td colspan="5" class="text-center" style="padding:30px;color:var(--text-muted);">暂无交接数据</td></tr>';
+  document.getElementById('handoverRecordsBody').innerHTML = handovers.map(h =>
+    `<tr><td>HJ-${h.id}</td><td>${h.name}</td><td>${h.handoverInfo.from}</td><td>${h.handoverInfo.to}</td><td>${h.handoverInfo.date}</td><td><span class="badge ${h.handoverInfo.status==='已完成'?'badge-green':'badge-blue'}">${h.handoverInfo.status}</span></td></tr>`
+  ).join('') || '<tr><td colspan="6" class="text-center" style="padding:30px;color:var(--text-muted);">暂无交接记录</td></tr>';
+}
+
+function renderDashboard() {
+  const total = contracts.length;
+  const pending = contracts.filter(c => c.status === '审批中').length;
+  const perf = contracts.filter(c => c.status === '履行中').length;
+  const expiredSoon = contracts.filter(c => { if(!c.expiry) return false; const e=new Date(c.expiry); const diff=(e-new Date())/(86400000); return diff>0&&diff<=30; }).length;
+  const perfProgress = perf ? Math.round(contracts.filter(c=>c.performancePlan).filter(c=>getContractPerfProgress(c)>=80).length/Math.max(1,perf)*100) : 0;
+  const statsRow = document.querySelector('.stats-row');
+  if(statsRow) statsRow.innerHTML = `
+    <div class="stat-card"><div class="stat-label">合同总数</div><div class="stat-value">${total}</div><div class="stat-change">较上月 <span style="color:var(--success)">↑ 12.5%</span></div></div>
+    <div class="stat-card"><div class="stat-label">待我审批</div><div class="stat-value">${pending}</div><div class="stat-change">较昨日 <span style="color:var(--orange)">↑ 5</span></div></div>
+    <div class="stat-card"><div class="stat-label">即将到期</div><div class="stat-value">${expiredSoon}</div><div class="stat-change">30天内到期 <span style="color:var(--danger)">⚠️ 需关注</span></div></div>
+    <div class="stat-card"><div class="stat-label">履行中</div><div class="stat-value">${perf}</div><div class="stat-change">完成率 <span style="color:var(--success)">${perfProgress}%</span></div></div>`;
+  const chartData = [rand(30,80),rand(40,90),rand(50,100),rand(35,85),rand(45,95),rand(55,100),rand(40,90),rand(45,85),rand(50,95),rand(60,100),rand(55,90),rand(50,85)];
+  const chartEl = document.getElementById('dashboardChart');
+  if(chartEl) chartEl.innerHTML = chartData.map((v,i)=>`<div class="bar-wrap"><div class="bar" style="height:${v}%"><span class="bar-value">${v}</span></div><span class="bar-label">${i+1}月</span></div>`).join('');
+  const feed = document.getElementById('activityFeed');
+  if(feed) feed.innerHTML = activities.slice(0,8).map(a=>`<li><span class="activity-dot" style="background:${a.dot}"></span><div class="activity-content"><div class="act-text">${a.text}</div><div class="act-time">${a.time}</div></div></li>`).join('');
+}
+
+// ======================== FILTER & PAGINATION ========================
+let contractPage = 0;
+const pageSize = 10;
+
+function getFilteredContracts() {
+  const search = (document.getElementById('contractSearch')?.value||'').toLowerCase();
+  const status = document.getElementById('contractStatusFilter')?.value||'';
+  const type = document.getElementById('contractTypeFilter')?.value||'';
+  return contracts.filter(c => {
+    if(search && !c.id.toLowerCase().includes(search) && !c.name.toLowerCase().includes(search) && !c.party.toLowerCase().includes(search)) return false;
+    if(status && c.status !== status) return false;
+    if(type && c.type !== type) return false;
+    return true;
+  });
+}
+
+function filterContractTable() {
+  contractPage = 0;
+  const filtered = getFilteredContracts();
+  renderContractTable(filtered.slice(0,pageSize));
+  document.querySelector('.pagination-info') && (document.querySelector('.pagination-info').textContent = '共 ' + filtered.length + ' 条');
+}
+
+function changeContractPage(delta) {
+  const filtered = getFilteredContracts();
+  const maxPage = Math.max(0, Math.ceil(filtered.length / pageSize) - 1);
+  contractPage = Math.max(0, Math.min(maxPage, contractPage + delta));
+  renderContractTable(filtered.slice(contractPage*pageSize, (contractPage+1)*pageSize));
+  document.querySelector('.pagination-info') && (document.querySelector('.pagination-info').textContent = '共 ' + filtered.length + ' 条');
+}
+
+// ======================== NAVIGATION ========================
+function switchPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page-'+pageId);
+  if(target) target.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const link = document.querySelector(`.nav-sub a[data-page="${pageId}"]`);
+  if(link) {
+    link.closest('.nav-item').classList.add('active');
+    link.closest('.nav-item').classList.add('open');
+    document.querySelectorAll('.nav-sub a').forEach(a => a.classList.remove('active'));
+    link.classList.add('active');
+  } else {
+    document.querySelectorAll('.nav-item').forEach(n => { if(n.dataset.page === pageId) n.classList.add('active'); });
+  }
+  updateBreadcrumb(pageId);
+}
+
+document.querySelectorAll('.nav-item > a').forEach(a => {
+  a.addEventListener('click', function(e) {
+    const item = this.closest('.nav-item');
+    const sub = item.querySelector('.nav-sub');
+    if(sub) { item.classList.toggle('open'); if(!sub.querySelector('a.active') && sub.querySelector('a')) sub.querySelector('a').click(); }
+    else switchPage(item.dataset.page);
+  });
+});
+
+document.querySelectorAll('.nav-sub a').forEach(a => {
+  a.addEventListener('click', function(e) { e.stopPropagation(); switchPage(this.dataset.page); });
+});
+
+// ======================== MODALS ========================
+function openModal(id) { document.getElementById(id)?.classList.add('show'); }
+function closeModal(id) { document.getElementById(id)?.classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(el => { el.addEventListener('click', function(e) { if(e.target===this) closeModal(this.id); }); });
+
+let currApproval = null;
+function openApproval(contractId) {
+  const c = findContract(contractId);
+  if(!c) return;
+  currApproval = { id: c.id, name: c.name, amount: c.amount, submitter: c.handler };
+  document.getElementById('approvalContractCode').textContent = c.id;
+  document.getElementById('approvalContractName').textContent = c.name;
+  document.getElementById('approvalContractAmount').textContent = '¥'+c.amount;
+  document.getElementById('approvalSubmitter').textContent = c.handler;
+  document.getElementById('approvalOpinion').value = '';
+  openModal('approvalModal');
+}
+
+function openUserModal() {
+  document.getElementById('userModalTitle').textContent = '新建用户';
+  document.getElementById('userModalUsername').value = '';
+  document.getElementById('userModalName').value = '';
+  document.getElementById('userModalPwd').value = '';
+  document.getElementById('userModalDept').value = '管理部';
+  document.getElementById('userModalRole').value = '合同经办人';
+  document.getElementById('userModalStatus').value = '启用';
+  openModal('userModal');
+}
+
+function saveUser() {
+  const name = document.getElementById('userModalName').value.trim();
+  const username = document.getElementById('userModalUsername').value.trim();
+  if(!name) { alert('请输入姓名'); return; }
+  if(!username) { alert('请输入用户名'); return; }
+  users.push({ username, name, dept: document.getElementById('userModalDept').value,
+    role: document.getElementById('userModalRole').value, status: document.getElementById('userModalStatus').value });
+  renderUsers(); closeModal('userModal');
+}
+
+let userEditIdx = -1;
+function editUser(idx) {
+  userEditIdx = idx; const u = users[idx]; if(!u) return;
+  document.getElementById('userModalTitle').textContent = '编辑用户';
+  document.getElementById('userModalUsername').value = u.username;
+  document.getElementById('userModalName').value = u.name;
+  document.getElementById('userModalPwd').value = '******';
+  document.getElementById('userModalDept').value = u.dept;
+  document.getElementById('userModalRole').value = u.role;
+  document.getElementById('userModalStatus').value = u.status;
+  openModal('userModal');
+}
+
+function showDetail(contractId) {
+  const c = findContract(contractId);
+  if(!c) { alert('合同未找到'); return; }
+  document.getElementById('dtCode').textContent = c.id;
+  document.getElementById('dtName').textContent = c.name;
+  document.getElementById('dtParty').textContent = c.party;
+  document.getElementById('dtType').textContent = c.type;
+  document.getElementById('dtAmount').textContent = '¥'+c.amount;
+  document.getElementById('dtDate').textContent = c.date;
+  document.getElementById('dtHandler').textContent = c.handler;
+  document.getElementById('dtStatus').innerHTML = `<span class="badge ${statusBadge[c.status]}">${c.status}</span>`;
+  document.getElementById('dtDuration').textContent = (c.date||'') + ' ~ ' + (c.expiry||'');
+  const pct = getContractPerfProgress(c);
+  const progressEl = document.getElementById('dtProgress');
+  const labelEl = document.getElementById('dtProgressLabel');
+  if(progressEl) { progressEl.style.width=pct+'%'; progressEl.className='progress-bar '+(pct>=80?'green':pct>=50?'orange':''); }
+  if(labelEl) labelEl.textContent = pct+'%';
+  const perfContent = document.getElementById('detailPerfContent');
+  if(perfContent) {
+    if(c.performancePlan && c.performancePlan.nodes.length) {
+      perfContent.innerHTML = c.performancePlan.nodes.map((n,idx) =>
+        `<div class="timeline-item"><div class="timeline-dot ${n.status==='已完成'?'green':n.status==='进行中'?'orange':'red'}"></div>
+        <h4>${n.name} ${n.anomaly?'<span class="badge badge-red">异常</span>':''}</h4>
+        <p>截止日期：${n.due} | 状态：<span class="badge ${n.status==='已完成'?'badge-green':n.status==='进行中'?'badge-blue':n.status==='逾期'?'badge-red':'badge-gray'}">${n.status}</span></p>
+        ${n.completed?'<p style="color:var(--text-light);font-size:12px;">完成日期：'+n.completed+'</p>':''}
+        ${n.evidence&&n.evidence.length?'<p style="font-size:12px;">📄 证据：'+n.evidence.join(', ')+'</p>':''}</div>`
+      ).join('');
+    } else perfContent.innerHTML = '<p style="color:var(--text-muted);">暂无履行数据</p>';
+  }
+  const flowArea = document.getElementById('detail-flow');
+  if(flowArea && c.approvalHistory.length) {
+    flowArea.innerHTML = '<div class="timeline" style="margin-bottom:16px;">' +
+      c.approvalHistory.map(a => `<div class="timeline-item"><div class="timeline-dot ${a.action.includes('驳回')?'red':a.action.includes('通过')||a.action==='已批准'?'green':'orange'}"></div>
+      <h4>${a.approver} - ${a.action}</h4><p>${a.opinion}</p><div class="meta">${a.time}</div></div>`).join('') + '</div>';
+  } else if(flowArea) { flowArea.innerHTML = '<p style="color:var(--text-muted);">暂无审批记录</p>'; }
+  openModal('detailModal');
+}
+
+function switchFormTab(el, tabId) {
+  el.closest('.tabs').querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  el.closest('.card-body').querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+function switchDetailTab(el, tabId) {
+  el.closest('.tabs').querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('detailModal').querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+function switchPermTab(el, tabId) {
+  document.querySelectorAll('#page-sys-perm .tab-item').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('#page-sys-perm .tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+
+// ======================== REFRESH ========================
+function refreshAll() {
+  renderDashboard(); filterContractTable(); renderApproveTable();
+  renderSigningTables(); renderPerfPlan(); renderPerfTrack();
+  renderExceptions(); renderArchive(); renderTermination(); renderHandover();
+}
+
+// ======================== ANOMALY REPORT ========================
+function openAnomalyReportModal() {
+  const sel = document.getElementById('anomalyContract');
+  if(sel) sel.innerHTML = '<option value="">请选择合同</option>'+contracts.filter(c=>c.performancePlan).map(c=>'<option value="'+c.id+'">'+c.id+' - '+c.name+'</option>').join('');
+  openModal('anomalyReportModal');
+}
+
+// ======================== USERS, ROLES, LOGS ========================
+const users = [];
+for(let i=0;i<userNames.length;i++) users.push({ username:'user'+String(i+1).padStart(2,'0'), name:userNames[i], dept:depts[i%depts.length], role:roles[i%roles.length], status:i<13?'启用':'禁用' });
+
+const roleData = [
+  {name:'超级管理员',code:'SUPER_ADMIN',count:1,created:'2026-01-01',desc:'系统最高权限'},
+  {name:'系统管理员',code:'SYS_ADMIN',count:3,created:'2026-01-01',desc:'系统配置与管理'},
+  {name:'合同经办人',code:'CONTRACT_HANDLER',count:12,created:'2026-01-05',desc:'合同起草与发起'},
+  {name:'审批人',code:'APPROVER',count:8,created:'2026-01-05',desc:'合同审批'},
+  {name:'归档管理员',code:'ARCHIVE_ADMIN',count:4,created:'2026-01-10',desc:'合同归档管理'},
+  {name:'查看人员',code:'VIEWER',count:20,created:'2026-01-10',desc:'只读查看权限'},
+  {name:'履行责任人',code:'PERFORMANCE_OWNER',count:6,created:'2026-01-15',desc:'合同履行跟踪'},
+];
+
+const logs = [];
+const logTypes = ['登录','新增','编辑','删除','审批','导出'];
+const logActions = ['用户登录系统','新建合同','修改合同信息','删除过期合同','审批通过合同','导出合同统计数据','修改系统配置','新建用户','角色权限变更','合同归档操作'];
+for(let i=0;i<18;i++) { const d=new Date(2026,4,rand(1,27),rand(8,20),rand(0,59)); logs.push({ time:d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes()), user:pick(userNames), type:pick(logTypes), action:pick(logActions), ip:'192.168.1.'+rand(10,200) }); }
+
+activities.push(
+  {text:'张明 提交了合同 "2026年度IT服务外包合同" 审批', time:'2026-05-20', dot:'var(--orange)'},
+  {text:'李经理 通过了合同 "网络设备采购框架协议" 审批', time:'2026-05-19', dot:'var(--success)'},
+  {text:'王法务 驳回了合同 "办公场地租赁合同" 审批', time:'2026-05-18', dot:'var(--danger)'},
+  {text:'系统自动提醒：3份合同即将到期', time:'2026-05-17', dot:'var(--danger)'},
+  {text:'陈静 上传了合同 "数据中心服务器采购合同" 签署文件', time:'2026-05-16', dot:'var(--teal)'},
+);
+
+function renderUsers() {
+  document.getElementById('userTableBody').innerHTML = users.map((u,i) =>
+    `<tr><td>${u.username}</td><td>${u.name}</td><td><span class="dept-tag">${u.dept}</span></td><td><span class="role-tag">${u.role}</span></td><td><span class="badge ${u.status==='启用'?'badge-green':'badge-gray'}">${u.status}</span></td><td><div class="btn-group"><button class="btn btn-sm btn-link" onclick='editUser(${i})'>编辑</button><button class="btn btn-sm btn-link" style="color:var(--danger)" onclick="toggleUser(${i})">${u.status==='启用'?'禁用':'启用'}</button></div></td></tr>`
+  ).join('');
+}
+
+function toggleUser(idx) { const u=users[idx]; if(!u) return; u.status=u.status==='启用'?'禁用':'启用'; renderUsers(); }
+
+function renderRoles() {
+  document.getElementById('roleTableBody').innerHTML = roleData.map(r =>
+    `<tr><td><strong>${r.name}</strong></td><td><code style="background:#f0f0f0;padding:1px 6px;border-radius:3px;font-size:12px;">${r.code}</code></td><td>${r.count}</td><td>${r.created}</td><td style="color:var(--text-light)">${r.desc}</td><td><button class="btn btn-sm btn-link">编辑</button></td></tr>`
+  ).join('');
+}
+
+function renderLogs() {
+  document.getElementById('logTableBody').innerHTML = logs.map(l =>
+    `<tr><td style="white-space:nowrap">${l.time}</td><td>${l.user}</td><td><span class="badge badge-blue">${l.type}</span></td><td>${l.action}</td><td><code style="font-size:12px;color:var(--text-muted)">${l.ip}</code></td></tr>`
+  ).join('');
+}
+
+function filterUserTable() {
+  const q=(document.getElementById('userSearch')?.value||'').toLowerCase();
+  const d=document.getElementById('userDeptFilter')?.value||'';
+  const filtered=users.filter(u=>{if(q&&!u.username.includes(q)&&!u.name.includes(q))return false;if(d&&u.dept!==d)return false;return true;});
+  document.getElementById('userTableBody').innerHTML=filtered.map((u,i)=>`<tr><td>${u.username}</td><td>${u.name}</td><td><span class="dept-tag">${u.dept}</span></td><td><span class="role-tag">${u.role}</span></td><td><span class="badge ${u.status==='启用'?'badge-green':'badge-gray'}">${u.status}</span></td><td><div class="btn-group"><button class="btn btn-sm btn-link">编辑</button><button class="btn btn-sm btn-link" style="color:var(--danger)" onclick="toggleUser(${i})">${u.status==='启用'?'禁用':'启用'}</button></div></td></tr>`).join('');
+}
+
+// ======================== UI ENHANCEMENTS ========================
+document.addEventListener('DOMContentLoaded', function() {
+  const toggleBtn=document.querySelector('.sidebar-toggle');
+  const sidebar=document.querySelector('.sidebar');
+  if(toggleBtn&&sidebar) toggleBtn.addEventListener('click',function(){sidebar.classList.toggle('collapsed');});
+});
+
+function updateBreadcrumb(pageTitle) {
+  const nav=document.getElementById('breadcrumbNav'); if(!nav) return;
+  const titles={'dashboard':'仪表盘','contract-list':'合同列表','contract-new':'发起合同','contract-approve':'待我审批','signing-pending':'待签署','signing-progress':'签署中','signing-done':'已签署','perf-plan':'履行计划','perf-track':'履行跟踪','perf-exception':'异常处理','archive-pending':'待归档','archive-done':'已归档','archive-borrow':'借阅管理','term-start':'解除发起','term-records':'解除记录','handover-start':'交接发起','handover-records':'交接记录','sys-user':'用户管理','sys-role':'角色管理','sys-perm':'权限配置','sys-config':'系统配置','sys-log':'日志管理'};
+  nav.innerHTML='<span class="breadcrumb-item" onclick="switchPage(\'dashboard\')">首页</span><span class="breadcrumb-sep">/</span><span class="breadcrumb-item breadcrumb-current">'+(titles[pageTitle]||pageTitle)+'</span>';
+}
+
+const notificationData=[{title:'合同 "IT服务外包合同" 待您审批',time:'5分钟前',dot:'var(--orange)'},{title:'合同 "网络设备采购" 签署已完成',time:'1小时前',dot:'var(--success)'},{title:'3份合同即将到期，请及时处理',time:'2小时前',dot:'var(--danger)'}];
+function toggleNotifDropdown(){const dd=document.getElementById('notifDropdown');if(!dd)return;dd.classList.toggle('show');if(dd.classList.contains('show'))renderNotifications();}
+function renderNotifications(){const list=document.getElementById('notifList');if(!list)return;list.innerHTML=notificationData.map(n=>'<div class="notif-item" onclick="alert(\''+n.title+'\')"><span class="notif-dot" style="background:'+n.dot+'"></span><div class="notif-content"><div class="notif-title">'+n.title+'</div><div class="notif-time">'+n.time+'</div></div></div>').join('');}
+document.addEventListener('click',function(e){const dd=document.getElementById('notifDropdown');if(dd&&dd.classList.contains('show')&&!e.target.closest('.notif-wrap'))dd.classList.remove('show');});
+
+const versionHistoryData=[{ver:'v3.0',date:'2026-05-20 16:30',editor:'张明',note:'合同条款修订，调整付款方式',current:true},{ver:'v2.0',date:'2026-05-18 10:15',editor:'李强',note:'合同金额调整，增加保密条款',current:false},{ver:'v1.0',date:'2026-05-15 09:00',editor:'张明',note:'初始版本创建',current:false}];
+function renderVersionHistory(){const c=document.getElementById('versionHistoryList');if(!c)return;c.innerHTML='';versionHistoryData.forEach(v=>{const d=document.createElement('div');d.className='version-item';d.innerHTML='<div class="version-dot'+(v.current?' current':'')+'"></div><div class="version-content"><div class="ver-num">'+v.ver+(v.current?' <span class="badge badge-green" style="font-size:10px;padding:0 6px;">当前版本</span>':'')+'</div><div class="ver-info">'+v.note+'</div><div class="ver-time">'+v.editor+' · '+v.date+'</div>'+(v.current?'':'<div class="ver-rollback" onclick="alert(\'确认回滚到'+v.ver+'？\')">↺ 回滚到此版本</div>')+'</div>';c.appendChild(d);});}
+
+function checkBackdate(inputEl){if(!inputEl||!inputEl.value)return;const s=new Date(inputEl.value),t=new Date();t.setHours(0,0,0,0);if(s<t){const a=document.createElement('div');a.style.cssText='margin-top:8px;padding:8px 12px;background:#fff1f0;border:1px solid #ffa39e;border-radius:4px;font-size:12px;color:#cf1322;display:flex;align-items:center;gap:8px;';a.id='backdateAlert';a.innerHTML='⚠️ <span><strong>倒签提醒：</strong>签订日期早于今天，需上传倒签证明文件。</span><button class="btn btn-sm btn-danger" onclick="alert(\'请选择倒签证明文件上传\')">上传证明</button>';if(!document.getElementById('backdateAlert'))inputEl.closest('.form-group')?.after(a);}else{const e=document.getElementById('backdateAlert');if(e)e.remove();}}
+document.addEventListener('DOMContentLoaded',function(){const di=document.querySelectorAll('#tab-basic input[type="date"]');if(di.length>0)di[0].addEventListener('change',function(){checkBackdate(this);});});
+
+document.addEventListener('DOMContentLoaded',function(){const si=document.querySelector('.header-search input');if(!si)return;const sd=document.createElement('div');sd.className='quick-search-suggest';sd.id='quickSuggest';si.parentElement.appendChild(sd);si.addEventListener('input',function(){const q=this.value.trim().toLowerCase(),sg=document.getElementById('quickSuggest');if(!q||q.length<1){sg.classList.remove('show');return;}const r=contracts.filter(c=>c.id.toLowerCase().includes(q)||c.name.toLowerCase().includes(q)||c.party.toLowerCase().includes(q)).slice(0,6);if(r.length===0){sg.classList.remove('show');return;}sg.innerHTML=r.map(c=>'<div class="quick-search-item" onclick="switchPage(\'contract-list\');document.getElementById(\'contractSearch\').value=\''+c.name+'\';filterContractTable();document.getElementById(\'quickSuggest\').classList.remove(\'show\')"><span class="qs-icon">📄</span><span class="qs-text">'+c.name+'</span><span class="qs-type">'+c.id+'</span></div>').join('');sg.classList.add('show');});si.addEventListener('blur',function(){setTimeout(function(){document.getElementById('quickSuggest')?.classList.remove('show');},200);});});
+
+function validateContractForm(){const f=document.querySelector('#tab-basic'),r=f.querySelectorAll('.form-control');let v=true;r.forEach(function(el){if(!el.value.trim()){el.style.borderColor='var(--danger)';v=false;}else el.style.borderColor='';});return v;}
+
+(function(){const orig=renderContractTable;renderContractTable=function(data){data.forEach(function(c){c._backdate=rand(1,100)<=20;});orig(data);const tb=document.getElementById('contractTableBody');if(tb){const rows=tb.querySelectorAll('tr');rows.forEach(function(row,idx){if(data[idx]&&data[idx]._backdate){const sc=row.cells[5];if(sc){const b=document.createElement('span');b.className='badge-backdate';b.textContent='倒签';sc.appendChild(document.createTextNode(' '));sc.appendChild(b);}}});}};})();
+
+document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('[data-tooltip]').forEach(function(el){const w=document.createElement('span');w.className='tooltip-wrap';el.parentNode.insertBefore(w,el);w.appendChild(el);const t=document.createElement('span');t.className='tooltip-text';t.textContent=el.getAttribute('data-tooltip');w.appendChild(t);});});
+
+// ---- Init sortable tables after all renders ----
+function initSortableTables() {
+  setTimeout(function() {
+    document.querySelectorAll('.table-wrap table').forEach(function(tbl) {
+      if(tbl.closest('#page-sys-perm')) return;
+      makeSortableForTable(tbl);
+    });
+  }, 100);
+}
+
+function makeSortableForTable(table) {
+  if(!table) return;
+  const headers = table.querySelectorAll('thead th');
+  headers.forEach(function(th, idx) {
+    th.classList.add('sortable');
+    th.addEventListener('click', function() {
+      const tbody = table.querySelector('tbody');
+      if(!tbody) return;
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      const isAsc = this.classList.contains('asc');
+      headers.forEach(function(h) { h.classList.remove('asc','desc'); });
+      this.classList.add(isAsc ? 'desc' : 'asc');
+      rows.sort(function(a, b) {
+        const aVal = a.cells[idx]?.textContent.trim() || '';
+        const bVal = b.cells[idx]?.textContent.trim() || '';
+        const aNum = parseFloat(aVal.replace(/[¥,]/g,''));
+        const bNum = parseFloat(bVal.replace(/[¥,]/g,''));
+        if(!isNaN(aNum) && !isNaN(bNum)) { return isAsc ? bNum - aNum : aNum - bNum; }
+        return isAsc ? bVal.localeCompare(aVal, 'zh-CN') : aVal.localeCompare(bVal, 'zh-CN');
+      });
+      rows.forEach(function(r) { tbody.appendChild(r); });
+    });
+  });
+}
+
+// ======================== INIT CALLS ========================
+renderDashboard();
+renderContractTable(contracts.slice(0,pageSize));
+renderApproveTable();
+renderSigningTables();
+renderPerfPlan();
+renderPerfTrack();
+renderExceptions();
+renderArchive();
+renderTermination();
+renderHandover();
+renderUsers();
+renderRoles();
+renderLogs();
+document.getElementById('approveCount').textContent = contracts.filter(c => c.status === '审批中').length;
+initSortableTables();
+</script>
+</body>
+</html>

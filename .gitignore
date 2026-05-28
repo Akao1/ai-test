@@ -2,3 +2,4 @@ backend/target/
 backend/data/mall.mv.db
 backend/data/mall.trace.db
 *.log
+data/mall.mv.db
