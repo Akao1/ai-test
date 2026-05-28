@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="utf-8">
+<style>
+  body { font-family: 'Microsoft YaHei','SimHei',sans-serif; padding:40px; line-height:1.8; font-size:13px; }
+  h1 { color:#1a1a2e; font-size:22px; text-align:center; border-bottom:3px solid #e94560; padding-bottom:12px; }
+  h2 { color:#16213e; font-size:17px; margin-top:22px; border-left:4px solid #e94560; padding-left:10px; }
+  table { border-collapse:collapse; width:100%; margin:12px 0; }
+  th,td { border:1px solid #ccc; padding:6px 10px; text-align:left; }
+  th { background:#f0f0f0; }
+  tr:nth-child(even) { background:#fafafa; }
+  ul,ol { margin:6px 0; padding-left:22px; }
+  li { margin:3px 0; }
+</style></head>
+<body><h1>后台数据总结报告</h1>
+<h2>一、基本信息</h2>
+<ul>
+<li><strong>报告周期</strong>：2026-05-11 至 2026-05-17</li>
+<li><strong>数据来源</strong>：商城核心数据库 / 埋点系统</li>
+<li><strong>生成时间</strong>：2026-05-18 09:30</li>
+</ul>
+<h2>二、核心指标概览</h2>
+<table>
+<thead>
+<tr>
+<th>指标名称</th>
+<th>当前值</th>
+<th>环比变化</th>
+<th>同比变化</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用户总数</td>
+<td>1,280,432</td>
+<td>+2.1%</td>
+<td>+35.6%</td>
+</tr>
+<tr>
+<td>活跃用户</td>
+<td>142,873（日活）</td>
+<td>+3.4%</td>
+<td>+28.1%</td>
+</tr>
+<tr>
+<td>订单数量</td>
+<td>67,234</td>
+<td>+5.1%</td>
+<td>+55.7%</td>
+</tr>
+<tr>
+<td>交易金额</td>
+<td>¥3,842,195</td>
+<td>+6.4%</td>
+<td>+61.2%</td>
+</tr>
+</tbody>
+</table>
+<h2>三、用户数据分析</h2>
+<ul>
+<li><strong>新增用户数</strong>：21,556（日均 3,079），环比 +8.4%</li>
+<li><strong>流失用户数</strong>：12,844（次周未回流），流失率 8.9%</li>
+<li><strong>用户留存率</strong>：次日 42.3% / 7日 18.7% / 30日 8.9%</li>
+<li><strong>用户画像特征</strong>：18-35 岁占 68%，女性占 57%，一二线城市占 72%</li>
+</ul>
+<h2>四、业务数据分析</h2>
+<ul>
+<li><strong>核心业务指标完成情况</strong>：GMV 达成月目标的 42%，进度正常；客单价 ¥57.12，环比 +1.2%</li>
+<li><strong>异常数据说明</strong>：5/15 iOS 端订单下降 12%，疑为支付 SDK 兼容问题</li>
+<li><strong>趋势分析</strong>：周三会员日达本周峰值（订单 12,874），周日最低（7,023），周中整体呈上升趋势</li>
+</ul>
+<h2>五、系统运行状况</h2>
+<ul>
+<li><strong>服务器负载</strong>：CPU 均值 52%，峰值 78%；内存 62%</li>
+<li><strong>接口响应时间</strong>：平均 187ms，P99 892ms</li>
+<li><strong>错误率</strong>：0.23%（上周 0.19%），其中 5/14 新首页上线后闪退率升至 0.7%</li>
+<li><strong>存储空间使用</strong>：数据库存储 72%，日志存储 54%</li>
+</ul>
+<h2>六、问题与建议</h2>
+<ul>
+<li><strong>发现的问题</strong>：</li>
+<li>新首页在 Android 低端机偶现白屏</li>
+<li>iOS 支付 SDK 兼容性导致订单下跌</li>
+<li>数据库连接池使用率达 78%，需提前扩容</li>
+<li><strong>优化建议</strong>：</li>
+<li>回滚 iOS 支付 SDK 至稳定版本</li>
+<li>修复 Android 低端机白屏问题后灰度发布</li>
+<li>本周提前扩容数据库连接池及读写分离</li>
+<li><strong>后续跟进事项</strong>：</li>
+<li>iOS 支付修复上线（5/18）</li>
+<li>Android 白屏修复上线（5/19）</li>
+<li>数据库扩容（5/25）</li>
+</ul></body></html>

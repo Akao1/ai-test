@@ -1,7 +1,9 @@
 package com.mall.config;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mall.entity.*;
 import com.mall.repository.*;
 import jakarta.annotation.PostConstruct;
@@ -10,11 +12,22 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
+import java.util.*;
 
-import static com.mall.repository.AllRepositories.*;
+import com.mall.repository.UserRepository;
+import com.mall.repository.VillageRepository;
+import com.mall.repository.ParcelRepository;
+import com.mall.repository.HouseholdRepository;
+import com.mall.repository.BuildingRepository;
+import com.mall.repository.CropRepository;
+import com.mall.repository.PolicyRepository;
+import com.mall.repository.SysConfigRepository;
+import com.mall.repository.MerchantRepository;
+import com.mall.repository.CategoryRepository;
+import com.mall.repository.ProductRepository;
+import com.mall.repository.SkuRepository;
+import com.mall.repository.AddressRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 @Component
 public class DataLoader {
@@ -62,10 +75,8 @@ public class DataLoader {
     public void init() throws Exception {
         if (userRepo.count() > 0) return;
 
-        // Load from data/ directory (relative to project root)
         String dataDir = "data";
 
-        // Platform users
         if (userRepo.count() == 0) {
             var admin = new User(); admin.setUsername("admin"); admin.setPassword(encoder.encode("admin123"));
             admin.setNickname("管理员"); admin.setRole("admin"); admin.setStatus(1);
@@ -90,7 +101,6 @@ public class DataLoader {
         loadJson(dataDir + "/policies.json", Policy.class, policyRepo);
         loadJson(dataDir + "/sysconfig.json", SysConfig.class, configRepo);
 
-        // Mall data
         loadJson(dataDir + "/test/data/merchants.json", Merchant.class, merchantRepo);
         loadJson(dataDir + "/test/data/categories.json", Category.class, categoryRepo);
         loadJson(dataDir + "/test/data/products.json", Product.class, productRepo);
@@ -100,21 +110,76 @@ public class DataLoader {
         System.out.println("Data loaded successfully!");
     }
 
+    @SuppressWarnings("unchecked")
     private <T> void loadJson(String path, Class<T> type, JpaRepository<T, Long> repo) {
         try {
-            var file = new File(path);
+            File file = new File(path);
+            JsonNode root;
             if (!file.exists()) {
-                // Try classpath
                 InputStream is = getClass().getClassLoader().getResourceAsStream(path);
                 if (is == null) return;
-                var list = mapper.readValue(is, mapper.getTypeFactory().constructCollectionType(List.class, type));
-                repo.saveAll(list);
+                root = mapper.readTree(is);
+            } else {
+                root = mapper.readTree(file);
+            }
+            JsonNode data = root.isArray() ? root : root.get("data");
+            if (data == null) return;
+
+            if (data.isObject()) {
+                ObjectNode obj = (ObjectNode) data;
+                convertKeys(obj);
+                convertArraysToStrings(obj);
+                T item = mapper.readValue(obj.traverse(), type);
+                repo.save(item);
                 return;
             }
-            var list = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, type));
+
+            for (JsonNode item : data) {
+                ObjectNode obj = (ObjectNode) item;
+                convertKeys(obj);
+                convertArraysToStrings(obj);
+            }
+            List<T> list = mapper.readValue(data.traverse(),
+                mapper.getTypeFactory().constructCollectionType(List.class, type));
             repo.saveAll(list);
         } catch (Exception e) {
             System.out.println("Skip " + path + ": " + e.getMessage());
         }
+    }
+
+    private void convertKeys(ObjectNode obj) {
+        List<String> toRemove = new ArrayList<>();
+        Map<String, JsonNode> toAdd = new HashMap<>();
+        var iter = obj.fields();
+        while (iter.hasNext()) {
+            var entry = iter.next();
+            String key = entry.getKey();
+            if (key.contains("_")) {
+                toRemove.add(key);
+                toAdd.put(toCamel(key), entry.getValue());
+            }
+        }
+        for (String k : toRemove) obj.remove(k);
+        for (var e : toAdd.entrySet()) obj.set(e.getKey(), e.getValue());
+    }
+
+    private void convertArraysToStrings(ObjectNode obj) {
+        for (var iter = obj.fields(); iter.hasNext(); ) {
+            var entry = iter.next();
+            if (entry.getValue().isArray()) {
+                obj.put(entry.getKey(), entry.getValue().toString());
+            }
+        }
+    }
+
+    private static String toCamel(String s) {
+        StringBuilder sb = new StringBuilder();
+        boolean nextUpper = false;
+        for (char c : s.toCharArray()) {
+            if (c == '_') { nextUpper = true; }
+            else if (nextUpper) { sb.append(Character.toUpperCase(c)); nextUpper = false; }
+            else { sb.append(c); }
+        }
+        return sb.toString();
     }
 }

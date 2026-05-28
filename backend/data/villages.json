@@ -1,0 +1,31 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "李家村",
+      "area": 320,
+      "population": 856,
+      "households": 212,
+      "desc": "东侧自然村，以小麦种植为主",
+      "coords": []
+    },
+    {
+      "id": 2,
+      "name": "王家坪",
+      "area": 280,
+      "population": 623,
+      "households": 158,
+      "desc": "西侧自然村，蔬菜大棚集中",
+      "coords": []
+    },
+    {
+      "id": 3,
+      "name": "赵家沟",
+      "area": 190,
+      "population": 412,
+      "households": 106,
+      "desc": "南侧自然村，果树种植区",
+      "coords": []
+    }
+  ]
+}

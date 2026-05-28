@@ -9,7 +9,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.mall.repository.AllRepositories.*;
+import com.mall.entity.*;
+import com.mall.repository.MerchantRepository;
+import com.mall.repository.ProductRepository;
+import com.mall.repository.SkuRepository;
+import com.mall.repository.CartRepository;
+import com.mall.repository.OrderRepository;
+import com.mall.repository.AddressRepository;
+import com.mall.repository.ReviewRepository;
+import com.mall.repository.CategoryRepository;
+import com.mall.repository.UserRepository;
 
 @Service
 public class MallService {
@@ -193,7 +202,7 @@ public class MallService {
         return map;
     }
 
-    static Map<String, Object> orderToMap(Order o) {
+    public static Map<String, Object> orderToMap(Order o) {
         var map = new LinkedHashMap<String, Object>();
         map.put("id", o.getId()); map.put("userId", o.getUserId());
         map.put("orderNo", o.getOrderNo()); map.put("totalAmount", o.getTotalAmount());

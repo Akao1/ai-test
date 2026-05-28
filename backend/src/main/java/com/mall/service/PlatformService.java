@@ -1,12 +1,19 @@
 package com.mall.service;
 
 import com.mall.entity.*;
-import com.mall.repository.*;
+import com.mall.repository.UserRepository;
+import com.mall.repository.VillageRepository;
+import com.mall.repository.ParcelRepository;
+import com.mall.repository.HouseholdRepository;
+import com.mall.repository.BuildingRepository;
+import com.mall.repository.CropRepository;
+import com.mall.repository.PolicyRepository;
+import com.mall.repository.SysConfigRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.mall.repository.AllRepositories.*;
 
 @Service
 public class PlatformService {

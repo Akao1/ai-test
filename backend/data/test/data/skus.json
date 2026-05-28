@@ -1,0 +1,164 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "product_id": 1,
+      "attrs": "5斤家庭装",
+      "price": 29.9,
+      "stock": 300,
+      "image": ""
+    },
+    {
+      "id": 2,
+      "product_id": 1,
+      "attrs": "10斤实惠装",
+      "price": 49.9,
+      "stock": 200,
+      "image": ""
+    },
+    {
+      "id": 3,
+      "product_id": 2,
+      "attrs": "5斤装",
+      "price": 35.9,
+      "stock": 500,
+      "image": ""
+    },
+    {
+      "id": 4,
+      "product_id": 2,
+      "attrs": "10斤装",
+      "price": 59.9,
+      "stock": 300,
+      "image": ""
+    },
+    {
+      "id": 5,
+      "product_id": 3,
+      "attrs": "20枚装",
+      "price": 25.9,
+      "stock": 800,
+      "image": ""
+    },
+    {
+      "id": 6,
+      "product_id": 3,
+      "attrs": "40枚装",
+      "price": 45,
+      "stock": 400,
+      "image": ""
+    },
+    {
+      "id": 7,
+      "product_id": 4,
+      "attrs": "5kg装",
+      "price": 49.9,
+      "stock": 400,
+      "image": ""
+    },
+    {
+      "id": 8,
+      "product_id": 4,
+      "attrs": "10kg装",
+      "price": 89,
+      "stock": 200,
+      "image": ""
+    },
+    {
+      "id": 9,
+      "product_id": 5,
+      "attrs": "2.5L装",
+      "price": 42,
+      "stock": 300,
+      "image": ""
+    },
+    {
+      "id": 10,
+      "product_id": 5,
+      "attrs": "5L装",
+      "price": 75,
+      "stock": 100,
+      "image": ""
+    },
+    {
+      "id": 11,
+      "product_id": 6,
+      "attrs": "1只（约2斤）",
+      "price": 68,
+      "stock": 100,
+      "image": ""
+    },
+    {
+      "id": 12,
+      "product_id": 6,
+      "attrs": "1只（约3斤）",
+      "price": 88,
+      "stock": 100,
+      "image": ""
+    },
+    {
+      "id": 13,
+      "product_id": 7,
+      "attrs": "250g装",
+      "price": 8.9,
+      "stock": 600,
+      "image": ""
+    },
+    {
+      "id": 14,
+      "product_id": 7,
+      "attrs": "500g装",
+      "price": 15.9,
+      "stock": 400,
+      "image": ""
+    },
+    {
+      "id": 15,
+      "product_id": 8,
+      "attrs": "5斤装",
+      "price": 19.9,
+      "stock": 500,
+      "image": ""
+    },
+    {
+      "id": 16,
+      "product_id": 8,
+      "attrs": "10斤装",
+      "price": 35,
+      "stock": 400,
+      "image": ""
+    },
+    {
+      "id": 17,
+      "product_id": 9,
+      "attrs": "500g装",
+      "price": 58,
+      "stock": 200,
+      "image": ""
+    },
+    {
+      "id": 18,
+      "product_id": 9,
+      "attrs": "1000g礼盒装",
+      "price": 108,
+      "stock": 150,
+      "image": ""
+    },
+    {
+      "id": 19,
+      "product_id": 10,
+      "attrs": "小号（直径25cm）",
+      "price": 45,
+      "stock": 80,
+      "image": ""
+    },
+    {
+      "id": 20,
+      "product_id": 10,
+      "attrs": "大号（直径35cm）",
+      "price": 65,
+      "stock": 70,
+      "image": ""
+    }
+  ]
+}

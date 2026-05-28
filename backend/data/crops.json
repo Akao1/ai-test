@@ -1,0 +1,56 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "parcelId": 1,
+      "type": "小麦",
+      "variety": "济麦22",
+      "area": 85,
+      "plantDate": "2025-10",
+      "harvestDate": "2026-06",
+      "yield": 42.5,
+      "income": 9.8,
+      "cost": 4.2,
+      "profit": 5.6
+    },
+    {
+      "id": 2,
+      "parcelId": 2,
+      "type": "玉米",
+      "variety": "郑单958",
+      "area": 62,
+      "plantDate": "2026-04",
+      "harvestDate": "2026-09",
+      "yield": 37.2,
+      "income": 7.4,
+      "cost": 3.1,
+      "profit": 4.3
+    },
+    {
+      "id": 3,
+      "parcelId": 3,
+      "type": "西红柿",
+      "variety": "瑞星",
+      "area": 20,
+      "plantDate": "2026-02",
+      "harvestDate": "2026-06",
+      "yield": 60,
+      "income": 15,
+      "cost": 6,
+      "profit": 9
+    },
+    {
+      "id": 4,
+      "parcelId": 3,
+      "type": "黄瓜",
+      "variety": "津优",
+      "area": 28,
+      "plantDate": "2026-01",
+      "harvestDate": "2026-05",
+      "yield": 56,
+      "income": 12.8,
+      "cost": 5.2,
+      "profit": 7.6
+    }
+  ]
+}

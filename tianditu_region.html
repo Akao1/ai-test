@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>天地图地形区域绘制</title>
+    <style>
+        html, body { height: 100%; margin: 0; padding: 0; }
+        #map { width: 100%; height: 100%; }
+    </style>
+    <script src="https://api.tianditu.gov.cn/api?v=4.0&tk=你的密钥"></script>
+    <script>
+        function initMap() {
+            var tk = '你的密钥';
+
+            var terURL = 'https://t0.tianditu.gov.cn/ter_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ter&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tk;
+            var ctaURL = 'https://t0.tianditu.gov.cn/cta_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cta&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tk;
+
+            var terLayer = new T.TileLayer(terURL, { minZoom: 1, maxZoom: 18 });
+            var ctaLayer = new T.TileLayer(ctaURL, { minZoom: 1, maxZoom: 18 });
+
+            var map = new T.Map('map', { layers: [terLayer, ctaLayer] });
+
+            var points = [
+                new T.LngLat(106.94353034, 35.73898474),
+                new T.LngLat(106.94352502, 35.73861043),
+                new T.LngLat(106.94411332, 35.73862023),
+                new T.LngLat(106.94410794, 35.73897932),
+                new T.LngLat(106.94353034, 35.73898691)
+            ];
+
+            var polygon = new T.Polygon(points, {
+                color: "#FF0000",
+                weight: 3,
+                opacity: 0.9,
+                fillColor: "#FF0000",
+                fillOpacity: 0.25
+            });
+            map.addOverLay(polygon);
+            map.setViewport(points);
+
+            polygon.addEventListener('click', function () {
+                var infoWin = new T.InfoWindow();
+                infoWin.setContent('<div style="padding:6px;font-size:14px;"><b>区域</b><br>面积约 ' + getArea(points) + ' m²</div>');
+                this.openInfoWindow(infoWin);
+            });
+        }
+
+        function getArea(pts) {
+            var area = 0;
+            for (var i = 0; i < pts.length; i++) {
+                var j = (i + 1) % pts.length;
+                var x1 = pts[i].getLng() * Math.PI / 180;
+                var y1 = pts[i].getLat() * Math.PI / 180;
+                var x2 = pts[j].getLng() * Math.PI / 180;
+                var y2 = pts[j].getLat() * Math.PI / 180;
+                area += (x2 - x1) * (2 + Math.sin(y1) + Math.sin(y2));
+            }
+            area = area * 6378137 * 6378137 / 2;
+            return Math.abs(area).toFixed(2);
+        }
+    </script>
+</head>
+<body onload="initMap()">
+    <div id="map"></div>
+</body>
+</html>

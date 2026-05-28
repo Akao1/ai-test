@@ -1,6 +1,7 @@
 package com.mall.entity;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 public class Village {
@@ -10,7 +11,7 @@ public class Village {
     private Double area;
     private Integer population;
     private Integer households;
-    @Column(length = 2000) private String desc_;
+    @JsonProperty("desc") @Column(length = 2000) private String desc_;
     @Column(length = 2000) private String coords;
 
     public Long getId() { return id; }

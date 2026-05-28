@@ -1,6 +1,7 @@
 package com.mall.entity;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 public class Policy {
@@ -11,7 +12,7 @@ public class Policy {
     private Double amount;
     private String unit;
     private String applyTime;
-    @Column(length = 2000) private String desc_;
+    @JsonProperty("desc") @Column(length = 2000) private String desc_;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

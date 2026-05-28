@@ -1,6 +1,7 @@
 package com.mall.entity;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 public class Crop {
@@ -12,7 +13,7 @@ public class Crop {
     private Double area;
     private String plantDate;
     private String harvestDate;
-    private Double yield_;
+    @JsonProperty("yield") private Double yield_;
     private Double income;
     private Double cost;
     private Double profit;

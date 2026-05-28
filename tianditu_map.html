@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>天地图 - 区域绘制</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+* { margin: 0; padding: 0; }
+html, body, #map { width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+const map = L.map('map', { crs: L.CRS.EPSG3857, zoomControl: true, attributionControl: false });
+
+const tk = 'bba9bb58a27102852ffef74286a19f9d';
+
+L.tileLayer('https://t0.tianditu.gov.cn/DataServer?T=img_w&X={x}&Y={y}&L={z}&tk=' + tk, { maxZoom: 18 }).addTo(map);
+L.tileLayer('https://t0.tianditu.gov.cn/DataServer?T=cia_w&X={x}&Y={y}&L={z}&tk=' + tk, { maxZoom: 18 }).addTo(map);
+
+const polygons = [
+  {
+    coords: [
+      [35.73898474, 106.94353034], [35.73861043, 106.94352502],
+      [35.73862023, 106.94411332], [35.73897932, 106.94410794],
+      [35.73898691, 106.94353034]
+    ],
+    color: '#ff4444', name: '区域1'
+  },
+  {
+    coords: [
+      [35.73730676, 106.94112364], [35.73770956, 106.94225753],
+      [35.73666728, 106.94337543], [35.73608261, 106.94173349],
+      [35.73730241, 106.94112364]
+    ],
+    color: '#4488ff', name: '区域2'
+  },
+  {
+    coords: [
+      [35.74180210, 106.94156188], [35.74160547, 106.94200049],
+      [35.74107521, 106.94158334], [35.74099676, 106.94164753],
+      [35.74093593, 106.94158870], [35.74086625, 106.94161010],
+      [35.74084002, 106.94167428], [35.74078794, 106.94159406],
+      [35.74045609, 106.94219848], [35.73968232, 106.94164763],
+      [35.73963042, 106.94146043], [35.74031945, 106.94068479],
+      [35.74049387, 106.94049222], [35.74180210, 106.94156188]
+    ],
+    color: '#44aa44', name: '区域3'
+  },
+  {
+    coords: [
+      [35.74008170, 106.93972198], [35.73730676, 106.94112364],
+      [35.73770956, 106.94225753], [35.74008170, 106.93972198]
+    ],
+    color: '#ff8800', name: '区域4'
+  },
+  {
+    coords: [
+      [35.73964303, 106.94171717], [35.73768944, 106.94376042],
+      [35.73819878, 106.94370690], [35.73821566, 106.94399569],
+      [35.73833757, 106.94397429], [35.73830737, 106.94382989],
+      [35.73982489, 106.94225201], [35.73974669, 106.94217179],
+      [35.73964739, 106.94171182]
+    ],
+    color: '#aa44aa', name: '区域5'
+  }
+];
+
+const allBounds = [];
+for (const p of polygons) {
+  const polygon = L.polygon(p.coords, {
+    color: p.color, weight: 2, fillColor: p.color, fillOpacity: 0.15
+  }).addTo(map);
+  polygon.bindPopup(p.name + '<br>顶点: ' + p.coords.length);
+  allBounds.push(polygon.getBounds());
+}
+
+map.fitBounds(allBounds.reduce((a, b) => a.extend(b)));
+</script>
+</body>
+</html>

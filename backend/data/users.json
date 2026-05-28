@@ -1,0 +1,22 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "admin123",
+      "nickname": "管理员",
+      "role": "admin",
+      "status": 1,
+      "created": "2026-01-01"
+    },
+    {
+      "id": 2,
+      "username": "viewer",
+      "password": "view123",
+      "nickname": "观察员",
+      "role": "viewer",
+      "status": 1,
+      "created": "2026-01-01"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "user_id": 2,
+      "product_id": 1,
+      "order_id": 1,
+      "sku_attrs": "5斤家庭装",
+      "rating": 5,
+      "content": "苹果很新鲜，脆甜好吃！",
+      "images": [],
+      "created_at": "2026-03-20"
+    },
+    {
+      "id": 2,
+      "user_id": 2,
+      "product_id": 3,
+      "order_id": 1,
+      "sku_attrs": "20枚装",
+      "rating": 5,
+      "content": "土鸡蛋品质很好",
+      "images": [],
+      "created_at": "2026-03-22"
+    }
+  ]
+}

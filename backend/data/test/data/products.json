@@ -1,0 +1,174 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "merchant_id": 1,
+      "name": "红富士苹果",
+      "category_id": 7,
+      "price": 29.9,
+      "original_price": 39.9,
+      "stock": 500,
+      "status": 1,
+      "images": [
+        "https://picsum.photos/seed/apple1/400/400"
+      ],
+      "description": "陕西洛川红富士，色泽红润，脆甜多汁，果香浓郁，产地直发。",
+      "sales": 1258,
+      "rating": 4.8,
+      "created_at": "2026-01-15"
+    },
+    {
+      "id": 2,
+      "merchant_id": 1,
+      "name": "赣南脐橙",
+      "category_id": 8,
+      "price": 35.9,
+      "original_price": 45,
+      "stock": 800,
+      "status": 1,
+      "images": [
+        "https://picsum.photos/seed/orange1/400/400"
+      ],
+      "description": "江西赣南脐橙，果大形正，橙红鲜艳，光洁美观，肉质脆嫩化渣。",
+      "sales": 980,
+      "rating": 4.9,
+      "created_at": "2026-01-20"
+    },
+    {
+      "id": 3,
+      "merchant_id": 2,
+      "name": "土鸡蛋20枚装",
+      "category_id": 21,
+      "price": 25.9,
+      "original_price": 32,
+      "stock": 1200,
+      "status": 1,
+      "images": [
+        "https://picsum.photos/seed/egg1/400/400"
+      ],
+      "description": "农家散养土鸡蛋，天然谷物喂养，蛋黄饱满，营养丰富。",
+      "sales": 2100,
+      "rating": 4.7,
+      "created_at": "2026-02-01"
+    },
+    {
+      "id": 4,
+      "merchant_id": 2,
+      "name": "有机五常大米5kg",
+      "category_id": 15,
+      "price": 49.9,
+      "original_price": 59.9,
+      "stock": 600,
+      "status": 1,
+      "images": [
+        "https://picsum.photos/seed/rice1/400/400"
+      ],
+      "description": "黑龙江五常有机稻花香米，颗粒饱满，晶莹剔透，饭香四溢。",
+      "sales": 1560,
+      "rating": 4.9,
+      "created_at": "2026-01-10"
+    },
+    {
+      "id": 5,
+      "merchant_id": 2,
+      "name": "纯正菜籽油2.5L",
+      "category_id": 16,
+      "price": 42,
+      "original_price": 52,
+      "stock": 400,
+      "status": 1,
+      "images": [
+        "https://picsum.photos/seed/oil1/400/400"
+      ],
+      "description": "物理压榨菜籽油，色泽金黄透亮，烹饪油烟少，香味纯正。",
+      "sales": 870,
+      "rating": 4.6,
+      "created_at": "2026-02-15"
+    },
+    {
+      "id": 6,
+      "merchant_id": 3,
+      "name": "散养土鸡",
+      "category_id": 20,
+      "price": 68,
+      "original_price": 88,
+      "stock": 200,
+      "status": 1,
+      "images": [
+        "https://picsum.photos/seed/chicken1/400/400"
+      ],
+      "description": "林下散养土鸡，生长期300天以上，肉质紧实鲜美，适合炖汤。",
+      "sales": 645,
+      "rating": 4.8,
+      "created_at": "2026-03-01"
+    },
+    {
+      "id": 7,
+      "merchant_id": 3,
+      "name": "新鲜香菇250g",
+      "category_id": 13,
+      "price": 8.9,
+      "original_price": 12,
+      "stock": 1000,
+      "status": 1,
+      "images": [
+        "https://picsum.photos/seed/mushroom1/400/400"
+      ],
+      "description": "当日采摘鲜香菇，肉质肥厚，菇香浓郁，口感滑嫩。",
+      "sales": 1890,
+      "rating": 4.5,
+      "created_at": "2026-03-10"
+    },
+    {
+      "id": 8,
+      "merchant_id": 3,
+      "name": "高山红薯5斤装",
+      "category_id": 12,
+      "price": 19.9,
+      "original_price": 25,
+      "stock": 900,
+      "status": 1,
+      "images": [
+        "https://picsum.photos/seed/sweetpotato1/400/400"
+      ],
+      "description": "高山沙地红薯，蜜甜流油，粉糯无丝，蒸烤皆宜。",
+      "sales": 1340,
+      "rating": 4.7,
+      "created_at": "2026-02-20"
+    },
+    {
+      "id": 9,
+      "merchant_id": 3,
+      "name": "纯天然蜂蜜500g",
+      "category_id": 18,
+      "price": 58,
+      "original_price": 78,
+      "stock": 350,
+      "status": 1,
+      "images": [
+        "https://picsum.photos/seed/honey1/400/400"
+      ],
+      "description": "深山百花蜜，自然成熟蜜，波美度42+，口感醇厚甘甜。",
+      "sales": 560,
+      "rating": 4.9,
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": 10,
+      "merchant_id": 3,
+      "name": "手工竹编制篮",
+      "category_id": 6,
+      "price": 45,
+      "original_price": 55,
+      "stock": 150,
+      "status": 1,
+      "images": [
+        "https://picsum.photos/seed/basket1/400/400"
+      ],
+      "description": "老匠人手工编织，精选竹篾，经久耐用，环保美观。",
+      "sales": 320,
+      "rating": 4.6,
+      "created_at": "2026-04-01"
+    }
+  ]
+}

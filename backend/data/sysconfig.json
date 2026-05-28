@@ -1,0 +1,13 @@
+{
+  "data": {
+    "title": "乡村振兴数字平台",
+    "logo": "",
+    "mapKey": "bba9bb58a27102852ffef74286a19f9d",
+    "modules": [
+      "household",
+      "building",
+      "crop",
+      "policy"
+    ]
+  }
+}

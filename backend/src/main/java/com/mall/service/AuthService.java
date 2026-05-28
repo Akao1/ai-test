@@ -9,7 +9,9 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.mall.repository.AllRepositories.*;
+import com.mall.entity.*;
+import com.mall.repository.UserRepository;
+import com.mall.repository.MerchantRepository;
 
 @Service
 public class AuthService {
